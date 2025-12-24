@@ -1,0 +1,196 @@
+<!-- 
+  📝 REGISTER PAGE TEMPLATE
+  User registration form
+-->
+
+<div class="register-container">
+  <!-- Left side: Registration form -->
+  <div class="register-form-section">
+    
+    <!-- Header -->
+    <div class="register-header">
+      <h1 class="logo">🎵 {{ 'APP_NAME' | translate }}</h1>
+      <h2 class="title">{{ 'AUTH.CREATE_ACCOUNT' | translate }}</h2>
+      <p class="subtitle">{{ 'AUTH.REGISTER_SUBTITLE' | translate }}</p>
+    </div>
+
+    <!-- Registration Form -->
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+      
+      <!-- Success Message -->
+      <div *ngIf="successMessage()" class="success-alert">
+        <span class="success-icon">✓</span>
+        <span>{{ successMessage() | translate }}</span>
+      </div>
+
+      <!-- Error Alert -->
+      <div *ngIf="errorMessage()" class="error-alert">
+        <span class="error-icon">⚠️</span>
+        <span>{{ errorMessage() | translate }}</span>
+      </div>
+
+      <!-- Display Name Input -->
+      <div class="form-group">
+        <label for="displayName">{{ 'AUTH.DISPLAY_NAME' | translate }}</label>
+        <input
+          id="displayName"
+          type="text"
+          formControlName="displayName"
+          class="form-input"
+          [class.error]="hasError('displayName', 'required') || hasError('displayName', 'minlength')"
+          placeholder="John Doe"
+        />
+        
+        <div class="error-message" *ngIf="hasError('displayName', 'required')">
+          {{ 'AUTH.DISPLAY_NAME_REQUIRED' | translate }}
+        </div>
+        <div class="error-message" *ngIf="hasError('displayName', 'minlength') && !hasError('displayName', 'required')">
+          {{ 'AUTH.DISPLAY_NAME_MIN_LENGTH' | translate }}
+        </div>
+      </div>
+
+      <!-- Email Input -->
+      <div class="form-group">
+        <label for="email">{{ 'AUTH.EMAIL' | translate }}</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          class="form-input"
+          [class.error]="hasError('email', 'required') || hasError('email', 'email')"
+          placeholder="name@example.com"
+        />
+        
+        <div class="error-message" *ngIf="hasError('email', 'required')">
+          {{ 'AUTH.EMAIL_REQUIRED' | translate }}
+        </div>
+        <div class="error-message" *ngIf="hasError('email', 'email') && !hasError('email', 'required')">
+          {{ 'AUTH.EMAIL_INVALID' | translate }}
+        </div>
+      </div>
+
+      <!-- Password Input -->
+      <div class="form-group">
+        <label for="password">{{ 'AUTH.PASSWORD' | translate }}</label>
+        <div class="password-wrapper">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            class="form-input"
+            [class.error]="hasError('password', 'required') || hasError('password', 'minlength')"
+            placeholder="••••••••"
+          />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePassword()"
+          >
+            <span *ngIf="!showPassword()">👁️</span>
+            <span *ngIf="showPassword()">🙈</span>
+          </button>
+        </div>
+        
+        <!-- Password Strength Indicator -->
+        <div *ngIf="registerForm.get('password')?.value" class="password-strength">
+          <div class="strength-bar">
+            <div 
+              class="strength-fill" 
+              [style.width.%]="passwordStrength().strength"
+              [style.background-color]="passwordStrength().color">
+            </div>
+          </div>
+          <span class="strength-label" [style.color]="passwordStrength().color">
+            {{ passwordStrength().label | translate }}
+          </span>
+        </div>
+
+        <div class="error-message" *ngIf="hasError('password', 'required')">
+          {{ 'AUTH.PASSWORD_REQUIRED' | translate }}
+        </div>
+        <div class="error-message" *ngIf="hasError('password', 'minlength') && !hasError('password', 'required')">
+          {{ 'AUTH.PASSWORD_MIN_LENGTH' | translate }}
+        </div>
+      </div>
+
+      <!-- Confirm Password Input -->
+      <div class="form-group">
+        <label for="confirmPassword">{{ 'AUTH.CONFIRM_PASSWORD' | translate }}</label>
+        <div class="password-wrapper">
+          <input
+            id="confirmPassword"
+            [type]="showConfirmPassword() ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            class="form-input"
+            [class.error]="hasError('confirmPassword', 'required') || (!passwordsMatch() && registerForm.get('confirmPassword')?.touched)"
+            placeholder="••••••••"
+          />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="toggleConfirmPassword()"
+          >
+            <span *ngIf="!showConfirmPassword()">👁️</span>
+            <span *ngIf="showConfirmPassword()">🙈</span>
+          </button>
+        </div>
+        
+        <div class="error-message" *ngIf="hasError('confirmPassword', 'required')">
+          {{ 'AUTH.CONFIRM_PASSWORD_REQUIRED' | translate }}
+        </div>
+        <div class="error-message" *ngIf="!passwordsMatch() && registerForm.get('confirmPassword')?.touched && !hasError('confirmPassword', 'required')">
+          {{ 'AUTH.PASSWORDS_MUST_MATCH' | translate }}
+        </div>
+      </div>
+
+      <!-- Terms Agreement -->
+      <div class="terms-text">
+        <p>{{ 'AUTH.TERMS_AGREEMENT' | translate }}</p>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="submit-button"
+        [disabled]="isLoading()"
+      >
+        <span *ngIf="!isLoading()">{{ 'AUTH.CREATE_ACCOUNT' | translate }}</span>
+        <span *ngIf="isLoading()" class="loading">
+          <span class="spinner"></span>
+          {{ 'COMMON.LOADING' | translate }}
+        </span>
+      </button>
+
+      <!-- Login Link -->
+      <div class="login-link">
+        <p>
+          {{ 'AUTH.ALREADY_HAVE_ACCOUNT' | translate }}
+          <a routerLink="/auth/login">{{ 'AUTH.LOGIN' | translate }}</a>
+        </p>
+      </div>
+    </form>
+  </div>
+
+  <!-- Right side: Branding (only on desktop) -->
+  <div class="branding-section">
+    <div class="branding-content">
+      <h2>{{ 'AUTH.BRANDING_TITLE_REGISTER' | translate }}</h2>
+      <p>{{ 'AUTH.BRANDING_DESCRIPTION_REGISTER' | translate }}</p>
+      
+      <div class="features">
+        <div class="feature">
+          <span class="icon">✓</span>
+          <span>{{ 'AUTH.REGISTER_FEATURE_1' | translate }}</span>
+        </div>
+        <div class="feature">
+          <span class="icon">✓</span>
+          <span>{{ 'AUTH.REGISTER_FEATURE_2' | translate }}</span>
+        </div>
+        <div class="feature">
+          <span class="icon">✓</span>
+          <span>{{ 'AUTH.REGISTER_FEATURE_3' | translate }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

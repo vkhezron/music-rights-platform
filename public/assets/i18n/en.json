@@ -1,6 +1,52 @@
 {
+  "APP_NAME": "Music Rights Platform",
   "TITLE": "My Music App",
   "WELCOME": "Welcome to the Music Industry Platform!",
   "DESCRIPTION": "Manage your rights, connect with artists, and grow your network.",
-  "LANGUAGE": "Language"
+  "LANGUAGE": "Language",
+  
+  "AUTH": {
+    "WELCOME_BACK": "Welcome Back",
+    "LOGIN_SUBTITLE": "Sign in to your account to continue",
+    "CREATE_ACCOUNT": "Create Account",
+    "REGISTER_SUBTITLE": "Join the music industry network today",
+    "DISPLAY_NAME": "Display Name",
+    "DISPLAY_NAME_REQUIRED": "Display name is required",
+    "DISPLAY_NAME_MIN_LENGTH": "Name must be at least 2 characters",
+    "EMAIL": "Email",
+    "PASSWORD": "Password",
+    "CONFIRM_PASSWORD": "Confirm Password",
+    "CONFIRM_PASSWORD_REQUIRED": "Please confirm your password",
+    "EMAIL_REQUIRED": "Email is required",
+    "EMAIL_INVALID": "Please enter a valid email",
+    "PASSWORD_REQUIRED": "Password is required",
+    "PASSWORD_MIN_LENGTH": "Password must be at least 6 characters",
+    "PASSWORDS_MUST_MATCH": "Passwords must match",
+    "FORGOT_PASSWORD": "Forgot password?",
+    "LOGIN": "Log In",
+    "NO_ACCOUNT": "Don't have an account?",
+    "ALREADY_HAVE_ACCOUNT": "Already have an account?",
+    "SIGN_UP": "Sign Up",
+    "TERMS_AGREEMENT": "By creating an account, you agree to our Terms of Service and Privacy Policy",
+    "WEAK": "Weak",
+    "MEDIUM": "Medium",
+    "STRONG": "Strong",
+    "REGISTRATION_SUCCESS": "Account created successfully! Redirecting to login...",
+    "REGISTRATION_ERROR": "Registration failed. Please try again.",
+    "EMAIL_ALREADY_EXISTS": "An account with this email already exists",
+    "BRANDING_TITLE": "Connect with Music Industry Professionals",
+    "BRANDING_DESCRIPTION": "Manage your music rights, collaborate with artists, and grow your professional network.",
+    "BRANDING_TITLE_REGISTER": "Start Your Music Journey",
+    "BRANDING_DESCRIPTION_REGISTER": "Join thousands of artists, producers, and rights holders managing their music careers.",
+    "FEATURE_1": "Track music rights & splits",
+    "FEATURE_2": "Collaborate with professionals",
+    "FEATURE_3": "Manage releases & projects",
+    "REGISTER_FEATURE_1": "Free forever for individual artists",
+    "REGISTER_FEATURE_2": "Secure rights management",
+    "REGISTER_FEATURE_3": "Global music community"
+  },
+  
+  "COMMON": {
+    "LOADING": "Loading..."
+  }
 }

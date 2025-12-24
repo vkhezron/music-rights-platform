@@ -1,6 +1,52 @@
 {
+  "APP_NAME": "Plataforma de Derechos Musicales",
   "TITLE": "Mi Aplicación de Música",
   "WELCOME": "¡Bienvenido a la Plataforma de la Industria Musical!",
   "DESCRIPTION": "Gestiona tus derechos, conecta con artistas y haz crecer tu red.",
-  "LANGUAGE": "Idioma"
+  "LANGUAGE": "Idioma",
+  
+  "AUTH": {
+    "WELCOME_BACK": "Bienvenido de nuevo",
+    "LOGIN_SUBTITLE": "Inicia sesión en tu cuenta para continuar",
+    "CREATE_ACCOUNT": "Crear cuenta",
+    "REGISTER_SUBTITLE": "Únete a la red de la industria musical hoy",
+    "DISPLAY_NAME": "Nombre para mostrar",
+    "DISPLAY_NAME_REQUIRED": "El nombre para mostrar es obligatorio",
+    "DISPLAY_NAME_MIN_LENGTH": "El nombre debe tener al menos 2 caracteres",
+    "EMAIL": "Correo electrónico",
+    "PASSWORD": "Contraseña",
+    "CONFIRM_PASSWORD": "Confirmar contraseña",
+    "CONFIRM_PASSWORD_REQUIRED": "Por favor confirme su contraseña",
+    "EMAIL_REQUIRED": "El correo electrónico es obligatorio",
+    "EMAIL_INVALID": "Por favor ingrese un correo válido",
+    "PASSWORD_REQUIRED": "La contraseña es obligatoria",
+    "PASSWORD_MIN_LENGTH": "La contraseña debe tener al menos 6 caracteres",
+    "PASSWORDS_MUST_MATCH": "Las contraseñas deben coincidir",
+    "FORGOT_PASSWORD": "¿Olvidaste tu contraseña?",
+    "LOGIN": "Iniciar sesión",
+    "NO_ACCOUNT": "¿No tienes una cuenta?",
+    "ALREADY_HAVE_ACCOUNT": "¿Ya tienes una cuenta?",
+    "SIGN_UP": "Registrarse",
+    "TERMS_AGREEMENT": "Al crear una cuenta, aceptas nuestros Términos de Servicio y Política de Privacidad",
+    "WEAK": "Débil",
+    "MEDIUM": "Media",
+    "STRONG": "Fuerte",
+    "REGISTRATION_SUCCESS": "¡Cuenta creada exitosamente! Redirigiendo al inicio de sesión...",
+    "REGISTRATION_ERROR": "Registro fallido. Por favor intenta de nuevo.",
+    "EMAIL_ALREADY_EXISTS": "Ya existe una cuenta con este correo electrónico",
+    "BRANDING_TITLE": "Conéctate con profesionales de la industria musical",
+    "BRANDING_DESCRIPTION": "Gestiona tus derechos musicales, colabora con artistas y amplía tu red profesional.",
+    "BRANDING_TITLE_REGISTER": "Comienza tu viaje musical",
+    "BRANDING_DESCRIPTION_REGISTER": "Únete a miles de artistas, productores y titulares de derechos que gestionan sus carreras musicales.",
+    "FEATURE_1": "Seguimiento de derechos musicales",
+    "FEATURE_2": "Colabora con profesionales",
+    "FEATURE_3": "Gestiona lanzamientos y proyectos",
+    "REGISTER_FEATURE_1": "Gratis para siempre para artistas individuales",
+    "REGISTER_FEATURE_2": "Gestión segura de derechos",
+    "REGISTER_FEATURE_3": "Comunidad musical global"
+  },
+  
+  "COMMON": {
+    "LOADING": "Cargando..."
+  }
 }

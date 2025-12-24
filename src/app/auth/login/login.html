@@ -1,0 +1,130 @@
+<!-- 
+  🔐 LOGIN PAGE TEMPLATE
+  This is what users see when logging in
+-->
+
+<div class="login-container">
+  <!-- Left side: Login form -->
+  <div class="login-form-section">
+    
+    <!-- Header -->
+    <div class="login-header">
+      <h1 class="logo">🎵 {{ 'APP_NAME' | translate }}</h1>
+      <h2 class="title">{{ 'AUTH.WELCOME_BACK' | translate }}</h2>
+      <p class="subtitle">{{ 'AUTH.LOGIN_SUBTITLE' | translate }}</p>
+    </div>
+
+    <!-- Login Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      
+      <!-- Error Alert -->
+      <div *ngIf="errorMessage()" class="error-alert">
+        <span class="error-icon">⚠️</span>
+        <span>{{ errorMessage() }}</span>
+      </div>
+
+      <!-- Email Input -->
+      <div class="form-group">
+        <label for="email">{{ 'AUTH.EMAIL' | translate }}</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          class="form-input"
+          [class.error]="hasError('email', 'required') || hasError('email', 'email')"
+          placeholder="name@example.com"
+        />
+        
+        <!-- Email Errors -->
+        <div class="error-message" *ngIf="hasError('email', 'required')">
+          {{ 'AUTH.EMAIL_REQUIRED' | translate }}
+        </div>
+        <div class="error-message" *ngIf="hasError('email', 'email') && !hasError('email', 'required')">
+          {{ 'AUTH.EMAIL_INVALID' | translate }}
+        </div>
+      </div>
+
+      <!-- Password Input -->
+      <div class="form-group">
+        <label for="password">{{ 'AUTH.PASSWORD' | translate }}</label>
+        <div class="password-wrapper">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            class="form-input"
+            [class.error]="hasError('password', 'required') || hasError('password', 'minlength')"
+            placeholder="••••••••"
+          />
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePassword()"
+          >
+            <span *ngIf="!showPassword()">👁️</span>
+            <span *ngIf="showPassword()">🙈</span>
+          </button>
+        </div>
+        
+        <!-- Password Errors -->
+        <div class="error-message" *ngIf="hasError('password', 'required')">
+          {{ 'AUTH.PASSWORD_REQUIRED' | translate }}
+        </div>
+        <div class="error-message" *ngIf="hasError('password', 'minlength') && !hasError('password', 'required')">
+          {{ 'AUTH.PASSWORD_MIN_LENGTH' | translate }}
+        </div>
+      </div>
+
+      <!-- Forgot Password Link -->
+      <div class="forgot-password">
+        <a routerLink="/auth/forgot-password">
+          {{ 'AUTH.FORGOT_PASSWORD' | translate }}
+        </a>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="submit-button"
+        [disabled]="isLoading()"
+      >
+        <span *ngIf="!isLoading()">{{ 'AUTH.LOGIN' | translate }}</span>
+        <span *ngIf="isLoading()" class="loading">
+          <span class="spinner"></span>
+          {{ 'COMMON.LOADING' | translate }}
+        </span>
+      </button>
+
+      <!-- Sign Up Link -->
+      <div class="signup-link">
+        <p>
+          {{ 'AUTH.NO_ACCOUNT' | translate }}
+          <a routerLink="/auth/register">{{ 'AUTH.SIGN_UP' | translate }}</a>
+        </p>
+      </div>
+    </form>
+  </div>
+
+  <!-- Right side: Branding (only on desktop) -->
+  <div class="branding-section">
+    <div class="branding-content">
+      <h2>{{ 'AUTH.BRANDING_TITLE' | translate }}</h2>
+      <p>{{ 'AUTH.BRANDING_DESCRIPTION' | translate }}</p>
+      
+      <div class="features">
+        <div class="feature">
+          <span class="icon">✓</span>
+          <span>{{ 'AUTH.FEATURE_1' | translate }}</span>
+        </div>
+        <div class="feature">
+          <span class="icon">✓</span>
+          <span>{{ 'AUTH.FEATURE_2' | translate }}</span>
+        </div>
+        <div class="feature">
+          <span class="icon">✓</span>
+          <span>{{ 'AUTH.FEATURE_3' | translate }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

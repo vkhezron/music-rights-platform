@@ -1,7 +1,9 @@
 <div class="container">
+  <!--
   <h1>{{ 'TITLE' | translate }}</h1>
   <h2>{{ 'WELCOME' | translate }}</h2>
   <p>{{ 'DESCRIPTION' | translate }}</p>
+  -->
   
   <div class="language-switcher">
     <button (click)="switchLanguage('en')" [class.active]="currentLang === 'en'">
@@ -13,7 +15,7 @@
     <button (click)="switchLanguage('es')" [class.active]="currentLang === 'es'">
       🇪🇸 Español
     </button>
-    <button (click)="switchLanguage('uk')" [class.active]="currentLang === 'uk'">
+    <button (click)="switchLanguage('ua')" [class.active]="currentLang === 'uk'">
       🇺🇦 Українська
     </button>
   </div>

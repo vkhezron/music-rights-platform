@@ -34,32 +34,27 @@ export class Login {
   }
 
   async onSubmit() {
-  if (this.loginForm.invalid) {
-    return;
-  }
+    if (this.loginForm.invalid) {
+      return;
+    }
 
-  this.isLoading.set(true);
-  try {
-    const {email, password} = this.loginForm.value;
+    this.isLoading.set(true);
+    try {
+      const {email,password} = this.loginForm.value;
 
-    await this.supabase.signIn(email, password);
+      await this.supabase.signIn(email, password);
 
-    // Add these console logs
-    console.log('✅ Login successful!');
-    console.log('Current user:', this.supabase.currentUser);
-
-    // Successful login
-    this.router.navigate(['/dashboard']);
+      //Successful login
+      this.router.navigate(['/dashboard']);
+    }
+    catch (error: any) {
+      this.errorMessage.set(error.message || 'An error occurred during login.');
+    }
+    finally {
+      // Stop loading indicator
+      this.isLoading.set(false);
+    }
   }
-  catch (error: any) {
-    console.error('❌ Login failed:', error);
-    this.errorMessage.set(error.message || 'An error occurred during login.');
-  }
-  finally {
-    // Stop loading indicator
-    this.isLoading.set(false);
-  }
-}
 
   //Toggle pwd visibility
   togglePassword() {

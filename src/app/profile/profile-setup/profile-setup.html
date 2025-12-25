@@ -1,0 +1,253 @@
+<div class="profile-setup-container">
+  <div class="setup-card">
+    
+    <!-- Header -->
+    <div class="setup-header">
+      <h1 class="setup-title">{{ 'PROFILE.SETUP_TITLE' | translate }}</h1>
+      <p class="setup-subtitle">{{ 'PROFILE.SETUP_SUBTITLE' | translate }}</p>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="setup-form">
+      
+      <!-- Error Message -->
+      <div *ngIf="errorMessage()" class="error-alert">
+        <span class="error-icon">!</span>
+        <span>{{ errorMessage() | translate }}</span>
+      </div>
+
+      <!-- REQUIRED SECTION -->
+      <div class="form-section">
+        <h2 class="section-title">{{ 'PROFILE.REQUIRED_INFO' | translate }}</h2>
+
+        <!-- Nickname -->
+        <div class="form-group">
+          <label for="nickname" class="required">
+            {{ 'PROFILE.NICKNAME' | translate }}
+          </label>
+          <div class="input-with-validation">
+            <input
+              id="nickname"
+              type="text"
+              formControlName="nickname"
+              class="form-input"
+              [class.error]="hasError('nickname', 'required') || hasError('nickname', 'minlength')"
+              [class.success]="nicknameAvailable() === true"
+              placeholder="Enter your display name"
+            />
+            <span *ngIf="nicknameCheckLoading()" class="validation-icon loading">
+              ...
+            </span>
+            <span *ngIf="nicknameAvailable() === true" class="validation-icon success">
+              ✓
+            </span>
+            <span *ngIf="nicknameAvailable() === false" class="validation-icon error">
+              ✗
+            </span>
+          </div>
+          
+          <div class="error-message" *ngIf="hasError('nickname', 'required')">
+            {{ 'PROFILE.NICKNAME_REQUIRED' | translate }}
+          </div>
+          <div class="error-message" *ngIf="hasError('nickname', 'minlength')">
+            {{ 'PROFILE.NICKNAME_MIN_LENGTH' | translate }}
+          </div>
+          <div class="success-message" *ngIf="nicknameAvailable() === true">
+            {{ 'PROFILE.NICKNAME_AVAILABLE' | translate }}
+          </div>
+          <div class="error-message" *ngIf="nicknameAvailable() === false">
+            {{ 'PROFILE.NICKNAME_TAKEN' | translate }}
+          </div>
+        </div>
+
+        <!-- Primary Role -->
+        <div class="form-group">
+          <label for="primary_role" class="required">
+            {{ 'PROFILE.PRIMARY_ROLE' | translate }}
+          </label>
+          <select
+            id="primary_role"
+            formControlName="primary_role"
+            class="form-select"
+          >
+            <option *ngFor="let role of primaryRoles" [value]="role.value">
+              {{ role.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Custom Role Text (shown if "Other" selected) -->
+        <div class="form-group" *ngIf="profileForm.get('primary_role')?.value === 'other'">
+          <label for="custom_role_text" class="required">
+            {{ 'PROFILE.SPECIFY_ROLE' | translate }}
+          </label>
+          <input
+            id="custom_role_text"
+            type="text"
+            formControlName="custom_role_text"
+            class="form-input"
+            placeholder="Enter your specific role"
+          />
+          <div class="error-message" *ngIf="hasError('custom_role_text', 'required')">
+            {{ 'PROFILE.CUSTOM_ROLE_REQUIRED' | translate }}
+          </div>
+        </div>
+      </div>
+
+      <!-- OPTIONAL SECTION -->
+      <div class="form-section">
+        <div class="section-header" (click)="toggleOptionalFields()">
+          <h2 class="section-title">{{ 'PROFILE.OPTIONAL_INFO' | translate }}</h2>
+          <button type="button" class="toggle-button">
+            {{ showOptionalFields() ? '−' : '+' }}
+          </button>
+        </div>
+
+        <div *ngIf="showOptionalFields()" class="optional-fields">
+          
+          <!-- Secondary Roles -->
+          <div class="form-group">
+            <label class="group-label">{{ 'PROFILE.SECONDARY_ROLES' | translate }}</label>
+            
+            <!-- Creative Roles -->
+            <div class="role-category">
+              <h3 class="category-title">{{ 'PROFILE.CREATIVE_ROLES' | translate }}</h3>
+              <div class="checkbox-grid">
+                <label *ngFor="let role of secondaryRoles.creative" class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="isSecondaryRoleSelected(role.value)"
+                    (change)="toggleSecondaryRole(role.value)"
+                  />
+                  <span>{{ role.label }}</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Production Roles -->
+            <div class="role-category">
+              <h3 class="category-title">{{ 'PROFILE.PRODUCTION_ROLES' | translate }}</h3>
+              <div class="checkbox-grid">
+                <label *ngFor="let role of secondaryRoles.production" class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="isSecondaryRoleSelected(role.value)"
+                    (change)="toggleSecondaryRole(role.value)"
+                  />
+                  <span>{{ role.label }}</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Business Roles -->
+            <div class="role-category">
+              <h3 class="category-title">{{ 'PROFILE.BUSINESS_ROLES' | translate }}</h3>
+              <div class="checkbox-grid">
+                <label *ngFor="let role of secondaryRoles.business" class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="isSecondaryRoleSelected(role.value)"
+                    (change)="toggleSecondaryRole(role.value)"
+                  />
+                  <span>{{ role.label }}</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Visual Roles -->
+            <div class="role-category">
+              <h3 class="category-title">{{ 'PROFILE.VISUAL_ROLES' | translate }}</h3>
+              <div class="checkbox-grid">
+                <label *ngFor="let role of secondaryRoles.visual" class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="isSecondaryRoleSelected(role.value)"
+                    (change)="toggleSecondaryRole(role.value)"
+                  />
+                  <span>{{ role.label }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bio -->
+          <div class="form-group">
+            <label for="bio">{{ 'PROFILE.BIO' | translate }}</label>
+            <textarea
+              id="bio"
+              formControlName="bio"
+              class="form-textarea"
+              rows="4"
+              maxlength="500"
+              placeholder="Tell us about yourself..."
+            ></textarea>
+            <div class="char-count">
+              {{ profileForm.get('bio')?.value?.length || 0 }} / 500
+            </div>
+          </div>
+
+          <!-- Primary Language -->
+          <div class="form-group">
+            <label for="primary_language">
+              {{ 'PROFILE.PRIMARY_LANGUAGE' | translate }}
+            </label>
+            <select
+              id="primary_language"
+              formControlName="primary_language"
+              class="form-select"
+            >
+              <option *ngFor="let lang of languages" [value]="lang.code">
+                {{ lang.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Social Links -->
+          <div class="form-group">
+            <label class="group-label">{{ 'PROFILE.SOCIAL_LINKS' | translate }}</label>
+            
+            <div class="social-inputs">
+              <div *ngFor="let platform of socialPlatforms" class="social-input-group">
+                <label [for]="platform.key">{{ platform.label }}</label>
+                <input
+                  [id]="platform.key"
+                  type="text"
+                  [formControlName]="platform.key"
+                  class="form-input"
+                  [placeholder]="platform.placeholder"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <button
+          *ngIf="!showOptionalFields()"
+          type="button"
+          class="skip-button"
+          (click)="skipOptionalFields()"
+          [disabled]="isLoading()"
+        >
+          {{ 'PROFILE.SKIP_OPTIONAL' | translate }}
+        </button>
+        
+        <button
+          type="submit"
+          class="submit-button"
+          [disabled]="isLoading() || nicknameAvailable() !== true"
+        >
+          <span *ngIf="!isLoading()">
+            {{ showOptionalFields() ? ('PROFILE.SAVE_PROFILE' | translate) : ('PROFILE.CONTINUE' | translate) }}
+          </span>
+          <span *ngIf="isLoading()" class="loading">
+            <span class="spinner"></span>
+            {{ 'COMMON.LOADING' | translate }}
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

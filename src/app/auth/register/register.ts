@@ -117,9 +117,12 @@ export class Register {
 
       // Success!
       this.successMessage.set('AUTH.REGISTRATION_SUCCESS');
-      
+
       setTimeout(() => {
-        this.router.navigate(['/auth/login']);
+        // Store displayName in sessionStorage for profile setup to use
+        sessionStorage.setItem('displayName', this.registerForm.value.displayName);
+        // Redirect to profile setup instead of login
+        this.router.navigate(['/profile/setup']);
       }, 2000);
 
     } catch (error: any) {

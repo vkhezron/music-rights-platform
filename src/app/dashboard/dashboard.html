@@ -1,0 +1,36 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Welcome to Music Rights Platform</h1>
+    <button (click)="logout()" class="logout-btn">Logout</button>
+  </div>
+
+  <div class="profile-info" *ngIf="profile$ | async as profile">
+    <h2>Your Profile</h2>
+    <div class="info-grid">
+      <div class="info-item">
+        <label>Nickname:</label>
+        <span>{{ profile.nickname }}</span>
+      </div>
+      <div class="info-item">
+        <label>User Number:</label>
+        <span>#{{ profile.user_number }}</span>
+      </div>
+      <div class="info-item">
+        <label>Primary Role:</label>
+        <span>{{ profile.primary_role }}</span>
+      </div>
+      <div class="info-item" *ngIf="profile.bio">
+        <label>Bio:</label>
+        <span>{{ profile.bio }}</span>
+      </div>
+      <div class="info-item" *ngIf="profile.spotify_artist_url">
+        <label>Spotify:</label>
+        <a [href]="profile.spotify_artist_url" target="_blank">{{ profile.spotify_artist_url }}</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="email-info">
+    <p>Email: {{ user?.email }}</p>
+  </div>
+</div>

@@ -91,11 +91,27 @@
     "CREATION_ERROR": "Profil konnte nicht erstellt werden. Bitte versuchen Sie es erneut."
   },
   
+  "WORKSPACE": {
+    "CREATE_TITLE": "Workspace erstellen",
+    "CREATE_SUBTITLE": "Richten Sie Ihren Workspace ein, um Rechte zu verwalten und zusammenzuarbeiten",
+    "NAME": "Workspace-Name",
+    "NAME_REQUIRED": "Workspace-Name ist erforderlich",
+    "NAME_MIN_LENGTH": "Name muss mindestens 2 Zeichen lang sein",
+    "TYPE": "Workspace-Typ",
+    "DESCRIPTION": "Beschreibung",
+    "CREATE_WORKSPACE": "Workspace erstellen",
+    "CREATION_ERROR": "Workspace konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+    "YOUR_WORKSPACES": "Ihre Workspaces",
+    "NO_WORKSPACES": "Sie haben noch keine Workspaces",
+    "CREATE_FIRST": "Erstellen Sie Ihren ersten Workspace"
+  },
+
   "COMMON": {
     "LOADING": "Lädt...",
     "ERROR": "Fehler",
     "SUCCESS": "Erfolg",
     "WARNING": "Warnung",
-    "INFO": "Information"
+    "INFO": "Information",
+    "OPTIONAL": "optional"
   }
 }

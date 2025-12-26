@@ -160,17 +160,20 @@ export class ProfileSetup {
     }
 
     // Check nickname availability
-    // Check nickname availability
-if (this.nicknameAvailable() !== true) {
-  this.errorMessage.set('PROFILE.NICKNAME_NOT_AVAILABLE');
-  return;
-}
+    if (this.nicknameAvailable() !== true) {
+      this.errorMessage.set('PROFILE.NICKNAME_NOT_AVAILABLE');
+      return;
+    }
 
     this.isLoading.set(true);
     this.errorMessage.set('');
 
     try {
       const formValue = this.profileForm.value;
+
+      // DEBUG: Log form values
+      console.log('Form values:', formValue);
+      console.log('Spotify value:', formValue.spotify);
       
       // Build profile data
       const profileData: ProfileFormData = {
@@ -181,19 +184,26 @@ if (this.nicknameAvailable() !== true) {
         bio: formValue.bio || undefined,
         primary_language: formValue.primary_language || 'en',
         social_links: {
-          instagram: formValue.instagram || undefined,
-          twitter: formValue.twitter || undefined,
-          facebook: formValue.facebook || undefined,
-          tiktok: formValue.tiktok || undefined,
-          youtube: formValue.youtube || undefined,
-          website: formValue.website || undefined,
-          spotify: formValue.spotify || undefined 
+          instagram: formValue.instagram && formValue.instagram.trim() ? formValue.instagram : undefined,
+          twitter: formValue.twitter && formValue.twitter.trim() ? formValue.twitter : undefined,
+          facebook: formValue.facebook && formValue.facebook.trim() ? formValue.facebook : undefined,
+          tiktok: formValue.tiktok && formValue.tiktok.trim() ? formValue.tiktok : undefined,
+          youtube: formValue.youtube && formValue.youtube.trim() ? formValue.youtube : undefined,
+          website: formValue.website && formValue.website.trim() ? formValue.website : undefined,
+          spotify: formValue.spotify && formValue.spotify.trim() ? formValue.spotify : undefined
         },
-        spotify_artist_url: formValue.spotify_artist_url || undefined
+        spotify_artist_url: formValue.spotify_artist_url ? formValue.spotify : undefined
       };
+
+      // DEBUG: Log what we're sending to Supabase
+      console.log('Profile data being sent:', profileData);
+      console.log('Spotify Artist URL:', profileData.spotify_artist_url);
 
       // Create profile (includes QR code generation)
       const profile = await this.profileService.createProfile(profileData);
+
+      //DEBUG: Log created profile
+      console.log('Created profile:', profile);
 
       // Check if this is a new user (no previous sessions)
       const isNewUser = true; // You can implement logic to check this

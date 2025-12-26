@@ -4,30 +4,75 @@
     <button (click)="logout()" class="logout-btn">Logout</button>
   </div>
 
-  <div class="profile-info" *ngIf="profile$ | async as profile">
-    <h2>Your Profile</h2>
-    <div class="info-grid">
-      <div class="info-item">
-        <label>Nickname:</label>
-        <span>{{ profile.nickname }}</span>
-      </div>
-      <div class="info-item">
-        <label>User Number:</label>
-        <span>#{{ profile.user_number }}</span>
-      </div>
-      <div class="info-item">
-        <label>Primary Role:</label>
-        <span>{{ profile.primary_role }}</span>
-      </div>
-      <div class="info-item" *ngIf="profile.bio">
-        <label>Bio:</label>
-        <span>{{ profile.bio }}</span>
-      </div>
-      <div class="info-item" *ngIf="profile.spotify_artist_url">
-        <label>Spotify:</label>
-        <a [href]="profile.spotify_artist_url" target="_blank">{{ profile.spotify_artist_url }}</a>
+  @if (profile$ | async; as profile) {
+    <div class="profile-info">
+      <h2>Your Profile</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Nickname:</label>
+          <span>{{ profile.nickname }}</span>
+        </div>
+        <div class="info-item">
+          <label>User Number:</label>
+          <span>#{{ profile.user_number }}</span>
+        </div>
+        <div class="info-item">
+          <label>Primary Role:</label>
+          <span>{{ profile.primary_role }}</span>
+        </div>
+        @if (profile.bio) {
+          <div class="info-item">
+            <label>Bio:</label>
+            <span>{{ profile.bio }}</span>
+          </div>
+        }
+        @if (profile.spotify_artist_url) {
+          <div class="info-item">
+            <label>Spotify:</label>
+            <a [href]="profile.spotify_artist_url" target="_blank">{{ profile.spotify_artist_url }}</a>
+          </div>
+        }
       </div>
     </div>
+  }
+
+  <div class="workspaces-section">
+    <div class="section-header">
+      <h2>Your Workspaces</h2>
+      <button (click)="goToWorkspaces()" class="manage-btn">
+        Manage Workspaces
+      </button>
+    </div>
+
+    @if (workspaces$ | async; as workspaces) {
+      <div class="workspace-list">
+        @if (workspaces.length === 0) {
+          <div class="no-workspaces">
+            <p>You don't have any workspaces yet.</p>
+            <button (click)="goToWorkspaces()" class="create-workspace-btn">
+              Create Your First Workspace
+            </button>
+          </div>
+        }
+
+        @if (workspaces.length > 0) {
+          <div class="workspace-cards">
+            @for (workspace of workspaces; track workspace.id) {
+              <div class="workspace-mini-card">
+                <h3>{{ workspace.name }}</h3>
+                <span class="workspace-type">{{ workspace.type }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (currentWorkspace) {
+      <div class="current-workspace">
+        <p>Current workspace: <strong>{{ currentWorkspace.name }}</strong></p>
+      </div>
+    }
   </div>
 
   <div class="email-info">

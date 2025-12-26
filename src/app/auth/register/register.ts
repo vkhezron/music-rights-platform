@@ -110,10 +110,10 @@ export class Register {
     this.isLoading.set(true);
 
     try {
-      const { email, password } = this.registerForm.value;
+      const { displayName,email, password } = this.registerForm.value;
 
       // signUp returns { user, session }, not { data, error }
-      await this.supabase.signUp(email, password);
+      await this.supabase.signUp(email, password, displayName);
 
       // Success!
       this.successMessage.set('AUTH.REGISTRATION_SUCCESS');

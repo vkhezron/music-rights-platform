@@ -1,0 +1,49 @@
+<div class="workspace-list-container">
+  <div class="header">
+    <h1>Your Workspaces</h1>
+    <button (click)="createWorkspace()" class="create-btn">
+      + New Workspace
+    </button>
+  </div>
+
+  @if (workspaces$ | async; as workspaces) {
+    <div class="workspaces-grid">
+      @if (workspaces.length === 0) {
+        <div class="empty-state">
+          <p>You don't have any workspaces yet.</p>
+          <button (click)="createWorkspace()" class="create-btn-large">
+            Create Your First Workspace
+          </button>
+        </div>
+      }
+
+      @for (workspace of workspaces; track workspace.id) {
+        <div 
+          class="workspace-card"
+          [class.active]="currentWorkspace?.id === workspace.id"
+          (click)="selectWorkspace(workspace)">
+          
+          <div class="workspace-icon">
+            {{ getWorkspaceIcon(workspace.type) }}
+          </div>
+          
+          <div class="workspace-info">
+            <h3>{{ workspace.name }}</h3>
+            <p class="workspace-type">{{ workspace.type }}</p>
+            @if (workspace.description) {
+              <p class="workspace-description">
+                {{ workspace.description }}
+              </p>
+            }
+          </div>
+
+          @if (currentWorkspace?.id === workspace.id) {
+            <div class="workspace-badge">
+              Active
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

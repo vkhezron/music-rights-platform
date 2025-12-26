@@ -145,6 +145,19 @@ export class ProfileService {
     if (!userId) throw new Error('Not authenticated');
 
     try {
+      // Log what we're about to insert (for debugging)
+      console.log('Creating profile with data:', {
+        id: userId,
+        nickname: formData.nickname,
+        primary_role: formData.primary_role,
+        custom_role_text: formData.custom_role_text,
+        secondary_roles: formData.secondary_roles || [],
+        bio: formData.bio,
+        primary_language: formData.primary_language || 'en',
+        social_links: formData.social_links || {},
+        spotify_artist_url: formData.spotify_artist_url  // Make sure this is here
+      });
+
       // Create profile with auto-generated user_number
       const { data: profile, error: profileError } = await this.supabase.client
         .from('profiles')

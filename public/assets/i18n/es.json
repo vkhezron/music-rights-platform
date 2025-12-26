@@ -70,7 +70,27 @@
     "CREATION_ERROR": "No se pudo crear el perfil. Por favor intente nuevamente."
   },
   
+  "WORKSPACE": {
+    "CREATE_TITLE": "Crear Espacio de Trabajo",
+    "CREATE_SUBTITLE": "Configure su espacio de trabajo para gestionar derechos y colaborar",
+    "NAME": "Nombre del Espacio de Trabajo",
+    "NAME_REQUIRED": "El nombre del espacio de trabajo es obligatorio",
+    "NAME_MIN_LENGTH": "El nombre debe tener al menos 2 caracteres",
+    "TYPE": "Tipo de Espacio de Trabajo",
+    "DESCRIPTION": "Descripción",
+    "CREATE_WORKSPACE": "Crear Espacio de Trabajo",
+    "CREATION_ERROR": "No se pudo crear el espacio de trabajo. Por favor intente nuevamente.",
+    "YOUR_WORKSPACES": "Sus Espacios de Trabajo",
+    "NO_WORKSPACES": "Aún no tiene espacios de trabajo",
+    "CREATE_FIRST": "Cree su primer Espacio de Trabajo"
+  },
+
   "COMMON": {
-    "LOADING": "Cargando..."
+    "LOADING": "Cargando...",
+    "ERROR": "Error",
+    "SUCCESS": "Éxito",
+    "WARNING": "Advertencia",
+    "INFO": "Información",
+    "OPTIONAL": "opcional"
   }
 }

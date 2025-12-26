@@ -1,5 +1,5 @@
 {
-  "APP_NAME": "Music Rights Platform",
+  "APP_NAME": "🎵 Music Rights Platform",
   "TITLE": "My Music App",
   "WELCOME": "Welcome to the Music Industry Platform!",
   "DESCRIPTION": "Manage your rights, connect with artists, and grow your network.",
@@ -27,6 +27,7 @@
   
   "AUTH": {
     "WELCOME_BACK": "Welcome Back",
+    "LOGIN_SUBTITLE": "Sign in to continue to Music Rights Platform",
     "JOIN_PLATFORM": "Sign in to continue to Music Rights Platform",
     "EMAIL": "Email",
     "PASSWORD": "Password",
@@ -37,6 +38,7 @@
     "LOG_IN": "Log In",
     "OR": "or",
     "SIGN_IN_WITH_GOOGLE": "Continue with Google",
+    "NO_ACCOUNT": "Don't have an account?",
     "DONT_HAVE_ACCOUNT": "Don't have an account?",
     "SIGN_UP": "Sign up",
     "CREATE_ACCOUNT": "Create Account",
@@ -90,12 +92,28 @@
     "REQUIRED_FIELDS_ERROR": "Please fill in all required fields",
     "CREATION_ERROR": "Failed to create profile. Please try again."
   },
+
+  "WORKSPACE": {
+    "CREATE_TITLE": "Create Workspace",
+    "CREATE_SUBTITLE": "Set up your workspace to manage rights and collaborate",
+    "NAME": "Workspace Name",
+    "NAME_REQUIRED": "Workspace name is required",
+    "NAME_MIN_LENGTH": "Name must be at least 2 characters",
+    "TYPE": "Workspace Type",
+    "DESCRIPTION": "Description",
+    "CREATE_WORKSPACE": "Create Workspace",
+    "CREATION_ERROR": "Failed to create workspace. Please try again.",
+    "YOUR_WORKSPACES": "Your Workspaces",
+    "NO_WORKSPACES": "You don't have any workspaces yet",
+    "CREATE_FIRST": "Create Your First Workspace"
+  },
   
   "COMMON": {
     "LOADING": "Loading...",
     "ERROR": "Error",
     "SUCCESS": "Success",
     "WARNING": "Warning",
-    "INFO": "Information"
+    "INFO": "Information",
+    "OPTIONAL": "optional"
   }
 }

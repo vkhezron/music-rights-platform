@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
+import { AuthResponse, createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { environment } from '../../environments/environment';
 import { BehaviorSubject, Observable } from 'rxjs';
 
@@ -59,14 +59,19 @@ export class SupabaseService {
   /**
    * 📝 SIGN UP - Create new user account
    */
-  async signUp(email: string, password: string) {
+  async signUp(email: string, password: string, displayName: string) : Promise<void> {
     const { data, error } = await this.supabase.auth.signUp({
       email,
-      password
+      password,
+      options: {
+        data: {
+          display_name: displayName
+        }
+      }
     });
 
     if (error) throw error;
-    return data;
+    //return data;
   }
 
   /**

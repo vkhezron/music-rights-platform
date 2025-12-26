@@ -1,15 +1,45 @@
 import { Routes } from '@angular/router';
+import { AuthGuard } from '../guards/auth.guard';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/auth/login', pathMatch: 'full' },
     {path: 'auth/login', loadComponent: () => import('./auth/login/login').then(m => m.Login)},
-    {path: 'dashboard', loadComponent: () => import('./dashboard/dashboard').then(m => m.Dashboard)},
-    {path: 'auth/register', loadComponent: () => import('./auth/register/register').then(m => m.Register)},
-    {path: 'profile/setup',loadComponent: () => import('./profile/profile-setup/profile-setup').then(m => m.ProfileSetup)},
-    {path: 'workspaces', loadComponent: () => import('./workspaces/workspace-list/workspace-list').then(m => m.WorkspaceList)},
-    {path: 'workspaces/create', loadComponent: () => import('./workspaces/workspace-create/workspace-create').then(m => m.WorkspaceCreateComponent)},
-    {path: 'profile/edit',  loadComponent: () => import('./profile/profile-edit/profile-edit').then(m => m.ProfileEditComponent)},
-    {path: 'profile/qr-code',loadComponent: () => import('./profile/qr-code-display/qr-code-display').then(m => m.QrCodeDisplayComponent)},
+   //Protected routes
+    {
+        path: 'dashboard'
+        , loadComponent: () => import('./dashboard/dashboard').then(m => m.Dashboard),
+        canActivate: [AuthGuard]
+    },
+    {
+        path: 'auth/register'
+        , loadComponent: () => import('./auth/register/register').then(m => m.Register),
+        canActivate: [AuthGuard]
+    },
+    
+    {
+        path: 'profile/setup'
+        ,loadComponent: () => import('./profile/profile-setup/profile-setup').then(m => m.ProfileSetup),
+        canActivate: [AuthGuard]
+    },
+    {
+        path: 'workspaces'
+        , loadComponent: () => import('./workspaces/workspace-list/workspace-list').then(m => m.WorkspaceList)
+        , canActivate: [AuthGuard]
+    },
+    {
+        path: 'workspaces/create'
+        , loadComponent: () => import('./workspaces/workspace-create/workspace-create').then(m => m.WorkspaceCreateComponent)
+        , canActivate: [AuthGuard]
+    },
+    {
+        path: 'profile/edit'
+        ,  loadComponent: () => import('./profile/profile-edit/profile-edit').then(m => m.ProfileEditComponent)
+        , canActivate: [AuthGuard]  
+    },
+    {path: 'profile/qr-code'
+        ,loadComponent: () => import('./profile/qr-code-display/qr-code-display').then(m => m.QrCodeDisplayComponent)
+        , canActivate: [AuthGuard]  
+    },
     {path: '**', redirectTo: 'login' }
 
 ];

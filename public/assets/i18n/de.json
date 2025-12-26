@@ -1,6 +1,6 @@
 {
-  "APP_NAME": "Music Rights Platform",
-  "TITLE": "Meine Musik-App",
+  "APP_NAME": "🎵 Musikrechte-Plattform",
+  "TITLE": "Musikrechte-Verwaltung",
   "WELCOME": "Willkommen auf der Musikindustrie-Plattform!",
   "DESCRIPTION": "Verwalten Sie Ihre Rechte, verbinden Sie sich mit Künstlern und erweitern Sie Ihr Netzwerk.",
   "LANGUAGE": "Sprache",
@@ -27,7 +27,8 @@
   
   "AUTH": {
     "WELCOME_BACK": "Willkommen zurück",
-    "JOIN_PLATFORM": "Melden Sie sich an, um fortzufahren",
+    "LOGIN_SUBTITLE": "Melden Sie sich an, um zur Musikrechte-Plattform zu gelangen",
+    "JOIN_PLATFORM": "Der Musikrechte-Plattform beitreten",
     "EMAIL": "E-Mail",
     "PASSWORD": "Passwort",
     "REQUIRED_FIELD": "Dieses Feld ist erforderlich",
@@ -35,10 +36,13 @@
     "PASSWORD_REQUIREMENTS": "Passwort muss mindestens 6 Zeichen lang sein",
     "FORGOT_PASSWORD": "Passwort vergessen?",
     "LOG_IN": "Anmelden",
+    "LOGIN": "Anmelden",
     "OR": "oder",
     "SIGN_IN_WITH_GOOGLE": "Mit Google fortfahren",
+    "NO_ACCOUNT": "Noch kein Konto?",
     "DONT_HAVE_ACCOUNT": "Noch kein Konto?",
     "SIGN_UP": "Registrieren",
+    "REGISTER": "Registrieren",
     "CREATE_ACCOUNT": "Konto erstellen",
     "REGISTER_SUBTITLE": "Treten Sie der Musikindustrie-Plattform bei",
     "DISPLAY_NAME": "Anzeigename",
@@ -48,23 +52,41 @@
     "CONFIRM_PASSWORD_REQUIRED": "Bitte bestätigen Sie Ihr Passwort",
     "PASSWORDS_MUST_MATCH": "Passwörter müssen übereinstimmen",
     "ALREADY_HAVE_ACCOUNT": "Bereits ein Konto?",
-    "TERMS_AGREEMENT": "Mit der Kontoerstellung stimmen Sie unseren Nutzungsbedingungen und Datenschutzrichtlinien zu",
+    "TERMS_AGREEMENT": "Durch die Erstellung eines Kontos stimmen Sie unseren Nutzungsbedingungen und Datenschutzrichtlinien zu",
     "WEAK": "Schwach",
     "MEDIUM": "Mittel",
     "STRONG": "Stark",
-    "REGISTRATION_SUCCESS": "Konto erfolgreich erstellt! Weiterleitung zur Profilkonfiguration...",
+    "REGISTRATION_SUCCESS": "Konto erfolgreich erstellt! Weiterleitung zur Profil-Einrichtung...",
     "REGISTRATION_ERROR": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
     "EMAIL_ALREADY_EXISTS": "Diese E-Mail ist bereits registriert",
+    "LOGIN_ERROR": "Ungültige E-Mail oder Passwort",
+    "BRANDING_TITLE": "Verwalten Sie Ihre Musikrechte",
+    "BRANDING_DESCRIPTION": "Professionelle Plattform für Künstler, Labels und Verlage.",
     "BRANDING_TITLE_REGISTER": "Treten Sie der Musik-Community bei",
-    "BRANDING_DESCRIPTION_REGISTER": "Verbinden Sie sich mit Künstlern, verwalten Sie Rechte und bauen Sie Ihr Netzwerk auf.",
+    "BRANDING_DESCRIPTION_REGISTER": "Verbinden Sie sich mit Künstlern, verwalten Sie Rechte und erweitern Sie Ihr Netzwerk.",
+    "FEATURE_1": "Eigentum und Aufteilungen verfolgen",
+    "FEATURE_2": "Split-Sheets generieren",
+    "FEATURE_3": "Nahtlos zusammenarbeiten",
     "REGISTER_FEATURE_1": "Sichere Rechteverwaltung",
-    "REGISTER_FEATURE_2": "Professionelles Networking",
-    "REGISTER_FEATURE_3": "Kollaborationstools"
+    "REGISTER_FEATURE_2": "Professionelles Netzwerk",
+    "REGISTER_FEATURE_3": "Kollaborations-Tools"
   },
   
   "PROFILE": {
-    "SETUP_TITLE": "Richten Sie Ihr Profil ein",
-    "SETUP_SUBTITLE": "Lernen wir Sie besser kennen",
+    "SETUP_TITLE": "Profil einrichten",
+    "SETUP_SUBTITLE": "Lernen wir uns kennen",
+    "EDIT_TITLE": "Profil bearbeiten",
+    "EDIT_SUBTITLE": "Aktualisieren Sie Ihre Profilinformationen",
+    "YOUR_QR_CODE": "Ihr QR-Code",
+    "QR_CODE_SUBTITLE": "Teilen Sie diesen Code, um sich mit anderen zu verbinden",
+    "HOW_TO_USE_QR": "So verwenden Sie",
+    "QR_INSTRUCTIONS": "Andere können diesen QR-Code scannen, um sich schnell mit Ihnen zu verbinden und Ihr Profil anzuzeigen.",
+    "DOWNLOAD_QR_CODE": "QR-Code herunterladen",
+    "SAVE_CHANGES": "Änderungen speichern",
+    "UPDATE_ERROR": "Profil konnte nicht aktualisiert werden",
+    "SELECT_ROLE": "Rolle auswählen",
+    "PRIMARY_ROLE_REQUIRED": "Hauptrolle ist erforderlich",
+    
     "REQUIRED_INFO": "Erforderliche Informationen",
     "OPTIONAL_INFO": "Optionale Informationen (Zum Erweitern klicken)",
     "NICKNAME": "Spitzname",
@@ -79,18 +101,18 @@
     "SECONDARY_ROLES": "Zusätzliche Rollen",
     "CREATIVE_ROLES": "Kreativ",
     "PRODUCTION_ROLES": "Produktion",
-    "BUSINESS_ROLES": "Geschäft",
+    "BUSINESS_ROLES": "Geschäftlich",
     "VISUAL_ROLES": "Visuell",
     "BIO": "Biografie",
-    "PRIMARY_LANGUAGE": "Hauptkommunikationssprache",
-    "SOCIAL_LINKS": "Social-Media-Links",
-    "SKIP_OPTIONAL": "Jetzt überspringen",
+    "PRIMARY_LANGUAGE": "Primäre Kommunikationssprache",
+    "SOCIAL_LINKS": "Soziale Medien",
+    "SKIP_OPTIONAL": "Vorerst überspringen",
     "CONTINUE": "Weiter",
     "SAVE_PROFILE": "Profil speichern",
     "REQUIRED_FIELDS_ERROR": "Bitte füllen Sie alle erforderlichen Felder aus",
     "CREATION_ERROR": "Profil konnte nicht erstellt werden. Bitte versuchen Sie es erneut."
   },
-  
+
   "WORKSPACE": {
     "CREATE_TITLE": "Workspace erstellen",
     "CREATE_SUBTITLE": "Richten Sie Ihren Workspace ein, um Rechte zu verwalten und zusammenzuarbeiten",
@@ -103,15 +125,158 @@
     "CREATION_ERROR": "Workspace konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
     "YOUR_WORKSPACES": "Ihre Workspaces",
     "NO_WORKSPACES": "Sie haben noch keine Workspaces",
-    "CREATE_FIRST": "Erstellen Sie Ihren ersten Workspace"
+    "CREATE_FIRST": "Erstellen Sie Ihren ersten Workspace",
+    "MANAGE_WORKSPACES": "Workspaces verwalten"
   },
 
+  "DASHBOARD": {
+    "WELCOME": "Willkommen auf der Musikrechte-Plattform",
+    "YOUR_PROFILE": "Ihr Profil",
+    "EDIT_PROFILE": "Profil bearbeiten",
+    "VIEW_QR_CODE": "QR-Code anzeigen",
+    "YOUR_WORKSPACES": "Ihre Workspaces",
+    "CURRENT_WORKSPACE": "Aktueller Workspace",
+    "NO_WORKSPACES": "Sie haben noch keine Workspaces",
+    "CREATE_FIRST_WORKSPACE": "Erstellen Sie Ihren ersten Workspace",
+    "EMAIL": "E-Mail",
+    "LOGOUT": "Abmelden",
+    "NICKNAME": "Spitzname",
+    "USER_NUMBER": "Benutzernummer",
+    "PRIMARY_ROLE": "Hauptrolle",
+    "BIO": "Biografie",
+    "SPOTIFY": "Spotify"
+  },
+  
   "COMMON": {
     "LOADING": "Lädt...",
+    "SAVING": "Speichern...",
     "ERROR": "Fehler",
     "SUCCESS": "Erfolg",
     "WARNING": "Warnung",
     "INFO": "Information",
-    "OPTIONAL": "optional"
+    "OPTIONAL": "optional",
+    "CANCEL": "Abbrechen",
+    "BACK": "Zurück",
+    "SAVE": "Speichern",
+    "DELETE": "Löschen",
+    "EDIT": "Bearbeiten",
+    "CLOSE": "Schließen",
+    "CONFIRM": "Bestätigen",
+    "NEXT": "Weiter",
+    "PREVIOUS": "Zurück",
+    "SUBMIT": "Absenden",
+    "SEARCH": "Suchen",
+    "FILTER": "Filtern",
+    "EXPORT": "Exportieren",
+    "DOWNLOAD": "Herunterladen",
+    "UPLOAD": "Hochladen",
+    "ADD": "Hinzufügen",
+    "REMOVE": "Entfernen",
+    "SELECT": "Auswählen",
+    "CLEAR": "Löschen",
+    "RESET": "Zurücksetzen",
+    "APPLY": "Anwenden",
+    "YES": "Ja",
+    "NO": "Nein",
+    "OK": "OK"
+  },
+
+  "ERRORS": {
+    "GENERIC": "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut.",
+    "NETWORK": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.",
+    "UNAUTHORIZED": "Sie sind nicht berechtigt, diese Aktion auszuführen.",
+    "NOT_FOUND": "Die angeforderte Ressource wurde nicht gefunden.",
+    "VALIDATION": "Bitte überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
+    "SERVER": "Serverfehler. Bitte versuchen Sie es später erneut."
+  },
+
+  "ROLES": {
+    "ARTIST": "Künstler",
+    "PRODUCER": "Produzent",
+    "SONGWRITER": "Songwriter",
+    "COMPOSER": "Komponist",
+    "LABEL": "Label",
+    "PUBLISHER": "Verlag",
+    "MANAGER": "Manager",
+    "ENGINEER": "Tontechniker",
+    "OTHER": "Sonstiges"
+  },
+
+  "WORKSPACE_TYPES": {
+    "BAND": "Band/Künstler",
+    "LABEL": "Plattenlabel",
+    "PUBLISHER": "Verlag",
+    "STUDIO": "Studio",
+    "MANAGEMENT": "Management",
+    "OTHER": "Sonstiges"
+  },
+
+  "LANGUAGES": {
+    "EN": "English",
+    "DE": "Deutsch",
+    "ES": "Español",
+    "UA": "Українська",
+    "FR": "Français",
+    "IT": "Italiano",
+    "PT": "Português"
+  },
+
+  "SOCIAL_PLATFORMS": {
+    "INSTAGRAM": "Instagram",
+    "TWITTER": "Twitter/X",
+    "FACEBOOK": "Facebook",
+    "TIKTOK": "TikTok",
+    "YOUTUBE": "YouTube",
+    "WEBSITE": "Website",
+    "SPOTIFY": "Spotify"
+  },
+
+  "NOTIFICATIONS": {
+    "PROFILE_CREATED": "Profil erfolgreich erstellt!",
+    "PROFILE_UPDATED": "Profil erfolgreich aktualisiert!",
+    "WORKSPACE_CREATED": "Workspace erfolgreich erstellt!",
+    "WORKSPACE_UPDATED": "Workspace erfolgreich aktualisiert!",
+    "WORKSPACE_DELETED": "Workspace erfolgreich gelöscht!",
+    "CHANGES_SAVED": "Änderungen erfolgreich gespeichert!",
+    "COPIED_TO_CLIPBOARD": "In Zwischenablage kopiert!",
+    "QR_CODE_DOWNLOADED": "QR-Code erfolgreich heruntergeladen!"
+  },
+
+  "VALIDATION": {
+    "REQUIRED": "Dieses Feld ist erforderlich",
+    "EMAIL": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+    "MIN_LENGTH": "Mindestlänge ist {min} Zeichen",
+    "MAX_LENGTH": "Maximale Länge ist {max} Zeichen",
+    "PATTERN": "Bitte geben Sie ein gültiges Format ein",
+    "MIN": "Mindestwert ist {min}",
+    "MAX": "Maximalwert ist {max}",
+    "URL": "Bitte geben Sie eine gültige URL ein"
+  },
+
+  "PLACEHOLDERS": {
+    "ENTER_EMAIL": "Geben Sie Ihre E-Mail ein",
+    "ENTER_PASSWORD": "Geben Sie Ihr Passwort ein",
+    "ENTER_NAME": "Geben Sie Ihren Namen ein",
+    "ENTER_NICKNAME": "Geben Sie Ihren Spitznamen ein",
+    "SEARCH": "Suchen...",
+    "SELECT": "Auswählen...",
+    "OPTIONAL": "Optional"
+  },
+
+  "TOOLTIPS": {
+    "EDIT": "Bearbeiten",
+    "DELETE": "Löschen",
+    "COPY": "Kopieren",
+    "DOWNLOAD": "Herunterladen",
+    "UPLOAD": "Hochladen",
+    "INFO": "Weitere Informationen",
+    "HELP": "Hilfe"
+  },
+
+  "FOOTER": {
+    "COPYRIGHT": "© 2025 Musikrechte-Plattform. Alle Rechte vorbehalten.",
+    "PRIVACY": "Datenschutzrichtlinie",
+    "TERMS": "Nutzungsbedingungen",
+    "CONTACT": "Kontakt"
   }
 }

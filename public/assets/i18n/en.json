@@ -1,6 +1,6 @@
 {
   "APP_NAME": "🎵 Music Rights Platform",
-  "TITLE": "My Music App",
+  "TITLE": "Music Rights Management",
   "WELCOME": "Welcome to the Music Industry Platform!",
   "DESCRIPTION": "Manage your rights, connect with artists, and grow your network.",
   "LANGUAGE": "Language",
@@ -28,7 +28,7 @@
   "AUTH": {
     "WELCOME_BACK": "Welcome Back",
     "LOGIN_SUBTITLE": "Sign in to continue to Music Rights Platform",
-    "JOIN_PLATFORM": "Sign in to continue to Music Rights Platform",
+    "JOIN_PLATFORM": "Join Music Rights Platform",
     "EMAIL": "Email",
     "PASSWORD": "Password",
     "REQUIRED_FIELD": "This field is required",
@@ -36,11 +36,13 @@
     "PASSWORD_REQUIREMENTS": "Password must be at least 6 characters",
     "FORGOT_PASSWORD": "Forgot password?",
     "LOG_IN": "Log In",
+    "LOGIN": "Log In",
     "OR": "or",
     "SIGN_IN_WITH_GOOGLE": "Continue with Google",
     "NO_ACCOUNT": "Don't have an account?",
     "DONT_HAVE_ACCOUNT": "Don't have an account?",
     "SIGN_UP": "Sign up",
+    "REGISTER": "Sign up",
     "CREATE_ACCOUNT": "Create Account",
     "REGISTER_SUBTITLE": "Join the music industry platform",
     "DISPLAY_NAME": "Display Name",
@@ -57,8 +59,14 @@
     "REGISTRATION_SUCCESS": "Account created successfully! Redirecting to profile setup...",
     "REGISTRATION_ERROR": "Registration failed. Please try again.",
     "EMAIL_ALREADY_EXISTS": "This email is already registered",
+    "LOGIN_ERROR": "Invalid email or password",
+    "BRANDING_TITLE": "Manage Your Music Rights",
+    "BRANDING_DESCRIPTION": "Professional platform for artists, labels, and publishers.",
     "BRANDING_TITLE_REGISTER": "Join the Music Community",
     "BRANDING_DESCRIPTION_REGISTER": "Connect with artists, manage rights, and build your network.",
+    "FEATURE_1": "Track ownership & splits",
+    "FEATURE_2": "Generate split sheets",
+    "FEATURE_3": "Collaborate seamlessly",
     "REGISTER_FEATURE_1": "Secure rights management",
     "REGISTER_FEATURE_2": "Professional networking",
     "REGISTER_FEATURE_3": "Collaboration tools"
@@ -67,6 +75,18 @@
   "PROFILE": {
     "SETUP_TITLE": "Set Up Your Profile",
     "SETUP_SUBTITLE": "Let's get to know you better",
+    "EDIT_TITLE": "Edit Profile",
+    "EDIT_SUBTITLE": "Update your profile information",
+    "YOUR_QR_CODE": "Your QR Code",
+    "QR_CODE_SUBTITLE": "Share this code to connect with others",
+    "HOW_TO_USE_QR": "How to use",
+    "QR_INSTRUCTIONS": "Others can scan this QR code to quickly connect with you and view your profile.",
+    "DOWNLOAD_QR_CODE": "Download QR Code",
+    "SAVE_CHANGES": "Save Changes",
+    "UPDATE_ERROR": "Failed to update profile",
+    "SELECT_ROLE": "Select a role",
+    "PRIMARY_ROLE_REQUIRED": "Primary role is required",
+    
     "REQUIRED_INFO": "Required Information",
     "OPTIONAL_INFO": "Optional Information (Click to expand)",
     "NICKNAME": "Nickname",
@@ -105,15 +125,158 @@
     "CREATION_ERROR": "Failed to create workspace. Please try again.",
     "YOUR_WORKSPACES": "Your Workspaces",
     "NO_WORKSPACES": "You don't have any workspaces yet",
-    "CREATE_FIRST": "Create Your First Workspace"
+    "CREATE_FIRST": "Create Your First Workspace",
+    "MANAGE_WORKSPACES": "Manage Workspaces"
+  },
+
+  "DASHBOARD": {
+    "WELCOME": "Welcome to Music Rights Platform",
+    "YOUR_PROFILE": "Your Profile",
+    "EDIT_PROFILE": "Edit Profile",
+    "VIEW_QR_CODE": "View QR Code",
+    "YOUR_WORKSPACES": "Your Workspaces",
+    "CURRENT_WORKSPACE": "Current workspace",
+    "NO_WORKSPACES": "You don't have any workspaces yet",
+    "CREATE_FIRST_WORKSPACE": "Create Your First Workspace",
+    "EMAIL": "Email",
+    "LOGOUT": "Logout",
+    "NICKNAME": "Nickname",
+    "USER_NUMBER": "User Number",
+    "PRIMARY_ROLE": "Primary Role",
+    "BIO": "Bio",
+    "SPOTIFY": "Spotify"
   },
   
   "COMMON": {
     "LOADING": "Loading...",
+    "SAVING": "Saving...",
     "ERROR": "Error",
     "SUCCESS": "Success",
     "WARNING": "Warning",
     "INFO": "Information",
-    "OPTIONAL": "optional"
+    "OPTIONAL": "optional",
+    "CANCEL": "Cancel",
+    "BACK": "Back",
+    "SAVE": "Save",
+    "DELETE": "Delete",
+    "EDIT": "Edit",
+    "CLOSE": "Close",
+    "CONFIRM": "Confirm",
+    "NEXT": "Next",
+    "PREVIOUS": "Previous",
+    "SUBMIT": "Submit",
+    "SEARCH": "Search",
+    "FILTER": "Filter",
+    "EXPORT": "Export",
+    "DOWNLOAD": "Download",
+    "UPLOAD": "Upload",
+    "ADD": "Add",
+    "REMOVE": "Remove",
+    "SELECT": "Select",
+    "CLEAR": "Clear",
+    "RESET": "Reset",
+    "APPLY": "Apply",
+    "YES": "Yes",
+    "NO": "No",
+    "OK": "OK"
+  },
+
+  "ERRORS": {
+    "GENERIC": "Something went wrong. Please try again.",
+    "NETWORK": "Network error. Please check your connection.",
+    "UNAUTHORIZED": "You are not authorized to perform this action.",
+    "NOT_FOUND": "The requested resource was not found.",
+    "VALIDATION": "Please check your input and try again.",
+    "SERVER": "Server error. Please try again later."
+  },
+
+  "ROLES": {
+    "ARTIST": "Artist",
+    "PRODUCER": "Producer",
+    "SONGWRITER": "Songwriter",
+    "COMPOSER": "Composer",
+    "LABEL": "Label",
+    "PUBLISHER": "Publisher",
+    "MANAGER": "Manager",
+    "ENGINEER": "Engineer",
+    "OTHER": "Other"
+  },
+
+  "WORKSPACE_TYPES": {
+    "BAND": "Band/Artist",
+    "LABEL": "Record Label",
+    "PUBLISHER": "Publisher",
+    "STUDIO": "Studio",
+    "MANAGEMENT": "Management",
+    "OTHER": "Other"
+  },
+
+  "LANGUAGES": {
+    "EN": "English",
+    "DE": "Deutsch",
+    "ES": "Español",
+    "UA": "Українська",
+    "FR": "Français",
+    "IT": "Italiano",
+    "PT": "Português"
+  },
+
+  "SOCIAL_PLATFORMS": {
+    "INSTAGRAM": "Instagram",
+    "TWITTER": "Twitter/X",
+    "FACEBOOK": "Facebook",
+    "TIKTOK": "TikTok",
+    "YOUTUBE": "YouTube",
+    "WEBSITE": "Website",
+    "SPOTIFY": "Spotify"
+  },
+
+  "NOTIFICATIONS": {
+    "PROFILE_CREATED": "Profile created successfully!",
+    "PROFILE_UPDATED": "Profile updated successfully!",
+    "WORKSPACE_CREATED": "Workspace created successfully!",
+    "WORKSPACE_UPDATED": "Workspace updated successfully!",
+    "WORKSPACE_DELETED": "Workspace deleted successfully!",
+    "CHANGES_SAVED": "Changes saved successfully!",
+    "COPIED_TO_CLIPBOARD": "Copied to clipboard!",
+    "QR_CODE_DOWNLOADED": "QR code downloaded successfully!"
+  },
+
+  "VALIDATION": {
+    "REQUIRED": "This field is required",
+    "EMAIL": "Please enter a valid email address",
+    "MIN_LENGTH": "Minimum length is {min} characters",
+    "MAX_LENGTH": "Maximum length is {max} characters",
+    "PATTERN": "Please enter a valid format",
+    "MIN": "Minimum value is {min}",
+    "MAX": "Maximum value is {max}",
+    "URL": "Please enter a valid URL"
+  },
+
+  "PLACEHOLDERS": {
+    "ENTER_EMAIL": "Enter your email",
+    "ENTER_PASSWORD": "Enter your password",
+    "ENTER_NAME": "Enter your name",
+    "ENTER_NICKNAME": "Enter your nickname",
+    "SEARCH": "Search...",
+    "SELECT": "Select...",
+    "OPTIONAL": "Optional"
+  },
+
+  "TOOLTIPS": {
+    "EDIT": "Edit",
+    "DELETE": "Delete",
+    "COPY": "Copy",
+    "DOWNLOAD": "Download",
+    "UPLOAD": "Upload",
+    "INFO": "More information",
+    "HELP": "Help"
+  },
+
+  "FOOTER": {
+    "COPYRIGHT": "© 2025 Music Rights Platform. All rights reserved.",
+    "PRIVACY": "Privacy Policy",
+    "TERMS": "Terms of Service",
+    "CONTACT": "Contact Us"
   }
 }

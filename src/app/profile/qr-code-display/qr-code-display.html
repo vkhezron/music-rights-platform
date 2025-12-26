@@ -1,0 +1,83 @@
+<div class="qr-code-container">
+  <!-- Back Button -->
+  <button class="back-button" (click)="goBack()">
+    <span class="back-icon">←</span>
+    <span>{{ 'COMMON.BACK' | translate }}</span>
+  </button>
+
+  <div class="qr-code-card">
+    
+    <!-- Header -->
+    <div class="qr-header">
+      <div class="qr-icon">📱</div>
+      <h1>{{ 'PROFILE.YOUR_QR_CODE' | translate }}</h1>
+      <p class="subtitle">{{ 'PROFILE.QR_CODE_SUBTITLE' | translate }}</p>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>{{ 'COMMON.LOADING' | translate }}</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (errorMessage() && !isLoading()) {
+      <div class="error-state">
+        <div class="error-icon">⚠️</div>
+        <p>{{ errorMessage() }}</p>
+        <button class="retry-button" (click)="generateQRCode()">
+          {{ 'COMMON.RETRY' | translate }}
+        </button>
+      </div>
+    }
+
+    <!-- QR Code Display -->
+    @if (qrCodeDataUrl() && !isLoading() && !errorMessage()) {
+      <div class="qr-content">
+        
+        <!-- Profile Info -->
+        @if (profile) {
+          <div class="profile-info">
+            <div class="info-row">
+              <span class="label">{{ 'PROFILE.NICKNAME' | translate }}:</span>
+              <span class="value">@{{ profile.nickname }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">{{ 'DASHBOARD.USER_NUMBER' | translate }}:</span>
+              <span class="value">#{{ profile.user_number }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">{{ 'DASHBOARD.PRIMARY_ROLE' | translate }}:</span>
+              <span class="value">{{ profile.primary_role }}</span>
+            </div>
+          </div>
+        }
+
+        <!-- QR Code Image -->
+        <div class="qr-code-wrapper">
+          <img 
+            [src]="qrCodeDataUrl()" 
+            alt="QR Code" 
+            class="qr-code-image"
+          />
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions">
+          <h3>{{ 'PROFILE.HOW_TO_USE_QR' | translate }}</h3>
+          <p>{{ 'PROFILE.QR_INSTRUCTIONS' | translate }}</p>
+        </div>
+
+        <!-- Download Button -->
+        <button class="download-button" (click)="downloadQRCode()">
+          <span class="download-icon">⬇️</span>
+          <span>{{ 'PROFILE.DOWNLOAD_QR_CODE' | translate }}</span>
+        </button>
+
+      </div>
+    }
+
+  </div>
+</div>

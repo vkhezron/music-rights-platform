@@ -178,7 +178,8 @@
     "APPLY": "Anwenden",
     "YES": "Ja",
     "NO": "Nein",
-    "OK": "OK"
+    "OK": "OK",
+    "RETRY": "Erneut versuchen"
   },
 
   "ERRORS": {

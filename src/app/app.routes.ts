@@ -9,6 +9,7 @@ export const routes: Routes = [
     {path: 'workspaces', loadComponent: () => import('./workspaces/workspace-list/workspace-list').then(m => m.WorkspaceList)},
     {path: 'workspaces/create', loadComponent: () => import('./workspaces/workspace-create/workspace-create').then(m => m.WorkspaceCreateComponent)},
     {path: 'profile/edit',  loadComponent: () => import('./profile/profile-edit/profile-edit').then(m => m.ProfileEditComponent)},
+    {path: 'profile/qr-code',loadComponent: () => import('./profile/qr-code-display/qr-code-display').then(m => m.QrCodeDisplayComponent)},
     {path: '**', redirectTo: 'login' }
 
 ];

@@ -12,7 +12,7 @@ import { WorkspaceService, CreateWorkspaceData } from '../../services/workspace.
     CommonModule,
     ReactiveFormsModule,
     TranslateModule
-    , AsyncPipe
+    //, AsyncPipe
   ],
   templateUrl: './workspace-create.html',
   styleUrl: './workspace-create.scss'

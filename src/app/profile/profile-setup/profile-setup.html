@@ -11,10 +11,12 @@
     <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="setup-form">
       
       <!-- Error Message -->
-      <div *ngIf="errorMessage()" class="error-alert">
-        <span class="error-icon">!</span>
-        <span>{{ errorMessage() | translate }}</span>
-      </div>
+      @if (errorMessage()) {
+        <div class="error-alert">
+          <span class="error-icon">!</span>
+          <span>{{ errorMessage() | translate }}</span>
+        </div>
+      }
 
       <!-- REQUIRED SECTION -->
       <div class="form-section">
@@ -35,29 +37,37 @@
               [class.success]="nicknameAvailable() === true"
               placeholder="Enter your display name"
             />
-            <span *ngIf="nicknameCheckLoading()" class="validation-icon loading">
-              ...
-            </span>
-            <span *ngIf="nicknameAvailable() === true" class="validation-icon success">
-              ✓
-            </span>
-            <span *ngIf="nicknameAvailable() === false" class="validation-icon error">
-              ✗
-            </span>
+            @if (nicknameCheckLoading()) {
+              <span class="validation-icon loading">...</span>
+            }
+            @if (nicknameAvailable() === true) {
+              <span class="validation-icon success">✓</span>
+            }
+            @if (nicknameAvailable() === false) {
+              <span class="validation-icon error">✗</span>
+            }
           </div>
           
-          <div class="error-message" *ngIf="hasError('nickname', 'required')">
-            {{ 'PROFILE.NICKNAME_REQUIRED' | translate }}
-          </div>
-          <div class="error-message" *ngIf="hasError('nickname', 'minlength')">
-            {{ 'PROFILE.NICKNAME_MIN_LENGTH' | translate }}
-          </div>
-          <div class="success-message" *ngIf="nicknameAvailable() === true">
-            {{ 'PROFILE.NICKNAME_AVAILABLE' | translate }}
-          </div>
-          <div class="error-message" *ngIf="nicknameAvailable() === false">
-            {{ 'PROFILE.NICKNAME_TAKEN' | translate }}
-          </div>
+          @if (hasError('nickname', 'required')) {
+            <div class="error-message">
+              {{ 'PROFILE.NICKNAME_REQUIRED' | translate }}
+            </div>
+          }
+          @if (hasError('nickname', 'minlength')) {
+            <div class="error-message">
+              {{ 'PROFILE.NICKNAME_MIN_LENGTH' | translate }}
+            </div>
+          }
+          @if (nicknameAvailable() === true) {
+            <div class="success-message">
+              {{ 'PROFILE.NICKNAME_AVAILABLE' | translate }}
+            </div>
+          }
+          @if (nicknameAvailable() === false) {
+            <div class="error-message">
+              {{ 'PROFILE.NICKNAME_TAKEN' | translate }}
+            </div>
+          }
         </div>
 
         <!-- Primary Role -->
@@ -70,28 +80,32 @@
             formControlName="primary_role"
             class="form-select"
           >
-            <option *ngFor="let role of primaryRoles" [value]="role.value">
-              {{ role.label }}
-            </option>
+            @for (role of primaryRoles; track role) {
+              <option [value]="role">{{ role }}</option>
+            }
           </select>
         </div>
 
         <!-- Custom Role Text (shown if "Other" selected) -->
-        <div class="form-group" *ngIf="profileForm.get('primary_role')?.value === 'other'">
-          <label for="custom_role_text" class="required">
-            {{ 'PROFILE.SPECIFY_ROLE' | translate }}
-          </label>
-          <input
-            id="custom_role_text"
-            type="text"
-            formControlName="custom_role_text"
-            class="form-input"
-            placeholder="Enter your specific role"
-          />
-          <div class="error-message" *ngIf="hasError('custom_role_text', 'required')">
-            {{ 'PROFILE.CUSTOM_ROLE_REQUIRED' | translate }}
+        @if (profileForm.get('primary_role')?.value === 'other') {
+          <div class="form-group">
+            <label for="custom_role_text" class="required">
+              {{ 'PROFILE.SPECIFY_ROLE' | translate }}
+            </label>
+            <input
+              id="custom_role_text"
+              type="text"
+              formControlName="custom_role_text"
+              class="form-input"
+              placeholder="Enter your specific role"
+            />
+            @if (hasError('custom_role_text', 'required')) {
+              <div class="error-message">
+                {{ 'PROFILE.CUSTOM_ROLE_REQUIRED' | translate }}
+              </div>
+            }
           </div>
-        </div>
+        }
       </div>
 
       <!-- OPTIONAL SECTION -->
@@ -103,149 +117,118 @@
           </button>
         </div>
 
-        <div *ngIf="showOptionalFields()" class="optional-fields">
-          
-          <!-- Secondary Roles -->
-          <div class="form-group">
-            <label class="group-label">{{ 'PROFILE.SECONDARY_ROLES' | translate }}</label>
+        @if (showOptionalFields()) {
+          <div class="optional-fields">
             
-            <!-- Creative Roles -->
-            <div class="role-category">
-              <h3 class="category-title">{{ 'PROFILE.CREATIVE_ROLES' | translate }}</h3>
-              <div class="checkbox-grid">
-                <label *ngFor="let role of secondaryRoles.creative" class="checkbox-label">
-                  <input
-                    type="checkbox"
-                    [checked]="isSecondaryRoleSelected(role.value)"
-                    (change)="toggleSecondaryRole(role.value)"
-                  />
-                  <span>{{ role.label }}</span>
-                </label>
+            <!-- Secondary Roles -->
+            <div class="form-group">
+              <label class="group-label">{{ 'PROFILE.SECONDARY_ROLES' | translate }}</label>
+              
+              @for (group of secondaryRoles; track group.category) {
+                <div class="role-category">
+                  <h3 class="category-title">{{ 'PROFILE.' + group.category | translate }}</h3>
+                  <div class="checkbox-grid">
+                    @for (role of group.roles; track role) {
+                      <label class="checkbox-label">
+                        <input
+                          type="checkbox"
+                          [checked]="isSecondaryRoleSelected(role)"
+                          (change)="toggleSecondaryRole(role)"
+                        />
+                        <span>{{ role }}</span>
+                      </label>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Bio -->
+            <div class="form-group">
+              <label for="bio">{{ 'PROFILE.BIO' | translate }}</label>
+              <textarea
+                id="bio"
+                formControlName="bio"
+                class="form-textarea"
+                rows="4"
+                maxlength="500"
+                placeholder="Tell us about yourself..."
+              ></textarea>
+              <div class="char-count">
+                {{ profileForm.get('bio')?.value?.length || 0 }} / 500
               </div>
             </div>
 
-            <!-- Production Roles -->
-            <div class="role-category">
-              <h3 class="category-title">{{ 'PROFILE.PRODUCTION_ROLES' | translate }}</h3>
-              <div class="checkbox-grid">
-                <label *ngFor="let role of secondaryRoles.production" class="checkbox-label">
-                  <input
-                    type="checkbox"
-                    [checked]="isSecondaryRoleSelected(role.value)"
-                    (change)="toggleSecondaryRole(role.value)"
-                  />
-                  <span>{{ role.label }}</span>
-                </label>
-              </div>
+            <!-- Primary Language -->
+            <div class="form-group">
+              <label for="primary_language">
+                {{ 'PROFILE.PRIMARY_LANGUAGE' | translate }}
+              </label>
+              <select
+                id="primary_language"
+                formControlName="primary_language"
+                class="form-select"
+              >
+                @for (lang of languages; track lang.code) {
+                  <option [value]="lang.code">
+                    {{ lang.name }}
+                  </option>
+                }
+              </select>
             </div>
 
-            <!-- Business Roles -->
-            <div class="role-category">
-              <h3 class="category-title">{{ 'PROFILE.BUSINESS_ROLES' | translate }}</h3>
-              <div class="checkbox-grid">
-                <label *ngFor="let role of secondaryRoles.business" class="checkbox-label">
-                  <input
-                    type="checkbox"
-                    [checked]="isSecondaryRoleSelected(role.value)"
-                    (change)="toggleSecondaryRole(role.value)"
-                  />
-                  <span>{{ role.label }}</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Visual Roles -->
-            <div class="role-category">
-              <h3 class="category-title">{{ 'PROFILE.VISUAL_ROLES' | translate }}</h3>
-              <div class="checkbox-grid">
-                <label *ngFor="let role of secondaryRoles.visual" class="checkbox-label">
-                  <input
-                    type="checkbox"
-                    [checked]="isSecondaryRoleSelected(role.value)"
-                    (change)="toggleSecondaryRole(role.value)"
-                  />
-                  <span>{{ role.label }}</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <!-- Bio -->
-          <div class="form-group">
-            <label for="bio">{{ 'PROFILE.BIO' | translate }}</label>
-            <textarea
-              id="bio"
-              formControlName="bio"
-              class="form-textarea"
-              rows="4"
-              maxlength="500"
-              placeholder="Tell us about yourself..."
-            ></textarea>
-            <div class="char-count">
-              {{ profileForm.get('bio')?.value?.length || 0 }} / 500
-            </div>
-          </div>
-
-          <!-- Primary Language -->
-          <div class="form-group">
-            <label for="primary_language">
-              {{ 'PROFILE.PRIMARY_LANGUAGE' | translate }}
-            </label>
-            <select
-              id="primary_language"
-              formControlName="primary_language"
-              class="form-select"
-            >
-              <option *ngFor="let lang of languages" [value]="lang.code">
-                {{ lang.name }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Social Links -->
-          <div class="form-group">
-            <label class="group-label">{{ 'PROFILE.SOCIAL_LINKS' | translate }}</label>
-            
-            <div class="social-inputs">
-              <div *ngFor="let platform of socialPlatforms" class="social-input-group">
-                <label [for]="platform.key">{{ platform.label }}</label>
-                <input
-                  [id]="platform.key"
-                  type="text"
-                  [formControlName]="platform.key"
-                  class="form-input"
-                  [placeholder]="platform.placeholder"
-                />
+            <!-- Social Links -->
+            <div class="form-group">
+              <label class="group-label">{{ 'PROFILE.SOCIAL_LINKS' | translate }}</label>
+              
+              <div class="social-inputs">
+                @for (platform of socialPlatforms; track platform.name) {
+                  <div class="social-input-group">
+                    <span class="social-icon">{{ platform.icon }}</span>
+                    <input
+                      [id]="platform.name"
+                      type="text"
+                      [formControlName]="platform.name"
+                      class="form-input"
+                      [placeholder]="platform.placeholder"
+                    />
+                  </div>
+                }
               </div>
             </div>
           </div>
-        </div>
+        }
       </div>
 
       <!-- Action Buttons -->
       <div class="form-actions">
-        <button
-          *ngIf="!showOptionalFields()"
-          type="button"
-          class="skip-button"
-          (click)="skipOptionalFields()"
-          [disabled]="isLoading()"
-        >
-          {{ 'PROFILE.SKIP_OPTIONAL' | translate }}
-        </button>
+        @if (!showOptionalFields()) {
+          <button
+            type="button"
+            class="skip-button"
+            (click)="skipOptionalFields()"
+            [disabled]="isLoading()"
+          >
+            {{ 'PROFILE.SKIP_OPTIONAL' | translate }}
+          </button>
+        }
         
         <button
           type="submit"
           class="submit-button"
           [disabled]="isLoading() || nicknameAvailable() !== true"
         >
-          <span *ngIf="!isLoading()">
-            {{ showOptionalFields() ? ('PROFILE.SAVE_PROFILE' | translate) : ('PROFILE.CONTINUE' | translate) }}
-          </span>
-          <span *ngIf="isLoading()" class="loading">
-            <span class="spinner"></span>
-            {{ 'COMMON.LOADING' | translate }}
-          </span>
+          @if (!isLoading()) {
+            <span>
+              {{ showOptionalFields() ? ('PROFILE.SAVE_PROFILE' | translate) : ('PROFILE.CONTINUE' | translate) }}
+            </span>
+          }
+          @if (isLoading()) {
+            <span class="loading">
+              <span class="spinner"></span>
+              {{ 'COMMON.LOADING' | translate }}
+            </span>
+          }
         </button>
       </div>
     </form>

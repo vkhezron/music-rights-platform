@@ -1,0 +1,219 @@
+<div class="profile-edit-container">
+  <div class="edit-card">
+    
+    <div class="header">
+      <h1>{{ 'PROFILE.EDIT_TITLE' | translate }}</h1>
+      <p>{{ 'PROFILE.EDIT_SUBTITLE' | translate }}</p>
+    </div>
+
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="edit-form">
+      
+      <!-- Success Message -->
+      @if (successMessage()) {
+        <div class="success-alert">
+          <span class="success-icon">✓</span>
+          <span>{{ successMessage() }}</span>
+        </div>
+      }
+
+      <!-- Error Message -->
+      @if (errorMessage()) {
+        <div class="error-alert">
+          <span class="error-icon">!</span>
+          <span>{{ errorMessage() | translate }}</span>
+        </div>
+      }
+
+      <!-- Loading State -->
+      @if (isLoading()) {
+        <div class="loading-overlay">
+          <div class="spinner"></div>
+          <p>{{ 'COMMON.LOADING' | translate }}</p>
+        </div>
+      }
+
+      <!-- Nickname -->
+      <div class="form-group">
+        <label for="nickname" class="required">
+          {{ 'PROFILE.NICKNAME' | translate }}
+        </label>
+        <input
+          id="nickname"
+          type="text"
+          formControlName="nickname"
+          class="form-input"
+          [class.error]="hasError('nickname', 'required') || hasError('nickname', 'minlength')"
+          placeholder="Your unique nickname"
+        />
+        @if (hasError('nickname', 'required')) {
+          <div class="error-message">
+            {{ 'PROFILE.NICKNAME_REQUIRED' | translate }}
+          </div>
+        }
+        @if (hasError('nickname', 'minlength')) {
+          <div class="error-message">
+            {{ 'PROFILE.NICKNAME_MIN_LENGTH' | translate }}
+          </div>
+        }
+      </div>
+
+      <!-- Primary Role -->
+      <div class="form-group">
+        <label for="primary_role" class="required">
+          {{ 'PROFILE.PRIMARY_ROLE' | translate }}
+        </label>
+        <select
+          id="primary_role"
+          formControlName="primary_role"
+          class="form-select"
+          [class.error]="hasError('primary_role', 'required')">
+          <option value="">{{ 'PROFILE.SELECT_ROLE' | translate }}</option>
+          @for (role of primaryRoles; track role) {
+            <option [value]="role">{{ role }}</option>
+          }
+        </select>
+        @if (hasError('primary_role', 'required')) {
+          <div class="error-message">
+            {{ 'PROFILE.PRIMARY_ROLE_REQUIRED' | translate }}
+          </div>
+        }
+      </div>
+
+      <!-- Custom Role Text (if "other" selected) -->
+      @if (profileForm.get('primary_role')?.value === 'other') {
+        <div class="form-group">
+          <label for="custom_role_text" class="required">
+            {{ 'PROFILE.SPECIFY_ROLE' | translate }}
+          </label>
+          <input
+            id="custom_role_text"
+            type="text"
+            formControlName="custom_role_text"
+            class="form-input"
+            [class.error]="hasError('custom_role_text', 'required')"
+            placeholder="e.g., Sound Engineer, Tour Manager"
+          />
+          @if (hasError('custom_role_text', 'required')) {
+            <div class="error-message">
+              {{ 'PROFILE.CUSTOM_ROLE_REQUIRED' | translate }}
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Optional Section Toggle -->
+      <div class="optional-toggle" (click)="toggleOptional()">
+        <h3>
+          {{ 'PROFILE.OPTIONAL_INFO' | translate }}
+          <span class="toggle-icon">{{ showOptional() ? '▼' : '▶' }}</span>
+        </h3>
+      </div>
+
+      @if (showOptional()) {
+        <div class="optional-section">
+          
+          <!-- Secondary Roles -->
+          <div class="form-group">
+            <label>{{ 'PROFILE.SECONDARY_ROLES' | translate }}</label>
+            
+            @for (group of secondaryRoles; track group.category) {
+              <div class="role-category">
+                <h4>{{ 'PROFILE.' + group.category | translate }}</h4>
+                <div class="role-checkboxes">
+                  @for (role of group.roles; track role) {
+                    <label class="checkbox-label">
+                      <input
+                        type="checkbox"
+                        [checked]="isSecondaryRoleSelected(role)"
+                        (change)="toggleSecondaryRole(role)"
+                      />
+                      <span>{{ role }}</span>
+                    </label>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Bio -->
+          <div class="form-group">
+            <label for="bio">
+              {{ 'PROFILE.BIO' | translate }}
+            </label>
+            <textarea
+              id="bio"
+              formControlName="bio"
+              class="form-textarea"
+              rows="4"
+              maxlength="500"
+              placeholder="Tell us about yourself..."
+            ></textarea>
+            <div class="char-count">
+              {{ profileForm.get('bio')?.value?.length || 0 }} / 500
+            </div>
+          </div>
+
+          <!-- Primary Language -->
+          <div class="form-group">
+            <label for="primary_language">
+              {{ 'PROFILE.PRIMARY_LANGUAGE' | translate }}
+            </label>
+            <select
+              id="primary_language"
+              formControlName="primary_language"
+              class="form-select">
+              @for (lang of languages; track lang.code) {
+                <option [value]="lang.code">{{ lang.name }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Social Links -->
+          <div class="form-group">
+            <label>{{ 'PROFILE.SOCIAL_LINKS' | translate }}</label>
+            
+            @for (platform of socialPlatforms; track platform.name) {
+              <div class="social-input">
+                <span class="social-icon">{{ platform.icon }}</span>
+                <input
+                  [id]="platform.name.toLowerCase()"
+                  type="text"
+                  [formControlName]="platform.name.toLowerCase()"
+                  class="form-input"
+                  [placeholder]="platform.placeholder"
+                />
+              </div>
+            }
+          </div>
+
+        </div>
+      }
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="cancel-button"
+          (click)="cancel()"
+          [disabled]="isLoading()">
+          {{ 'COMMON.CANCEL' | translate }}
+        </button>
+        
+        <button
+          type="submit"
+          class="submit-button"
+          [disabled]="isLoading() || profileForm.invalid">
+          @if (!isLoading()) {
+            <span>{{ 'PROFILE.SAVE_CHANGES' | translate }}</span>
+          }
+          @if (isLoading()) {
+            <span class="loading">
+              <span class="spinner"></span>
+              {{ 'COMMON.SAVING' | translate }}
+            </span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

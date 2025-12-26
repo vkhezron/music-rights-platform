@@ -1,0 +1,187 @@
+import { Component, inject, signal, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
+import { ProfileService } from '../../services/profile.service';
+import { ProfileFormData, PRIMARY_ROLES, SECONDARY_ROLES, LANGUAGES, SOCIAL_PLATFORMS } from '../../../models/profile.model';
+
+
+@Component({
+  selector: 'app-profile-edit',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TranslateModule
+  ],
+  templateUrl: './profile-edit.html',
+  styleUrl: './profile-edit.scss'
+})
+export class ProfileEditComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private profileService = inject(ProfileService);
+  private router = inject(Router);
+
+  profileForm!: FormGroup;
+  isLoading = signal(false);
+  errorMessage = signal('');
+  successMessage = signal('');
+  showOptional = signal(false);
+
+  // Constants
+  primaryRoles = PRIMARY_ROLES;
+  secondaryRoles = SECONDARY_ROLES;
+  languages = LANGUAGES;
+  socialPlatforms = SOCIAL_PLATFORMS;
+
+  ngOnInit() {
+    this.initializeForm();
+    this.loadCurrentProfile();
+  }
+
+  initializeForm() {
+    this.profileForm = this.fb.group({
+      nickname: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30)]],
+      primary_role: ['', Validators.required],
+      custom_role_text: [''],
+      secondary_roles: [[]],
+      bio: ['', Validators.maxLength(500)],
+      primary_language: ['en'],
+      instagram: [''],
+      twitter: [''],
+      facebook: [''],
+      tiktok: [''],
+      youtube: [''],
+      website: [''],
+      spotify: ['']
+    });
+
+    // Watch primary_role changes
+    this.profileForm.get('primary_role')?.valueChanges.subscribe(value => {
+      const customRoleControl = this.profileForm.get('custom_role_text');
+      if (value === 'other') {
+        customRoleControl?.setValidators([Validators.required]);
+      } else {
+        customRoleControl?.clearValidators();
+        customRoleControl?.setValue('');
+      }
+      customRoleControl?.updateValueAndValidity();
+    });
+  }
+
+  async loadCurrentProfile() {
+    this.isLoading.set(true);
+    try {
+      const profile = await this.profileService.currentProfile;
+      
+      if (profile) {
+        // Populate form with current profile data
+        this.profileForm.patchValue({
+          nickname: profile.nickname,
+          primary_role: profile.primary_role,
+          custom_role_text: profile.custom_role_text || '',
+          secondary_roles: profile.secondary_roles || [],
+          bio: profile.bio || '',
+          primary_language: profile.primary_language || 'en',
+          instagram: profile.social_links?.instagram || '',
+          twitter: profile.social_links?.twitter || '',
+          facebook: profile.social_links?.facebook || '',
+          tiktok: profile.social_links?.tiktok || '',
+          youtube: profile.social_links?.youtube || '',
+          website: profile.social_links?.website || '',
+          spotify: profile.social_links?.spotify || ''
+        });
+
+        // Show optional section if there's data
+        if (profile.bio || profile.secondary_roles?.length || Object.keys(profile.social_links || {}).length) {
+          this.showOptional.set(true);
+        }
+      }
+    } catch (error: any) {
+      console.error('Error loading profile:', error);
+      this.errorMessage.set('Failed to load profile');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  toggleOptional() {
+    this.showOptional.set(!this.showOptional());
+  }
+
+  hasError(fieldName: string, errorType: string): boolean {
+    const field = this.profileForm.get(fieldName);
+    return field ? field.hasError(errorType) && (field.dirty || field.touched) : false;
+  }
+
+  isSecondaryRoleSelected(role: string): boolean {
+    const selectedRoles = this.profileForm.get('secondary_roles')?.value || [];
+    return selectedRoles.includes(role);
+  }
+
+  toggleSecondaryRole(role: string) {
+    const control = this.profileForm.get('secondary_roles');
+    const currentRoles = control?.value || [];
+    
+    if (currentRoles.includes(role)) {
+      control?.setValue(currentRoles.filter((r: string) => r !== role));
+    } else {
+      control?.setValue([...currentRoles, role]);
+    }
+  }
+
+  async onSubmit() {
+    if (this.profileForm.invalid) {
+      this.profileForm.markAllAsTouched();
+      this.errorMessage.set('PROFILE.REQUIRED_FIELDS_ERROR');
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    try {
+      const formValue = this.profileForm.value;
+
+      const profileData: Partial<ProfileFormData> = {
+        nickname: formValue.nickname,
+        primary_role: formValue.primary_role,
+        custom_role_text: formValue.custom_role_text || undefined,
+        secondary_roles: formValue.secondary_roles || [],
+        bio: formValue.bio || undefined,
+        primary_language: formValue.primary_language || 'en',
+        social_links: {
+          instagram: formValue.instagram && formValue.instagram.trim() ? formValue.instagram : undefined,
+          twitter: formValue.twitter && formValue.twitter.trim() ? formValue.twitter : undefined,
+          facebook: formValue.facebook && formValue.facebook.trim() ? formValue.facebook : undefined,
+          tiktok: formValue.tiktok && formValue.tiktok.trim() ? formValue.tiktok : undefined,
+          youtube: formValue.youtube && formValue.youtube.trim() ? formValue.youtube : undefined,
+          website: formValue.website && formValue.website.trim() ? formValue.website : undefined,
+          spotify: formValue.spotify && formValue.spotify.trim() ? formValue.spotify : undefined
+        },
+        spotify_artist_url: formValue.spotify && formValue.spotify.trim() ? formValue.spotify : undefined
+      };
+
+      await this.profileService.updateProfile(profileData);
+
+      this.successMessage.set('Profile updated successfully!');
+      
+      // Redirect to dashboard after 2 seconds
+      setTimeout(() => {
+        this.router.navigate(['/dashboard']);
+      }, 2000);
+
+    } catch (error: any) {
+      console.error('Profile update error:', error);
+      this.errorMessage.set(error.message || 'PROFILE.UPDATE_ERROR');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  cancel() {
+    this.router.navigate(['/dashboard']);
+  }
+}

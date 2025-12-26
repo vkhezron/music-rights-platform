@@ -44,6 +44,10 @@ export class Dashboard  implements OnInit{
     this.router.navigate(['/workspaces']);
   }
 
+  editProfile() {
+    this.router.navigate(['/profile/edit']);
+  }
+
   async logout() {
     await this.supabase.signOut();
     this.router.navigate(['/auth/login']);

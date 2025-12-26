@@ -16,34 +16,24 @@ export const PRIMARY_ROLES = [
 ] as const;
 
 // Secondary roles grouped by category
-export const SECONDARY_ROLES = {
-  creative: [
-    { value: 'musician', label: 'Musician' },
-    { value: 'session_musician', label: 'Session Musician' },
-    { value: 'singer', label: 'Singer/Vocalist' },
-    { value: 'arranger', label: 'Arranger' },
-    { value: 'dj', label: 'DJ' }
-  ],
-  production: [
-    { value: 'producer', label: 'Producer' },
-    { value: 'recording_producer', label: 'Recording Producer' },
-    { value: 'assistant_producer', label: 'Assistant Producer' },
-    { value: 'mixing_engineer', label: 'Mixing Engineer' },
-    { value: 'mastering_engineer', label: 'Mastering Engineer' },
-    { value: 'sound_engineer', label: 'Sound Engineer' }
-  ],
-  business: [
-    { value: 'label_manager', label: 'Label Manager' },
-    { value: 'publishing_manager', label: 'Publishing Manager' },
-    { value: 'anr', label: 'A&R' },
-    { value: 'booking_agent', label: 'Booking Agent' }
-  ],
-  visual: [
-    { value: 'photographer', label: 'Photographer' },
-    { value: 'videographer', label: 'Videographer' },
-    { value: 'graphic_designer', label: 'Graphic Designer' }
-  ]
-} as const;
+export const SECONDARY_ROLES = [
+  {
+    category: 'CREATIVE_ROLES',
+    roles: ['Lyricist', 'Vocalist', 'Instrumentalist', 'Arranger']
+  },
+  {
+    category: 'PRODUCTION_ROLES',
+    roles: ['Mix Engineer', 'Master Engineer', 'Recording Engineer', 'Studio Owner']
+  },
+  {
+    category: 'BUSINESS_ROLES',
+    roles: ['A&R', 'Booking Agent', 'Promoter', 'Marketing']
+  },
+  {
+    category: 'VISUAL_ROLES',
+    roles: ['Photographer', 'Videographer', 'Graphic Designer', 'Art Director']
+  }
+];
 
 // Language options
 export const LANGUAGES = [
@@ -58,14 +48,14 @@ export const LANGUAGES = [
 
 // Social platform options
 export const SOCIAL_PLATFORMS = [
-  { key: 'instagram', label: 'Instagram', placeholder: '@username' },
-  { key: 'twitter', label: 'Twitter/X', placeholder: '@username' },
-  { key: 'facebook', label: 'Facebook', placeholder: 'profile URL' },
-  { key: 'tiktok', label: 'TikTok', placeholder: '@username' },
-  { key: 'youtube', label: 'YouTube', placeholder: 'channel URL' },
-  { key: 'website', label: 'Website', placeholder: 'https://...' },
-  { key: 'spotify', label: 'Spotify', placeholder: 'https://open.spotify.com/artist/...' }  // Add this
-] as const;
+  { name: 'instagram', icon: '📷', placeholder: '@username' },
+  { name: 'twitter', icon: '🐦', placeholder: '@username' },
+  { name: 'facebook', icon: '👤', placeholder: 'facebook.com/username' },
+  { name: 'tiktok', icon: '🎵', placeholder: '@username' },
+  { name: 'youtube', icon: '▶️', placeholder: 'youtube.com/@username' },
+  { name: 'website', icon: '🌐', placeholder: 'https://yourwebsite.com' },
+  { name: 'spotify', icon: '🎧', placeholder: 'open.spotify.com/artist/...' }
+];
 
 // Main profile interface
 export interface UserProfile {

@@ -5,7 +5,7 @@ import { SupabaseService } from './supabase.service';
 export interface Workspace {
   id: string;
   name: string;
-  type: 'band' | 'label' | 'publisher' | 'studio' | 'management' | 'other';
+  type: string;
   description?: string;
   created_by: string;
   created_at: string;
@@ -22,7 +22,7 @@ export interface WorkspaceMember {
 
 export interface CreateWorkspaceData {
   name: string;
-  type: Workspace['type'];
+  type: string;
   description?: string;
 }
 
@@ -31,90 +31,100 @@ export interface CreateWorkspaceData {
 })
 export class WorkspaceService {
   private supabase = inject(SupabaseService);
-  
-  private currentWorkspace$ = new BehaviorSubject<Workspace | null>(null);
-  private workspaces$ = new BehaviorSubject<Workspace[]>([]);
+
+  // Public observables
+  private workspacesSubject = new BehaviorSubject<Workspace[]>([]);
+  public workspaces$: Observable<Workspace[]> = this.workspacesSubject.asObservable();
+
+  private currentWorkspaceSubject = new BehaviorSubject<Workspace | null>(null);
+  public currentWorkspace$: Observable<Workspace | null> = this.currentWorkspaceSubject.asObservable();
 
   constructor() {
-    // Load workspaces when user logs in
-    this.supabase.user$.subscribe(async (user) => {
-      if (user) {
-        await this.loadUserWorkspaces();
-      } else {
-        this.currentWorkspace$.next(null);
-        this.workspaces$.next([]);
-      }
-    });
-  }
-
-  get currentWorkspace(): Workspace | null {
-    return this.currentWorkspace$.value;
+    // Auto-load workspaces when user is authenticated
+    const user = this.supabase.currentUser;
+    if (user) {
+      this.loadUserWorkspaces();
+    }
   }
 
   get workspaces(): Observable<Workspace[]> {
-    return this.workspaces$.asObservable();
+    return this.workspaces$;
   }
 
-  /**
-   * Load all workspaces user is member of
-   */
+  get currentWorkspace(): Workspace | null {
+    return this.currentWorkspaceSubject.value;
+  }
+
   async loadUserWorkspaces(): Promise<void> {
-    const userId = this.supabase.currentUser?.id;
-    if (!userId) return;
+    const user = this.supabase.currentUser;
+    if (!user) {
+      console.error('No user logged in');
+      return;
+    }
 
     try {
-      // Get workspaces where user is a member
-      const { data: members, error: membersError } = await this.supabase.client
+      // Get workspace IDs where user is a member
+      const { data: memberData, error: memberError } = await this.supabase.client
         .from('workspace_members')
         .select('workspace_id')
-        .eq('user_id', userId);
+        .eq('user_id', user.id);
 
-      if (membersError) throw membersError;
+      if (memberError) throw memberError;
 
-      if (!members || members.length === 0) {
-        this.workspaces$.next([]);
+      if (!memberData || memberData.length === 0) {
+        this.workspacesSubject.next([]);
         return;
       }
 
-      const workspaceIds = members.map(m => m.workspace_id);
+      const workspaceIds = memberData.map(m => m.workspace_id);
 
       // Get workspace details
-      const { data: workspaces, error: workspacesError } = await this.supabase.client
+      const { data: workspaceData, error: workspaceError } = await this.supabase.client
         .from('workspaces')
         .select('*')
         .in('id', workspaceIds)
         .order('created_at', { ascending: false });
 
-      if (workspacesError) throw workspacesError;
+      if (workspaceError) throw workspaceError;
 
-      this.workspaces$.next(workspaces || []);
+      this.workspacesSubject.next(workspaceData || []);
 
       // Set first workspace as current if none selected
-      if (!this.currentWorkspace && workspaces && workspaces.length > 0) {
-        this.setCurrentWorkspace(workspaces[0]);
+      if (!this.currentWorkspace && workspaceData && workspaceData.length > 0) {
+        this.setCurrentWorkspace(workspaceData[0]);
       }
-    } catch (error: any) {
+
+    } catch (error) {
       console.error('Error loading workspaces:', error);
-      this.workspaces$.next([]);
+      this.workspacesSubject.next([]);
     }
   }
 
-  /**
-   * Create new workspace
-   */
+  setCurrentWorkspace(workspace: Workspace | null): void {
+    this.currentWorkspaceSubject.next(workspace);
+    if (workspace) {
+      localStorage.setItem('currentWorkspaceId', workspace.id);
+    } else {
+      localStorage.removeItem('currentWorkspaceId');
+    }
+  }
+
+  // Updated to accept object parameter
   async createWorkspace(data: CreateWorkspaceData): Promise<Workspace> {
-    const userId = this.supabase.currentUser?.id;
-    if (!userId) throw new Error('Not authenticated');
+    const user = this.supabase.currentUser;
+    
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
 
     try {
-      // Create workspace
       const { data: workspace, error: workspaceError } = await this.supabase.client
         .from('workspaces')
         .insert({
           name: data.name,
           type: data.type,
           description: data.description,
-          created_by: userId
+          created_by: user.id
         })
         .select()
         .single();
@@ -126,34 +136,79 @@ export class WorkspaceService {
         .from('workspace_members')
         .insert({
           workspace_id: workspace.id,
-          user_id: userId,
+          user_id: user.id,
           role: 'owner'
         });
 
       if (memberError) throw memberError;
 
-      // Reload workspaces
-      await this.loadUserWorkspaces();
+      // Update local state
+      const currentWorkspaces = this.workspacesSubject.value;
+      this.workspacesSubject.next([workspace, ...currentWorkspaces]);
+      this.setCurrentWorkspace(workspace);
 
       return workspace;
-    } catch (error: any) {
+
+    } catch (error) {
       console.error('Error creating workspace:', error);
-      throw new Error(error.message || 'Failed to create workspace');
+      throw error;
     }
   }
 
-  /**
-   * Set current active workspace
-   */
-  setCurrentWorkspace(workspace: Workspace): void {
-    this.currentWorkspace$.next(workspace);
-    // Store in localStorage for persistence
-    localStorage.setItem('currentWorkspaceId', workspace.id);
+  async updateWorkspace(id: string, updates: Partial<Workspace>): Promise<Workspace> {
+    try {
+      const { data, error } = await this.supabase.client
+        .from('workspaces')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update local state
+      const currentWorkspaces = this.workspacesSubject.value;
+      const updatedWorkspaces = currentWorkspaces.map(w => w.id === id ? data : w);
+      this.workspacesSubject.next(updatedWorkspaces);
+
+      // Update current workspace if it's the one being edited
+      if (this.currentWorkspace?.id === id) {
+        this.setCurrentWorkspace(data);
+      }
+
+      return data;
+
+    } catch (error) {
+      console.error('Error updating workspace:', error);
+      throw error;
+    }
   }
 
-  /**
-   * Get workspace members
-   */
+  async deleteWorkspace(id: string): Promise<void> {
+    try {
+      const { error } = await this.supabase.client
+        .from('workspaces')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Update local state
+      const currentWorkspaces = this.workspacesSubject.value;
+      const filteredWorkspaces = currentWorkspaces.filter(w => w.id !== id);
+      this.workspacesSubject.next(filteredWorkspaces);
+
+      // Clear current workspace if it was deleted
+      if (this.currentWorkspace?.id === id) {
+        this.setCurrentWorkspace(filteredWorkspaces[0] || null);
+      }
+
+    } catch (error) {
+      console.error('Error deleting workspace:', error);
+      throw error;
+    }
+  }
+
   async getWorkspaceMembers(workspaceId: string): Promise<WorkspaceMember[]> {
     try {
       const { data, error } = await this.supabase.client
@@ -163,53 +218,10 @@ export class WorkspaceService {
 
       if (error) throw error;
       return data || [];
-    } catch (error: any) {
-      console.error('Error loading workspace members:', error);
+
+    } catch (error) {
+      console.error('Error getting workspace members:', error);
       return [];
-    }
-  }
-
-  /**
-   * Update workspace
-   */
-  async updateWorkspace(workspaceId: string, updates: Partial<CreateWorkspaceData>): Promise<Workspace> {
-    try {
-      const { data, error } = await this.supabase.client
-        .from('workspaces')
-        .update(updates)
-        .eq('id', workspaceId)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Reload workspaces
-      await this.loadUserWorkspaces();
-
-      return data;
-    } catch (error: any) {
-      console.error('Error updating workspace:', error);
-      throw new Error(error.message || 'Failed to update workspace');
-    }
-  }
-
-  /**
-   * Delete workspace (owner only)
-   */
-  async deleteWorkspace(workspaceId: string): Promise<void> {
-    try {
-      const { error } = await this.supabase.client
-        .from('workspaces')
-        .delete()
-        .eq('id', workspaceId);
-
-      if (error) throw error;
-
-      // Reload workspaces
-      await this.loadUserWorkspaces();
-    } catch (error: any) {
-      console.error('Error deleting workspace:', error);
-      throw new Error(error.message || 'Failed to delete workspace');
     }
   }
 }

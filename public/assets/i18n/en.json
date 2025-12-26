@@ -86,7 +86,6 @@
     "UPDATE_ERROR": "Failed to update profile",
     "SELECT_ROLE": "Select a role",
     "PRIMARY_ROLE_REQUIRED": "Primary role is required",
-    
     "REQUIRED_INFO": "Required Information",
     "OPTIONAL_INFO": "Optional Information (Click to expand)",
     "NICKNAME": "Nickname",
@@ -110,7 +109,9 @@
     "CONTINUE": "Continue",
     "SAVE_PROFILE": "Save Profile",
     "REQUIRED_FIELDS_ERROR": "Please fill in all required fields",
-    "CREATION_ERROR": "Failed to create profile. Please try again."
+    "CREATION_ERROR": "Failed to create profile. Please try again.",
+    "PROFILE_DETAILS": "Profile Details",
+    "QR_CODE": "QR Code"
   },
 
   "WORKSPACE": {
@@ -126,7 +127,26 @@
     "YOUR_WORKSPACES": "Your Workspaces",
     "NO_WORKSPACES": "You don't have any workspaces yet",
     "CREATE_FIRST": "Create Your First Workspace",
-    "MANAGE_WORKSPACES": "Manage Workspaces"
+    "MANAGE_WORKSPACES": "Manage Projects",
+    "PROJECT": "Project",
+    "CREATE_PROJECT": "Create Project",
+    "YOUR_PROJECTS": "Your Projects",
+    "NEW_PROJECT": "New Project",
+    "NO_PROJECTS_YET": "You don't have any projects yet. Start by creating your first music project.",
+    "CREATE_FIRST_PROJECT": "Create Your First Project",
+    "CREATE_NEW_PROJECT": "Create New Project",
+    "PROJECT_NAME": "Project Name",
+    "PROJECT_TYPE": "Project Type",
+    "SELECT_TYPE": "Select project type...",
+    "NAME_PLACEHOLDER": "e.g., Summer Vibes 2025, Debut Album, My Latest Single",
+    "TYPE_REQUIRED": "Project type is required",
+    "DESCRIPTION_PLACEHOLDER": "Add notes about this project (release date, collaborators, etc.)",
+    "DESCRIPTION_HINT": "This helps you organize and remember details about your project",
+    "CREATE_PROJECT_BTN": "Create Project",
+    "TYPE_SINGLE": "Single Work",
+    "TYPE_EP": "EP",
+    "TYPE_ALBUM": "Album",
+    "TYPE_COLLECTION": "Collection"
   },
 
   "DASHBOARD": {
@@ -144,7 +164,49 @@
     "USER_NUMBER": "User Number",
     "PRIMARY_ROLE": "Primary Role",
     "BIO": "Bio",
-    "SPOTIFY": "Spotify"
+    "SPOTIFY": "Spotify",
+    "DASHBOARD": "Dashboard",
+    "QUICK_ACTIONS": "Quick Actions"
+  },
+
+  "WORKS": {
+    "WORKS": "Works",
+    "ADD_WORK": "Add Work",
+    "ADD_WORK_DESC": "Register a new musical work in this project",
+    "CREATE_WORK": "Create Work",
+    "EDIT_WORK": "Edit Work",
+    "WORK_TITLE": "Work Title",
+    "ALTERNATIVE_TITLES": "Alternative Titles",
+    "DURATION": "Duration",
+    "GENRE": "Genre",
+    "LANGUAGES": "Languages",
+    "ISRC": "ISRC Code",
+    "ISWC": "ISWC Code",
+    "IS_COVER": "This is a cover version",
+    "ORIGINAL_WORK": "Original Work",
+    "IS_PUBLIC_DOMAIN": "Original work is public domain",
+    "NO_WORKS_YET": "No works in this project yet",
+    "CREATE_FIRST_WORK": "Create Your First Work"
+  },
+
+  "RIGHTS_HOLDERS": {
+    "TITLE": "Rights Holders",
+    "ADD": "Add Rights Holder",
+    "ADD_DESC": "Add artists, composers, publishers",
+    "CREATE": "Create Rights Holder",
+    "EDIT": "Edit Rights Holder",
+    "TYPE_PERSON": "Person",
+    "TYPE_COMPANY": "Company",
+    "FIRST_NAME": "First Name",
+    "LAST_NAME": "Last Name",
+    "COMPANY_NAME": "Company Name",
+    "EMAIL": "Email",
+    "PHONE": "Phone",
+    "CMO_PRO": "CMO/PRO",
+    "IPI_NUMBER": "IPI Number",
+    "TAX_ID": "Tax ID",
+    "NO_RIGHTS_HOLDERS": "No rights holders yet",
+    "CREATE_FIRST": "Add Your First Rights Holder"
   },
   
   "COMMON": {
@@ -179,7 +241,8 @@
     "YES": "Yes",
     "NO": "No",
     "OK": "OK",
-    "RETRY": "Retry"
+    "RETRY": "Retry",
+    "CREATING": "Creating..."
   },
 
   "ERRORS": {

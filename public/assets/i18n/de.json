@@ -1,7 +1,7 @@
 {
   "APP_NAME": "🎵 Musikrechte-Plattform",
   "TITLE": "Musikrechte-Verwaltung",
-  "WELCOME": "Willkommen auf der Musikindustrie-Plattform!",
+  "WELCOME": "Willkommen bei der Musikindustrie-Plattform!",
   "DESCRIPTION": "Verwalten Sie Ihre Rechte, verbinden Sie sich mit Künstlern und erweitern Sie Ihr Netzwerk.",
   "LANGUAGE": "Sprache",
   
@@ -27,8 +27,8 @@
   
   "AUTH": {
     "WELCOME_BACK": "Willkommen zurück",
-    "LOGIN_SUBTITLE": "Melden Sie sich an, um zur Musikrechte-Plattform zu gelangen",
-    "JOIN_PLATFORM": "Der Musikrechte-Plattform beitreten",
+    "LOGIN_SUBTITLE": "Melden Sie sich an, um fortzufahren",
+    "JOIN_PLATFORM": "Musikrechte-Plattform beitreten",
     "EMAIL": "E-Mail",
     "PASSWORD": "Passwort",
     "REQUIRED_FIELD": "Dieses Feld ist erforderlich",
@@ -52,7 +52,7 @@
     "CONFIRM_PASSWORD_REQUIRED": "Bitte bestätigen Sie Ihr Passwort",
     "PASSWORDS_MUST_MATCH": "Passwörter müssen übereinstimmen",
     "ALREADY_HAVE_ACCOUNT": "Bereits ein Konto?",
-    "TERMS_AGREEMENT": "Durch die Erstellung eines Kontos stimmen Sie unseren Nutzungsbedingungen und Datenschutzrichtlinien zu",
+    "TERMS_AGREEMENT": "Mit der Erstellung eines Kontos stimmen Sie unseren Nutzungsbedingungen und Datenschutzrichtlinien zu",
     "WEAK": "Schwach",
     "MEDIUM": "Mittel",
     "STRONG": "Stark",
@@ -63,54 +63,55 @@
     "BRANDING_TITLE": "Verwalten Sie Ihre Musikrechte",
     "BRANDING_DESCRIPTION": "Professionelle Plattform für Künstler, Labels und Verlage.",
     "BRANDING_TITLE_REGISTER": "Treten Sie der Musik-Community bei",
-    "BRANDING_DESCRIPTION_REGISTER": "Verbinden Sie sich mit Künstlern, verwalten Sie Rechte und erweitern Sie Ihr Netzwerk.",
-    "FEATURE_1": "Eigentum und Aufteilungen verfolgen",
+    "BRANDING_DESCRIPTION_REGISTER": "Verbinden Sie sich mit Künstlern, verwalten Sie Rechte und bauen Sie Ihr Netzwerk auf.",
+    "FEATURE_1": "Eigentum & Aufteilungen verfolgen",
     "FEATURE_2": "Split-Sheets generieren",
     "FEATURE_3": "Nahtlos zusammenarbeiten",
     "REGISTER_FEATURE_1": "Sichere Rechteverwaltung",
-    "REGISTER_FEATURE_2": "Professionelles Netzwerk",
+    "REGISTER_FEATURE_2": "Professionelles Networking",
     "REGISTER_FEATURE_3": "Kollaborations-Tools"
   },
   
   "PROFILE": {
     "SETUP_TITLE": "Profil einrichten",
-    "SETUP_SUBTITLE": "Lernen wir uns kennen",
+    "SETUP_SUBTITLE": "Lassen Sie uns Sie besser kennenlernen",
     "EDIT_TITLE": "Profil bearbeiten",
     "EDIT_SUBTITLE": "Aktualisieren Sie Ihre Profilinformationen",
     "YOUR_QR_CODE": "Ihr QR-Code",
     "QR_CODE_SUBTITLE": "Teilen Sie diesen Code, um sich mit anderen zu verbinden",
-    "HOW_TO_USE_QR": "So verwenden Sie",
+    "HOW_TO_USE_QR": "Verwendung",
     "QR_INSTRUCTIONS": "Andere können diesen QR-Code scannen, um sich schnell mit Ihnen zu verbinden und Ihr Profil anzuzeigen.",
     "DOWNLOAD_QR_CODE": "QR-Code herunterladen",
     "SAVE_CHANGES": "Änderungen speichern",
     "UPDATE_ERROR": "Profil konnte nicht aktualisiert werden",
     "SELECT_ROLE": "Rolle auswählen",
     "PRIMARY_ROLE_REQUIRED": "Hauptrolle ist erforderlich",
-    
     "REQUIRED_INFO": "Erforderliche Informationen",
-    "OPTIONAL_INFO": "Optionale Informationen (Zum Erweitern klicken)",
-    "NICKNAME": "Spitzname",
-    "NICKNAME_REQUIRED": "Spitzname ist erforderlich",
-    "NICKNAME_MIN_LENGTH": "Spitzname muss mindestens 3 Zeichen lang sein",
-    "NICKNAME_AVAILABLE": "Dieser Spitzname ist verfügbar",
-    "NICKNAME_TAKEN": "Dieser Spitzname ist bereits vergeben",
-    "NICKNAME_NOT_AVAILABLE": "Bitte wählen Sie einen verfügbaren Spitznamen",
+    "OPTIONAL_INFO": "Optionale Informationen (Klicken zum Erweitern)",
+    "NICKNAME": "Nickname",
+    "NICKNAME_REQUIRED": "Nickname ist erforderlich",
+    "NICKNAME_MIN_LENGTH": "Nickname muss mindestens 3 Zeichen lang sein",
+    "NICKNAME_AVAILABLE": "Dieser Nickname ist verfügbar",
+    "NICKNAME_TAKEN": "Dieser Nickname ist bereits vergeben",
+    "NICKNAME_NOT_AVAILABLE": "Bitte wählen Sie einen verfügbaren Nickname",
     "PRIMARY_ROLE": "Hauptrolle",
     "SPECIFY_ROLE": "Geben Sie Ihre Rolle an",
     "CUSTOM_ROLE_REQUIRED": "Bitte geben Sie Ihre Rolle an",
     "SECONDARY_ROLES": "Zusätzliche Rollen",
     "CREATIVE_ROLES": "Kreativ",
     "PRODUCTION_ROLES": "Produktion",
-    "BUSINESS_ROLES": "Geschäftlich",
+    "BUSINESS_ROLES": "Business",
     "VISUAL_ROLES": "Visuell",
     "BIO": "Biografie",
-    "PRIMARY_LANGUAGE": "Primäre Kommunikationssprache",
-    "SOCIAL_LINKS": "Soziale Medien",
-    "SKIP_OPTIONAL": "Vorerst überspringen",
-    "CONTINUE": "Weiter",
+    "PRIMARY_LANGUAGE": "Hauptkommunikationssprache",
+    "SOCIAL_LINKS": "Social-Media-Links",
+    "SKIP_OPTIONAL": "Jetzt überspringen",
+    "CONTINUE": "Fortfahren",
     "SAVE_PROFILE": "Profil speichern",
     "REQUIRED_FIELDS_ERROR": "Bitte füllen Sie alle erforderlichen Felder aus",
-    "CREATION_ERROR": "Profil konnte nicht erstellt werden. Bitte versuchen Sie es erneut."
+    "CREATION_ERROR": "Profil konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+    "PROFILE_DETAILS": "Profil-Details",
+    "QR_CODE": "QR-Code"
   },
 
   "WORKSPACE": {
@@ -126,11 +127,30 @@
     "YOUR_WORKSPACES": "Ihre Workspaces",
     "NO_WORKSPACES": "Sie haben noch keine Workspaces",
     "CREATE_FIRST": "Erstellen Sie Ihren ersten Workspace",
-    "MANAGE_WORKSPACES": "Workspaces verwalten"
+    "MANAGE_WORKSPACES": "Projekte verwalten",
+    "PROJECT": "Projekt",
+    "CREATE_PROJECT": "Projekt erstellen",
+    "YOUR_PROJECTS": "Ihre Projekte",
+    "NEW_PROJECT": "Neues Projekt",
+    "NO_PROJECTS_YET": "Sie haben noch keine Projekte. Beginnen Sie mit der Erstellung Ihres ersten Musikprojekts.",
+    "CREATE_FIRST_PROJECT": "Erstellen Sie Ihr erstes Projekt",
+    "CREATE_NEW_PROJECT": "Neues Projekt erstellen",
+    "PROJECT_NAME": "Projektname",
+    "PROJECT_TYPE": "Projekttyp",
+    "SELECT_TYPE": "Projekttyp auswählen...",
+    "NAME_PLACEHOLDER": "z.B. Sommervibes 2025, Debütalbum, Meine neueste Single",
+    "TYPE_REQUIRED": "Projekttyp ist erforderlich",
+    "DESCRIPTION_PLACEHOLDER": "Fügen Sie Notizen zu diesem Projekt hinzu (Veröffentlichungsdatum, Mitwirkende usw.)",
+    "DESCRIPTION_HINT": "Dies hilft Ihnen, Details zu Ihrem Projekt zu organisieren und zu merken",
+    "CREATE_PROJECT_BTN": "Projekt erstellen",
+    "TYPE_SINGLE": "Einzelwerk",
+    "TYPE_EP": "EP",
+    "TYPE_ALBUM": "Album",
+    "TYPE_COLLECTION": "Sammlung"
   },
 
   "DASHBOARD": {
-    "WELCOME": "Willkommen auf der Musikrechte-Plattform",
+    "WELCOME": "Willkommen bei der Musikrechte-Plattform",
     "YOUR_PROFILE": "Ihr Profil",
     "EDIT_PROFILE": "Profil bearbeiten",
     "VIEW_QR_CODE": "QR-Code anzeigen",
@@ -140,15 +160,57 @@
     "CREATE_FIRST_WORKSPACE": "Erstellen Sie Ihren ersten Workspace",
     "EMAIL": "E-Mail",
     "LOGOUT": "Abmelden",
-    "NICKNAME": "Spitzname",
+    "NICKNAME": "Nickname",
     "USER_NUMBER": "Benutzernummer",
     "PRIMARY_ROLE": "Hauptrolle",
     "BIO": "Biografie",
-    "SPOTIFY": "Spotify"
+    "SPOTIFY": "Spotify",
+    "DASHBOARD": "Dashboard",
+    "QUICK_ACTIONS": "Schnellaktionen"
+  },
+
+  "WORKS": {
+    "WORKS": "Werke",
+    "ADD_WORK": "Werk hinzufügen",
+    "ADD_WORK_DESC": "Registrieren Sie ein neues Musikwerk in diesem Projekt",
+    "CREATE_WORK": "Werk erstellen",
+    "EDIT_WORK": "Werk bearbeiten",
+    "WORK_TITLE": "Werktitel",
+    "ALTERNATIVE_TITLES": "Alternative Titel",
+    "DURATION": "Dauer",
+    "GENRE": "Genre",
+    "LANGUAGES": "Sprachen",
+    "ISRC": "ISRC-Code",
+    "ISWC": "ISWC-Code",
+    "IS_COVER": "Dies ist eine Coverversion",
+    "ORIGINAL_WORK": "Originalwerk",
+    "IS_PUBLIC_DOMAIN": "Originalwerk ist gemeinfrei",
+    "NO_WORKS_YET": "Noch keine Werke in diesem Projekt",
+    "CREATE_FIRST_WORK": "Erstellen Sie Ihr erstes Werk"
+  },
+
+  "RIGHTS_HOLDERS": {
+    "TITLE": "Rechteinhaber",
+    "ADD": "Rechteinhaber hinzufügen",
+    "ADD_DESC": "Künstler, Komponisten, Verlage hinzufügen",
+    "CREATE": "Rechteinhaber erstellen",
+    "EDIT": "Rechteinhaber bearbeiten",
+    "TYPE_PERSON": "Person",
+    "TYPE_COMPANY": "Unternehmen",
+    "FIRST_NAME": "Vorname",
+    "LAST_NAME": "Nachname",
+    "COMPANY_NAME": "Firmenname",
+    "EMAIL": "E-Mail",
+    "PHONE": "Telefon",
+    "CMO_PRO": "CMO/PRO",
+    "IPI_NUMBER": "IPI-Nummer",
+    "TAX_ID": "Steuernummer",
+    "NO_RIGHTS_HOLDERS": "Noch keine Rechteinhaber",
+    "CREATE_FIRST": "Fügen Sie Ihren ersten Rechteinhaber hinzu"
   },
   
   "COMMON": {
-    "LOADING": "Lädt...",
+    "LOADING": "Laden...",
     "SAVING": "Speichern...",
     "ERROR": "Fehler",
     "SUCCESS": "Erfolg",
@@ -179,11 +241,12 @@
     "YES": "Ja",
     "NO": "Nein",
     "OK": "OK",
-    "RETRY": "Erneut versuchen"
+    "RETRY": "Wiederholen",
+    "CREATING": "Erstellen..."
   },
 
   "ERRORS": {
-    "GENERIC": "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut.",
+    "GENERIC": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     "NETWORK": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.",
     "UNAUTHORIZED": "Sie sind nicht berechtigt, diese Aktion auszuführen.",
     "NOT_FOUND": "Die angeforderte Ressource wurde nicht gefunden.",
@@ -200,7 +263,7 @@
     "PUBLISHER": "Verlag",
     "MANAGER": "Manager",
     "ENGINEER": "Tontechniker",
-    "OTHER": "Sonstiges"
+    "OTHER": "Andere"
   },
 
   "WORKSPACE_TYPES": {
@@ -209,17 +272,17 @@
     "PUBLISHER": "Verlag",
     "STUDIO": "Studio",
     "MANAGEMENT": "Management",
-    "OTHER": "Sonstiges"
+    "OTHER": "Andere"
   },
 
   "LANGUAGES": {
-    "EN": "English",
+    "EN": "Englisch",
     "DE": "Deutsch",
-    "ES": "Español",
-    "UA": "Українська",
-    "FR": "Français",
-    "IT": "Italiano",
-    "PT": "Português"
+    "ES": "Spanisch",
+    "UA": "Ukrainisch",
+    "FR": "Französisch",
+    "IT": "Italienisch",
+    "PT": "Portugiesisch"
   },
 
   "SOCIAL_PLATFORMS": {
@@ -228,7 +291,7 @@
     "FACEBOOK": "Facebook",
     "TIKTOK": "TikTok",
     "YOUTUBE": "YouTube",
-    "WEBSITE": "Website",
+    "WEBSITE": "Webseite",
     "SPOTIFY": "Spotify"
   },
 
@@ -258,7 +321,7 @@
     "ENTER_EMAIL": "Geben Sie Ihre E-Mail ein",
     "ENTER_PASSWORD": "Geben Sie Ihr Passwort ein",
     "ENTER_NAME": "Geben Sie Ihren Namen ein",
-    "ENTER_NICKNAME": "Geben Sie Ihren Spitznamen ein",
+    "ENTER_NICKNAME": "Geben Sie Ihren Nickname ein",
     "SEARCH": "Suchen...",
     "SELECT": "Auswählen...",
     "OPTIONAL": "Optional"
@@ -276,8 +339,8 @@
 
   "FOOTER": {
     "COPYRIGHT": "© 2025 Musikrechte-Plattform. Alle Rechte vorbehalten.",
-    "PRIVACY": "Datenschutzrichtlinie",
+    "PRIVACY": "Datenschutzerklärung",
     "TERMS": "Nutzungsbedingungen",
-    "CONTACT": "Kontakt"
+    "CONTACT": "Kontaktieren Sie uns"
   }
 }

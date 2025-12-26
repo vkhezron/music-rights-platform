@@ -1,27 +1,92 @@
 .dashboard-container {
   min-height: 100vh;
-  padding: 2rem;
   background: #f7fafc;
 }
 
-.dashboard-header {
+// =====================
+// TOP BAR
+// =====================
+
+.top-bar {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
 
-  h1 {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: 700;
-    color: #1a202c;
-  }
+.workspace-selector {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 
-  .header-actions {
+  .workspace-info {
     display: flex;
-    gap: 1rem;
     align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: #f7fafc;
+    border-radius: 10px;
+
+    .workspace-icon {
+      font-size: 1.5rem;
+    }
+
+    .workspace-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+
+      .workspace-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        color: #718096;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+      }
+
+      .workspace-select {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #2d3748;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        padding: 0;
+        outline: none;
+
+        &:hover {
+          color: #667eea;
+        }
+      }
+    }
   }
+
+  .create-workspace-btn {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+  }
+}
+
+.top-actions {
+  display: flex;
+  gap: 1rem;
 }
 
 .logout-btn {
@@ -33,12 +98,167 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  white-space: nowrap;
 
   &:hover {
     background: #dc2626;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  }
+}
+
+// =====================
+// NAVIGATION TABS
+// =====================
+
+.navigation-tabs {
+  background: white;
+  border-bottom: 2px solid #e2e8f0;
+  padding: 0 2rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #718096;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: -2px;
+
+  .tab-icon {
+    font-size: 1.25rem;
+  }
+
+  &:hover {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+  }
+
+  &.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+  }
+}
+
+// =====================
+// DASHBOARD CONTENT
+// =====================
+
+.dashboard-content {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+// =====================
+// QUICK ACTIONS SECTION
+// =====================
+
+.quick-actions-section {
+  h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2d3748;
+  }
+}
+
+.project-info-bar {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #667eea;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.project-details {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  .project-icon {
+    font-size: 2.5rem;
+  }
+
+  .project-text {
+    h2 {
+      margin: 0 0 0.25rem 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #2d3748;
+    }
+
+    .project-type {
+      font-size: 0.875rem;
+      color: #667eea;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.action-card {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s;
+
+  &:hover {
+    border-color: #667eea;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+  }
+
+  .action-icon {
+    font-size: 3rem;
+  }
+
+  .action-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2d3748;
+  }
+
+  .action-description {
+    font-size: 0.875rem;
+    color: #718096;
+  }
+}
+
+// =====================
+// PROFILE SECTION
+// =====================
+
+.profile-section {
+  h2 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
   }
 }
 
@@ -50,7 +270,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
-  margin-bottom: 3rem;
 }
 
 .bento-card {
@@ -86,9 +305,9 @@
     justify-content: space-between;
     align-items: center;
 
-    h2 {
+    h3 {
       margin: 0;
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       font-weight: 700;
     }
   }
@@ -294,128 +513,6 @@
 }
 
 // =====================
-// WORKSPACES SECTION
-// =====================
-
-.workspaces-section {
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-
-    h2 {
-      margin: 0;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #2d3748;
-    }
-  }
-
-  .manage-btn {
-    padding: 0.5rem 1rem;
-    background: #f7fafc;
-    color: #4a5568;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover {
-      background: #edf2f7;
-      border-color: #cbd5e0;
-    }
-  }
-
-  .no-workspaces {
-    text-align: center;
-    padding: 3rem 2rem;
-    color: #718096;
-
-    p {
-      margin-bottom: 1.5rem;
-      font-size: 1.125rem;
-    }
-  }
-
-  .create-workspace-btn {
-    padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    }
-  }
-
-  .workspace-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
-  }
-
-  .workspace-card {
-    background: #f7fafc;
-    padding: 1.5rem;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    transition: all 0.2s;
-
-    &:hover {
-      border-color: #667eea;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
-    }
-
-    h3 {
-      margin: 0 0 0.75rem 0;
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: #2d3748;
-    }
-
-    .workspace-type {
-      font-size: 0.875rem;
-      color: #667eea;
-      text-transform: capitalize;
-      font-weight: 500;
-    }
-  }
-
-  .current-workspace {
-    margin-top: 1.5rem;
-    padding: 1rem 1.5rem;
-    background: #eef2ff;
-    border-radius: 10px;
-    border-left: 4px solid #667eea;
-
-    p {
-      margin: 0;
-      color: #4a5568;
-      font-size: 0.875rem;
-
-      strong {
-        color: #667eea;
-        font-weight: 600;
-      }
-    }
-  }
-}
-
-// =====================
 // ANIMATIONS
 // =====================
 
@@ -441,17 +538,37 @@
 }
 
 @media (max-width: 768px) {
-  .dashboard-container {
-    padding: 1rem;
+  .top-bar,
+  .navigation-tabs,
+  .dashboard-content {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 
-  .dashboard-header {
+  .top-bar {
     flex-direction: column;
     gap: 1rem;
     align-items: stretch;
+  }
 
-    .header-actions {
-      flex-direction: column;
+  .workspace-selector {
+    justify-content: center;
+
+    .workspace-info {
+      flex: 1;
+      justify-content: center;
+    }
+  }
+
+  .navigation-tabs {
+    overflow-x: auto;
+    
+    .tab-label {
+      display: none;
+    }
+
+    .nav-tab {
+      padding: 1rem;
     }
   }
 
@@ -463,9 +580,7 @@
     grid-column: span 1;
   }
 
-  .workspaces-section {
-    .workspace-cards {
-      grid-template-columns: 1fr;
-    }
+  .quick-actions {
+    grid-template-columns: 1fr;
   }
 }

@@ -1,8 +1,8 @@
 <div class="workspace-list-container">
   <div class="header">
-    <h1>Your Workspaces</h1>
+    <h1>{{ 'WORKSPACE.YOUR_PROJECTS' | translate }}</h1>
     <button (click)="createWorkspace()" class="create-btn">
-      + New Workspace
+      + {{ 'WORKSPACE.NEW_PROJECT' | translate }}
     </button>
   </div>
 
@@ -10,38 +10,41 @@
     <div class="workspaces-grid">
       @if (workspaces.length === 0) {
         <div class="empty-state">
-          <p>You don't have any workspaces yet.</p>
+          <div class="empty-icon">🎵</div>
+          <p>{{ 'WORKSPACE.NO_PROJECTS_YET' | translate }}</p>
           <button (click)="createWorkspace()" class="create-btn-large">
-            Create Your First Workspace
+            {{ 'WORKSPACE.CREATE_FIRST_PROJECT' | translate }}
           </button>
         </div>
       }
 
       @for (workspace of workspaces; track workspace.id) {
-        <div 
-          class="workspace-card"
-          [class.active]="currentWorkspace?.id === workspace.id"
-          (click)="selectWorkspace(workspace)">
-          
+        <div class="workspace-card" (click)="selectWorkspace(workspace)">
           <div class="workspace-icon">
-            {{ getWorkspaceIcon(workspace.type) }}
-          </div>
-          
-          <div class="workspace-info">
-            <h3>{{ workspace.name }}</h3>
-            <p class="workspace-type">{{ workspace.type }}</p>
-            @if (workspace.description) {
-              <p class="workspace-description">
-                {{ workspace.description }}
-              </p>
+            @switch (workspace.type) {
+              @case ('single') { 🎵 }
+              @case ('ep') { 💿 }
+              @case ('album') { 📀 }
+              @case ('collection') { 📚 }
+              @default { 🎵 }
             }
           </div>
-
-          @if (currentWorkspace?.id === workspace.id) {
-            <div class="workspace-badge">
-              Active
-            </div>
-          }
+          <div class="workspace-content">
+            <h3>{{ workspace.name }}</h3>
+            <span class="workspace-type">
+              @switch (workspace.type) {
+                @case ('single') { {{ 'WORKSPACE.TYPE_SINGLE' | translate }} }
+                @case ('ep') { {{ 'WORKSPACE.TYPE_EP' | translate }} }
+                @case ('album') { {{ 'WORKSPACE.TYPE_ALBUM' | translate }} }
+                @case ('collection') { {{ 'WORKSPACE.TYPE_COLLECTION' | translate }} }
+                @default { {{ 'WORKSPACE.PROJECT' | translate }} }
+              }
+            </span>
+            @if (workspace.description) {
+              <p class="workspace-description">{{ workspace.description }}</p>
+            }
+          </div>
+          <div class="workspace-arrow">→</div>
         </div>
       }
     </div>

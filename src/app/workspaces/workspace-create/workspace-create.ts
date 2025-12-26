@@ -1,51 +1,77 @@
 import { Component, inject, signal } from '@angular/core';
-import { AsyncPipe, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { WorkspaceService, CreateWorkspaceData } from '../../services/workspace.service';
+import { WorkspaceService } from '../../services/workspace.service';
 
 @Component({
   selector: 'app-workspace-create',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    TranslateModule
-    //, AsyncPipe
-  ],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule],
   templateUrl: './workspace-create.html',
   styleUrl: './workspace-create.scss'
 })
 export class WorkspaceCreateComponent {
   private fb = inject(FormBuilder);
-  private workspaceService = inject(WorkspaceService);
   private router = inject(Router);
+  private workspaceService = inject(WorkspaceService);
 
   workspaceForm: FormGroup;
   isLoading = signal(false);
   errorMessage = signal('');
 
+  // Updated workspace types for music projects
   workspaceTypes = [
-    { value: 'band', label: 'Band/Artist', icon: '🎸', description: 'For bands, solo artists, and musical groups' },
-    { value: 'label', label: 'Record Label', icon: '🏢', description: 'For record labels and distributors' },
-    { value: 'publisher', label: 'Publisher', icon: '📄', description: 'For music publishers and rights organizations' },
-    { value: 'studio', label: 'Studio', icon: '🎙️', description: 'For recording studios and production companies' },
-    { value: 'management', label: 'Management', icon: '👔', description: 'For artist management and agencies' },
-    { value: 'other', label: 'Other', icon: '📁', description: 'For other types of music organizations' }
+    { 
+      value: 'single', 
+      label: 'Single Work', 
+      icon: '🎵',
+      description: 'One song/composition with rights splits'
+    },
+    { 
+      value: 'ep', 
+      label: 'EP', 
+      icon: '💿',
+      description: 'Extended Play - typically 3-6 tracks'
+    },
+    { 
+      value: 'album', 
+      label: 'Album', 
+      icon: '📀',
+      description: 'Full album - 7 or more tracks'
+    },
+    { 
+      value: 'collection', 
+      label: 'Collection', 
+      icon: '📚',
+      description: 'Other grouping of works (compilation, soundtrack, etc.)'
+    }
   ];
 
   constructor() {
     this.workspaceForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      type: ['band', Validators.required],
-      description: ['', Validators.maxLength(500)]
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      type: ['', Validators.required],
+      description: ['']
     });
+  }
+
+  hasError(fieldName: string, errorType: string): boolean {
+    const field = this.workspaceForm.get(fieldName);
+    return !!(field && field.hasError(errorType) && (field.dirty || field.touched));
+  }
+
+  getSelectedTypeInfo() {
+    const selectedValue = this.workspaceForm.get('type')?.value;
+    return this.workspaceTypes.find(type => type.value === selectedValue) || null;
   }
 
   async onSubmit() {
     if (this.workspaceForm.invalid) {
-      this.workspaceForm.markAllAsTouched();
+      Object.keys(this.workspaceForm.controls).forEach(key => {
+        this.workspaceForm.get(key)?.markAsTouched();
+      });
       return;
     }
 
@@ -53,33 +79,25 @@ export class WorkspaceCreateComponent {
     this.errorMessage.set('');
 
     try {
-      const formData: CreateWorkspaceData = this.workspaceForm.value;
-      const workspace = await this.workspaceService.createWorkspace(formData);
+      const workspace = await this.workspaceService.createWorkspace({
+        name: this.workspaceForm.value.name,
+        type: this.workspaceForm.value.type,
+        description: this.workspaceForm.value.description
+      });
 
-      // Set as current workspace
-      this.workspaceService.setCurrentWorkspace(workspace);
-
-      // Redirect to dashboard
+      // After creating workspace, redirect to dashboard
+      // Dashboard will show "Add First Work" button
       this.router.navigate(['/dashboard']);
+
     } catch (error: any) {
-      console.error('Workspace creation error:', error);
-      this.errorMessage.set(error.message || 'WORKSPACE.CREATION_ERROR');
+      console.error('Error creating workspace:', error);
+      this.errorMessage.set(error.message || 'Failed to create project');
     } finally {
       this.isLoading.set(false);
     }
   }
 
   cancel() {
-    this.router.navigate(['/workspaces']);
-  }
-
-  hasError(fieldName: string, errorType: string): boolean {
-    const field = this.workspaceForm.get(fieldName);
-    return field ? field.hasError(errorType) && (field.dirty || field.touched) : false;
-  }
-
-  getSelectedTypeInfo() {
-    const selectedType = this.workspaceForm.get('type')?.value;
-    return this.workspaceTypes.find(t => t.value === selectedType);
+    this.router.navigate(['/dashboard']);
   }
 }

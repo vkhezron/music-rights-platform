@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-workspace-list',
   standalone: true,
-  imports: [CommonModule, AsyncPipe],
+  imports: [CommonModule, AsyncPipe, TranslateModule],
   templateUrl: './workspace-list.html',
   styleUrl: './workspace-list.scss',
 })

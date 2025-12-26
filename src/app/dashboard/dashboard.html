@@ -1,140 +1,279 @@
 <div class="dashboard-container">
-  <!-- Header -->
-  <div class="dashboard-header">
-    <h1>{{ 'DASHBOARD.WELCOME' | translate }}</h1>
-    <button (click)="logout()" class="logout-btn">
-      {{ 'DASHBOARD.LOGOUT' | translate }}
+  
+  <!-- Top Bar with Workspace Selector -->
+  <div class="top-bar">
+    <div class="workspace-selector">
+      @if (currentWorkspace$ | async; as currentWorkspace) {
+        <div class="workspace-info">
+          <span class="workspace-icon">
+            @switch (currentWorkspace.type) {
+              @case ('single') { 🎵 }
+              @case ('ep') { 💿 }
+              @case ('album') { 📀 }
+              @case ('collection') { 📚 }
+              @default { 🎵 }
+            }
+          </span>
+          <div class="workspace-details">
+            <span class="workspace-label">{{ 'WORKSPACE.PROJECT' | translate }}</span>
+            <select 
+              class="workspace-select"
+              (change)="switchWorkspace($any($event.target).value)">
+              @for (ws of workspaces$ | async; track ws.id) {
+                <option [value]="ws.id" [selected]="ws.id === currentWorkspace.id">
+                  {{ ws.name }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+        
+        <!-- Add New Workspace Button -->
+        <button class="create-workspace-btn" (click)="goToWorkspaces()">
+          <span class="btn-icon">➕</span>
+          <span>{{ 'WORKSPACE.NEW_PROJECT' | translate }}</span>
+        </button>
+      } @else {
+        <button class="create-workspace-btn" (click)="goToWorkspaces()">
+          + {{ 'WORKSPACE.CREATE_PROJECT' | translate }}
+        </button>
+      }
+    </div>
+
+    <div class="top-actions">
+      <button (click)="logout()" class="logout-btn">
+        {{ 'DASHBOARD.LOGOUT' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="navigation-tabs">
+    <button 
+      class="nav-tab"
+      [class.active]="activeTab() === 'dashboard'"
+      (click)="setActiveTab('dashboard')">
+      <span class="tab-icon">🏠</span>
+      <span class="tab-label">{{ 'DASHBOARD.DASHBOARD' | translate }}</span>
+    </button>
+    <button 
+      class="nav-tab"
+      [class.active]="activeTab() === 'works'"
+      (click)="setActiveTab('works')">
+      <span class="tab-icon">🎵</span>
+      <span class="tab-label">{{ 'WORKS.WORKS' | translate }}</span>
+    </button>
+    <button 
+      class="nav-tab"
+      [class.active]="activeTab() === 'rights-holders'"
+      (click)="setActiveTab('rights-holders')">
+      <span class="tab-icon">👥</span>
+      <span class="tab-label">{{ 'RIGHTS_HOLDERS.TITLE' | translate }}</span>
     </button>
   </div>
 
-  @if (profile$ | async; as profile) {
-    <!-- Bento Grid Layout -->
-    <div class="bento-grid">
+  <!-- Dashboard Content -->
+  @if (activeTab() === 'dashboard') {
+    <div class="dashboard-content">
       
-      <!-- Profile Card (Main) -->
-      <div class="bento-card profile-main">
-        <div class="profile-header-section">
-          <div class="profile-title-row">
-            <h2>{{ 'DASHBOARD.YOUR_PROFILE' | translate }}</h2>
-            <button (click)="toggleProfileDetails()" class="toggle-btn">
-              <span class="toggle-icon">{{ profileDetailsVisible() ? '▼' : '▶' }}</span>
-            </button>
-          </div>
-          
-          <div class="profile-quick-info">
-            <div class="quick-info-item">
-              <span class="label">@{{ profile.nickname }}</span>
+      <!-- Project Management Card -->
+      @if (currentWorkspace$ | async; as currentWorkspace) {
+        <div class="project-management-section">
+          <div class="project-card">
+            <!-- Project Header -->
+            <div class="project-header">
+              <div class="project-info">
+                <span class="project-icon-large">
+                  @switch (currentWorkspace.type) {
+                    @case ('single') { 🎵 }
+                    @case ('ep') { 💿 }
+                    @case ('album') { 📀 }
+                    @case ('collection') { 📚 }
+                    @default { 🎵 }
+                  }
+                </span>
+                <div class="project-details">
+                  <h2>{{ currentWorkspace.name }}</h2>
+                  <span class="project-type-badge">
+                    @switch (currentWorkspace.type) {
+                      @case ('single') { {{ 'WORKSPACE.TYPE_SINGLE' | translate }} }
+                      @case ('ep') { {{ 'WORKSPACE.TYPE_EP' | translate }} }
+                      @case ('album') { {{ 'WORKSPACE.TYPE_ALBUM' | translate }} }
+                      @case ('collection') { {{ 'WORKSPACE.TYPE_COLLECTION' | translate }} }
+                      @default { {{ 'WORKSPACE.PROJECT' | translate }} }
+                    }
+                  </span>
+                  @if (currentWorkspace.description) {
+                    <p class="project-description">{{ currentWorkspace.description }}</p>
+                  }
+                </div>
+              </div>
+              <button class="edit-project-btn" (click)="editWorkspace(currentWorkspace)">
+                <span class="btn-icon">✏️</span>
+                <span>{{ 'COMMON.EDIT' | translate }}</span>
+              </button>
             </div>
-            <div class="quick-info-item">
-              <span class="badge">{{ profile.primary_role }}</span>
-            </div>
-          </div>
 
-          <div class="profile-actions">
-            <button (click)="editProfile()" class="action-btn edit">
-              <span class="icon">✏️</span>
-              <span>{{ 'DASHBOARD.EDIT_PROFILE' | translate }}</span>
-            </button>
-            <button (click)="viewQRCode()" class="action-btn qr">
-              <span class="icon">📱</span>
-              <span>{{ 'DASHBOARD.VIEW_QR_CODE' | translate }}</span>
-            </button>
+            <!-- Progress Indicator (for Single type) -->
+            @if (currentWorkspace.type === 'single') {
+              <div class="progress-section">
+                <div class="progress-header">
+                  <span class="progress-label">{{ 'DASHBOARD.PROJECT_COMPLETION' | translate }}</span>
+                  <span class="progress-percentage">{{ getProjectCompletionPercentage() }}%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="getProjectCompletionPercentage()"></div>
+                </div>
+                <div class="progress-checklist">
+                  <div class="checklist-item" [class.completed]="hasWorkData()">
+                    <span class="check-icon">{{ hasWorkData() ? '✅' : '⭕' }}</span>
+                    <span>{{ 'DASHBOARD.WORK_DATA_ADDED' | translate }}</span>
+                  </div>
+                  <div class="checklist-item" [class.completed]="hasRightsHolders()">
+                    <span class="check-icon">{{ hasRightsHolders() ? '✅' : '⭕' }}</span>
+                    <span>{{ 'DASHBOARD.RIGHTS_HOLDERS_ADDED' | translate }}</span>
+                  </div>
+                  <div class="checklist-item" [class.completed]="hasSplits()">
+                    <span class="check-icon">{{ hasSplits() ? '✅' : '⭕' }}</span>
+                    <span>{{ 'DASHBOARD.SPLITS_DEFINED' | translate }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Action Buttons -->
+            <div class="project-actions">
+              @if (currentWorkspace.type === 'single') {
+                <button class="action-btn primary" (click)="updateWorkData()">
+                  <span class="btn-icon">🎵</span>
+                  <span>{{ 'DASHBOARD.UPDATE_WORK_DATA' | translate }}</span>
+                </button>
+                <button class="action-btn secondary" (click)="manageRightsHolders()">
+                  <span class="btn-icon">👥</span>
+                  <span>{{ 'DASHBOARD.MANAGE_RIGHTS_HOLDERS' | translate }}</span>
+                </button>
+              }
+              <button class="action-btn archive" (click)="archiveWorkspace(currentWorkspace)">
+                <span class="btn-icon">📦</span>
+                <span>{{ 'DASHBOARD.ARCHIVE_PROJECT' | translate }}</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Collapsible Details -->
-        @if (profileDetailsVisible()) {
-          <div class="profile-details-section">
-            <div class="detail-item">
-              <label>{{ 'DASHBOARD.USER_NUMBER' | translate }}</label>
-              <span class="value">#{{ profile.user_number }}</span>
-            </div>
-            @if (profile.bio) {
-              <div class="detail-item">
-                <label>{{ 'DASHBOARD.BIO' | translate }}</label>
-                <span class="value bio">{{ profile.bio }}</span>
-              </div>
-            }
-            <div class="detail-item">
-              <label>{{ 'DASHBOARD.EMAIL' | translate }}</label>
-              <span class="value">{{ user?.email }}</span>
-            </div>
-          </div>
-        }
-      </div>
-
-      <!-- Social Links Cards -->
-      @for (platform of socialPlatforms; track platform.key) {
-        @if (getSocialLink(profile, platform.key); as link) {
-          <div class="bento-card social-card" [style.--accent-color]="platform.color">
-            <div class="social-header">
-              <span class="social-icon">{{ platform.icon }}</span>
-              <span class="social-name">{{ platform.label }}</span>
-            </div>
-            <div class="social-content">
-              <a [href]="link" target="_blank" class="social-link">
-                {{ link.length > 30 ? (link | slice:0:30) + '...' : link }}
-              </a>
-            </div>
-            <div class="social-actions">
-              <button 
-                (click)="copyToClipboard(link, platform.label)" 
-                class="copy-btn"
-                title="Copy link">
-                <span class="copy-icon">📋</span>
+        <!-- Quick Actions (only for EP/Album/Collection) -->
+        @if (currentWorkspace.type !== 'single') {
+          <div class="quick-actions-section">
+            <h3>{{ 'DASHBOARD.QUICK_ACTIONS' | translate }}</h3>
+            <div class="quick-actions">
+              <button class="action-card" (click)="createWork()">
+                <span class="action-icon">🎵</span>
+                <span class="action-title">{{ 'WORKS.ADD_WORK' | translate }}</span>
+                <span class="action-description">{{ 'WORKS.ADD_WORK_DESC' | translate }}</span>
               </button>
-              <a 
-                [href]="link" 
-                target="_blank" 
-                class="visit-btn"
-                title="Visit">
-                <span class="visit-icon">↗</span>
-              </a>
+              <button class="action-card" (click)="addRightsHolder()">
+                <span class="action-icon">➕</span>
+                <span class="action-title">{{ 'RIGHTS_HOLDERS.ADD' | translate }}</span>
+                <span class="action-description">{{ 'RIGHTS_HOLDERS.ADD_DESC' | translate }}</span>
+              </button>
             </div>
           </div>
         }
       }
 
+      <!-- Profile Section -->
+      @if (profile$ | async; as profile) {
+        <div class="profile-section">
+          <h2>{{ 'DASHBOARD.YOUR_PROFILE' | translate }}</h2>
+          <div class="bento-grid">
+            
+            <!-- Profile Card (Main) -->
+            <div class="bento-card profile-main">
+              <div class="profile-header-section">
+                <div class="profile-title-row">
+                  <h3>{{ 'PROFILE.PROFILE_DETAILS' | translate }}</h3>
+                  <button (click)="toggleProfileDetails()" class="toggle-btn">
+                    <span class="toggle-icon">{{ profileDetailsVisible() ? '▼' : '▶' }}</span>
+                  </button>
+                </div>
+                
+                <div class="profile-quick-info">
+                  <div class="quick-info-item">
+                    <span class="label">@{{ profile.nickname }}</span>
+                  </div>
+                  <div class="quick-info-item">
+                    <span class="badge">{{ profile.primary_role }}</span>
+                  </div>
+                </div>
+
+                <div class="profile-actions">
+                  <button (click)="editProfile()" class="action-btn edit">
+                    <span class="icon">✏️</span>
+                    <span>{{ 'DASHBOARD.EDIT_PROFILE' | translate }}</span>
+                  </button>
+                  <button (click)="viewQRCode()" class="action-btn qr">
+                    <span class="icon">📱</span>
+                    <span>{{ 'PROFILE.QR_CODE' | translate }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Collapsible Details -->
+              @if (profileDetailsVisible()) {
+                <div class="profile-details-section">
+                  <div class="detail-item">
+                    <label>{{ 'DASHBOARD.USER_NUMBER' | translate }}</label>
+                    <span class="value">#{{ profile.user_number }}</span>
+                  </div>
+                  @if (profile.bio) {
+                    <div class="detail-item">
+                      <label>{{ 'DASHBOARD.BIO' | translate }}</label>
+                      <span class="value bio">{{ profile.bio }}</span>
+                    </div>
+                  }
+                  <div class="detail-item">
+                    <label>{{ 'DASHBOARD.EMAIL' | translate }}</label>
+                    <span class="value">{{ user?.email }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Social Links Cards -->
+            @for (platform of socialPlatforms; track platform.key) {
+              @if (getSocialLink(profile, platform.key); as link) {
+                <div class="bento-card social-card" [style.--accent-color]="platform.color">
+                  <div class="social-header">
+                    <span class="social-icon">{{ platform.icon }}</span>
+                    <span class="social-name">{{ platform.label }}</span>
+                  </div>
+                  <div class="social-content">
+                    <a [href]="link" target="_blank" class="social-link">
+                      {{ link.length > 30 ? (link | slice:0:30) + '...' : link }}
+                    </a>
+                  </div>
+                  <div class="social-actions">
+                    <button 
+                      (click)="copyToClipboard(link, platform.label)" 
+                      class="copy-btn"
+                      title="Copy link">
+                      <span class="copy-icon">📋</span>
+                    </button>
+                    <a 
+                      [href]="link" 
+                      target="_blank" 
+                      class="visit-btn"
+                      title="Visit">
+                      <span class="visit-icon">↗</span>
+                    </a>
+                  </div>
+                </div>
+              }
+            }
+
+          </div>
+        </div>
+      }
     </div>
   }
-
-  <!-- Workspaces Section -->
-  <div class="workspaces-section">
-    <div class="section-header">
-      <h2>{{ 'DASHBOARD.YOUR_WORKSPACES' | translate }}</h2>
-      <button (click)="goToWorkspaces()" class="manage-btn">
-        {{ 'WORKSPACE.MANAGE_WORKSPACES' | translate }}
-      </button>
-    </div>
-
-    @if (workspaces$ | async; as workspaces) {
-      <div class="workspace-list">
-        @if (workspaces.length === 0) {
-          <div class="no-workspaces">
-            <p>{{ 'DASHBOARD.NO_WORKSPACES' | translate }}</p>
-            <button (click)="goToWorkspaces()" class="create-workspace-btn">
-              {{ 'DASHBOARD.CREATE_FIRST_WORKSPACE' | translate }}
-            </button>
-          </div>
-        }
-
-        @if (workspaces.length > 0) {
-          <div class="workspace-cards">
-            @for (workspace of workspaces; track workspace.id) {
-              <div class="workspace-card">
-                <h3>{{ workspace.name }}</h3>
-                <span class="workspace-type">{{ workspace.type }}</span>
-              </div>
-            }
-          </div>
-        }
-      </div>
-    }
-
-    @if (currentWorkspace) {
-      <div class="current-workspace">
-        <p>{{ 'DASHBOARD.CURRENT_WORKSPACE' | translate }}: <strong>{{ currentWorkspace.name }}</strong></p>
-      </div>
-    }
-  </div>
 </div>

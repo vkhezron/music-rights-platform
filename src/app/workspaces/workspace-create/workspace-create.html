@@ -1,25 +1,28 @@
 <div class="workspace-create-container">
   <div class="create-card">
     
+    <!-- Header -->
     <div class="header">
-      <h1>{{ 'WORKSPACE.CREATE_TITLE' | translate }}</h1>
+      <div class="workspace-icon">🎵</div>
+      <h1>{{ 'WORKSPACE.CREATE_NEW_PROJECT' | translate }}</h1>
       <p>{{ 'WORKSPACE.CREATE_SUBTITLE' | translate }}</p>
     </div>
 
+    <!-- Form -->
     <form [formGroup]="workspaceForm" (ngSubmit)="onSubmit()" class="create-form">
       
       <!-- Error Message -->
       @if (errorMessage()) {
         <div class="error-alert">
-          <span class="error-icon">!</span>
-          <span>{{ errorMessage() | translate }}</span>
+          <span class="error-icon">⚠️</span>
+          <span>{{ errorMessage() }}</span>
         </div>
       }
 
-      <!-- Workspace Name -->
+      <!-- Project Name -->
       <div class="form-group">
         <label for="name" class="required">
-          {{ 'WORKSPACE.NAME' | translate }}
+          {{ 'WORKSPACE.PROJECT_NAME' | translate }}
         </label>
         <input
           id="name"
@@ -27,7 +30,7 @@
           formControlName="name"
           class="form-input"
           [class.error]="hasError('name', 'required') || hasError('name', 'minlength')"
-          placeholder="e.g., My Band, Studio X, Label Records"
+          [placeholder]="'WORKSPACE.NAME_PLACEHOLDER' | translate"
         />
         @if (hasError('name', 'required')) {
           <div class="error-message">
@@ -41,39 +44,40 @@
         }
       </div>
 
-      <!-- Workspace Type -->
+      <!-- Project Type (Dropdown) -->
       <div class="form-group">
-        <label class="required">
-          {{ 'WORKSPACE.TYPE' | translate }}
+        <label for="type" class="required">
+          {{ 'WORKSPACE.PROJECT_TYPE' | translate }}
         </label>
-        
-        <div class="type-grid">
+        <select
+          id="type"
+          formControlName="type"
+          class="form-select"
+          [class.error]="hasError('type', 'required')">
+          <option value="">{{ 'WORKSPACE.SELECT_TYPE' | translate }}</option>
           @for (type of workspaceTypes; track type.value) {
-            <label 
-              class="type-card"
-              [class.selected]="workspaceForm.get('type')?.value === type.value">
-              
-              <input
-                type="radio"
-                formControlName="type"
-                [value]="type.value"
-                class="type-radio"
-              />
-              
-              <div class="type-content">
-                <div class="type-icon">{{ type.icon }}</div>
-                <div class="type-label">{{ type.label }}</div>
-              </div>
-            </label>
+            <option [value]="type.value">
+              {{ type.icon }} {{ type.label }}
+            </option>
           }
-        </div>
-
-        @if (getSelectedTypeInfo(); as typeInfo) {
-          <div class="type-description">
-            <p>{{ typeInfo.description }}</p>
+        </select>
+        @if (hasError('type', 'required')) {
+          <div class="error-message">
+            {{ 'WORKSPACE.TYPE_REQUIRED' | translate }}
           </div>
         }
       </div>
+
+      <!-- Selected Type Info -->
+      @if (getSelectedTypeInfo(); as selectedType) {
+        <div class="selected-type-info">
+          <div class="selected-icon">{{ selectedType.icon }}</div>
+          <div class="selected-content">
+            <div class="selected-label">{{ selectedType.label }}</div>
+            <div class="selected-description">{{ selectedType.description }}</div>
+          </div>
+        </div>
+      }
 
       <!-- Description -->
       <div class="form-group">
@@ -85,12 +89,10 @@
           id="description"
           formControlName="description"
           class="form-textarea"
-          rows="4"
-          maxlength="500"
-          placeholder="What does your workspace do?"
-        ></textarea>
-        <div class="char-count">
-          {{ workspaceForm.get('description')?.value?.length || 0 }} / 500
+          rows="3"
+          [placeholder]="'WORKSPACE.DESCRIPTION_PLACEHOLDER' | translate"></textarea>
+        <div class="field-hint">
+          💡 {{ 'WORKSPACE.DESCRIPTION_HINT' | translate }}
         </div>
       </div>
 
@@ -109,12 +111,12 @@
           class="submit-button"
           [disabled]="isLoading() || workspaceForm.invalid">
           @if (!isLoading()) {
-            <span>{{ 'WORKSPACE.CREATE_WORKSPACE' | translate }}</span>
+            <span>{{ 'WORKSPACE.CREATE_PROJECT_BTN' | translate }}</span>
           }
           @if (isLoading()) {
             <span class="loading">
               <span class="spinner"></span>
-              {{ 'COMMON.LOADING' | translate }}
+              {{ 'COMMON.CREATING' | translate }}
             </span>
           }
         </button>

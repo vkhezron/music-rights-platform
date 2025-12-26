@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { SupabaseService } from '../services/supabase.service';
 import { ProfileService } from '../services/profile.service';
 import { Observable } from 'rxjs';
-import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { Workspace } from '../services/workspace.service';
 import { WorkspaceService } from '../services/workspace.service';
 
@@ -26,10 +26,13 @@ export class Dashboard implements OnInit {
   profile$ = this.profileService.profile$;
   user = this.supabase.currentUser;
   workspaces$!: Observable<Workspace[]>;
+  currentWorkspace$ = this.workspaceService.currentWorkspace$;
   currentWorkspace: Workspace | null = null;
 
-  // Fixed: profileDetailsVisible (plural) to match template
   profileDetailsVisible = signal(false);
+
+  // Active tab
+  activeTab = signal<'dashboard' | 'rights-holders' | 'works'>('dashboard');
 
   // Social platforms with icons
   socialPlatforms = [
@@ -50,11 +53,14 @@ export class Dashboard implements OnInit {
     }
 
     // Initialize observables
-    this.workspaces$ = this.workspaceService.workspaces;
-    this.currentWorkspace = this.workspaceService.currentWorkspace;
+    this.workspaces$ = this.workspaceService.workspaces$;
+    
+    // Subscribe to current workspace
+    this.currentWorkspace$.subscribe(workspace => {
+      this.currentWorkspace = workspace;
+    });
   }
 
-  // Fixed: toggleProfileDetails (2 g's, not 3)
   toggleProfileDetails() {
     this.profileDetailsVisible.set(!this.profileDetailsVisible());
   }
@@ -67,7 +73,6 @@ export class Dashboard implements OnInit {
     this.router.navigate(['/profile/edit']);
   }
 
-  // Added: missing viewQRCode method
   viewQRCode() {
     this.router.navigate(['/profile/qr-code']);
   }
@@ -75,7 +80,6 @@ export class Dashboard implements OnInit {
   async copyToClipboard(text: string, platform: string) {
     try {
       await navigator.clipboard.writeText(text);
-      // Fixed: alert syntax
       alert(`${platform} link copied to clipboard!`);
     } catch (err) {
       console.error('Failed to copy:', err);
@@ -86,6 +90,96 @@ export class Dashboard implements OnInit {
     const value = profile[key];
     return value || null;
   }
+
+  // Workspace management
+  switchWorkspace(workspaceId: string) {
+    const workspaces = this.workspaceService.workspaces$ as any;
+    // Find workspace by ID
+    this.workspaces$.subscribe(ws => {
+      const workspace = ws.find(w => w.id === workspaceId);
+      if (workspace) {
+        this.workspaceService.setCurrentWorkspace(workspace);
+      }
+    });
+  }
+
+  // Navigation
+  setActiveTab(tab: 'dashboard' | 'rights-holders' | 'works') {
+    this.activeTab.set(tab);
+    
+    // Navigate to appropriate route
+    switch(tab) {
+      case 'rights-holders':
+        this.router.navigate(['/rights-holders']);
+        break;
+      case 'works':
+        this.router.navigate(['/works']);
+        break;
+      default:
+        // Stay on dashboard
+        break;
+    }
+  }
+
+  // Quick actions
+  addRightsHolder() {
+    this.router.navigate(['/rights-holders/create']);
+  }
+
+  createWork() {
+    this.router.navigate(['/works/create']);
+  }
+
+  // Add these methods after existing methods
+
+editWorkspace(workspace: Workspace) {
+  // TODO: Navigate to edit workspace or show modal
+  console.log('Edit workspace:', workspace);
+  alert('Edit workspace feature - coming soon!');
+}
+
+updateWorkData() {
+  this.router.navigate(['/works/create']);
+}
+
+manageRightsHolders() {
+  this.router.navigate(['/rights-holders']);
+}
+
+archiveWorkspace(workspace: Workspace) {
+  const confirm = window.confirm(`Archive "${workspace.name}"? You can restore it later.`);
+  if (confirm) {
+    // TODO: Implement archive functionality
+    console.log('Archive workspace:', workspace);
+    alert('Archive feature - coming soon!');
+  }
+}
+
+// Progress tracking methods (placeholder - will connect to actual data)
+getProjectCompletionPercentage(): number {
+  // TODO: Calculate based on actual data
+  // For now, return dummy data
+  let completion = 0;
+  if (this.hasWorkData()) completion += 33;
+  if (this.hasRightsHolders()) completion += 33;
+  if (this.hasSplits()) completion += 34;
+  return completion;
+}
+
+hasWorkData(): boolean {
+  // TODO: Check if work has data (title, ISRC, etc.)
+  return false;
+}
+
+hasRightsHolders(): boolean {
+  // TODO: Check if rights holders are added
+  return false;
+}
+
+hasSplits(): boolean {
+  // TODO: Check if splits are defined and total 100%
+  return false;
+}
 
   async logout() {
     await this.supabase.signOut();

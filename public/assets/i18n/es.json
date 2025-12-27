@@ -4,7 +4,7 @@
   "WELCOME": "¡Bienvenido a la Plataforma de la Industria Musical!",
   "DESCRIPTION": "Gestiona tus derechos, conéctate con artistas y amplía tu red.",
   "LANGUAGE": "Idioma",
-  
+
   "BUTTONS": {
     "SAVE": "Guardar",
     "CANCEL": "Cancelar",
@@ -24,7 +24,7 @@
     "ADD": "Añadir",
     "REMOVE": "Eliminar"
   },
-  
+
   "AUTH": {
     "WELCOME_BACK": "Bienvenido de nuevo",
     "LOGIN_SUBTITLE": "Inicia sesión para continuar",
@@ -71,7 +71,7 @@
     "REGISTER_FEATURE_2": "Networking profesional",
     "REGISTER_FEATURE_3": "Herramientas de colaboración"
   },
-  
+
   "PROFILE": {
     "SETUP_TITLE": "Configura tu perfil",
     "SETUP_SUBTITLE": "Conozcámonos mejor",
@@ -132,6 +132,7 @@
     "CREATE_PROJECT": "Crear proyecto",
     "YOUR_PROJECTS": "Tus proyectos",
     "NEW_PROJECT": "Nuevo proyecto",
+    "CURRENT": "Actual",
     "NO_PROJECTS_YET": "Aún no tienes proyectos. Comienza creando tu primer proyecto musical.",
     "CREATE_FIRST_PROJECT": "Crea tu primer proyecto",
     "CREATE_NEW_PROJECT": "Crear nuevo proyecto",
@@ -143,7 +144,7 @@
     "DESCRIPTION_PLACEHOLDER": "Añade notas sobre este proyecto (fecha de lanzamiento, colaboradores, etc.)",
     "DESCRIPTION_HINT": "Esto te ayuda a organizar y recordar detalles sobre tu proyecto",
     "CREATE_PROJECT_BTN": "Crear proyecto",
-    "TYPE_SINGLE": "Obra única",
+    "TYPE_SINGLE": "Sencillo",
     "TYPE_EP": "EP",
     "TYPE_ALBUM": "Álbum",
     "TYPE_COLLECTION": "Colección"
@@ -151,12 +152,16 @@
 
   "DASHBOARD": {
     "WELCOME": "Bienvenido a la Plataforma de Derechos Musicales",
+    "DASHBOARD": "Panel",
     "YOUR_PROFILE": "Tu perfil",
+    "YOUR_PROJECTS": "Tus proyectos",
     "EDIT_PROFILE": "Editar perfil",
     "VIEW_QR_CODE": "Ver código QR",
     "YOUR_WORKSPACES": "Tus espacios de trabajo",
     "CURRENT_WORKSPACE": "Espacio de trabajo actual",
     "NO_WORKSPACES": "Aún no tienes espacios de trabajo",
+    "NO_PROJECTS": "Aún no hay proyectos",
+    "CREATE_FIRST_PROJECT": "Empieza creando tu primer proyecto musical",
     "CREATE_FIRST_WORKSPACE": "Crea tu primer espacio de trabajo",
     "EMAIL": "Correo electrónico",
     "LOGOUT": "Cerrar sesión",
@@ -165,28 +170,67 @@
     "PRIMARY_ROLE": "Rol principal",
     "BIO": "Biografía",
     "SPOTIFY": "Spotify",
-    "DASHBOARD": "Panel",
-    "QUICK_ACTIONS": "Acciones rápidas"
+    "QUICK_ACTIONS": "Acciones rápidas",
+    "COMPLETION": "Progreso",
+    "UPDATE_WORK_DATA": "Actualizar datos de la obra",
+    "MANAGE_RIGHTS_HOLDERS": "Gestionar titulares de derechos",
+    "ARCHIVE_PROJECT": "Archivar proyecto"
   },
 
   "WORKS": {
     "WORKS": "Obras",
     "ADD_WORK": "Añadir obra",
-    "ADD_WORK_DESC": "Registra una nueva obra musical en este proyecto",
     "CREATE_WORK": "Crear obra",
     "EDIT_WORK": "Editar obra",
+    "CREATE_WORK_SUBTITLE": "Añade los detalles de tu obra musical",
+    "EDIT_WORK_SUBTITLE": "Actualiza la información de la obra",
+    "CREATE_FIRST_WORK": "Crea tu primera obra",
+    "NO_WORKS": "Aún no hay obras",
+    "NO_WORKS_DESCRIPTION": "Empieza creando tu primera obra musical",
+    "NO_RESULTS": "No se han encontrado resultados",
+    "NO_RESULTS_FOR": "Sin resultados para",
+    "SEARCH_PLACEHOLDER": "Buscar por título, ISRC, ISWC...",
+
+    "BASIC_INFO": "Información básica",
     "WORK_TITLE": "Título de la obra",
+    "TITLE_REQUIRED": "El título de la obra es obligatorio",
     "ALTERNATIVE_TITLES": "Títulos alternativos",
+    "ALTERNATIVE_TITLES_HINT": "Añade títulos alternativos o traducidos",
+    "ADD_ALTERNATIVE_TITLE": "Añadir título alternativo",
+    "STATUS": "Estado",
+
+    "IDENTIFICATION_CODES": "Códigos de identificación",
+    "ISRC": "ISRC",
+    "ISWC": "ISWC",
+    "ISRC_FORMAT": "Formato: USRC17607839 (2 letras + 3 alfanuméricos + 7 dígitos)",
+    "ISWC_FORMAT": "Formato: T-123.456.789-0",
+    "ISRC_INVALID": "Formato de ISRC no válido",
+    "ISWC_INVALID": "Formato de ISWC no válido",
+
+    "DURATION_AND_DATES": "Duración y fechas",
     "DURATION": "Duración",
+    "MINUTES": "min",
+    "SECONDS": "seg",
+    "RECORDING_DATE": "Fecha de grabación",
+    "RELEASE_DATE": "Fecha de lanzamiento",
+
+    "GENRE_AND_LANGUAGES": "Género e idiomas",
     "GENRE": "Género",
+    "SELECT_GENRE": "Selecciona un género",
     "LANGUAGES": "Idiomas",
-    "ISRC": "Código ISRC",
-    "ISWC": "Código ISWC",
-    "IS_COVER": "Esta es una versión cover",
-    "ORIGINAL_WORK": "Obra original",
-    "IS_PUBLIC_DOMAIN": "La obra original es de dominio público",
-    "NO_WORKS_YET": "Aún no hay obras en este proyecto",
-    "CREATE_FIRST_WORK": "Crea tu primera obra"
+    "LANGUAGES_HINT": "Selecciona todos los idiomas usados en esta obra",
+
+    "COVER_VERSION_INFO": "Información de la versión cover",
+    "IS_COVER_VERSION": "Esta es una versión cover",
+    "ORIGINAL_WORK_TITLE": "Título de la obra original",
+    "ORIGINAL_TITLE_REQUIRED": "El título original es obligatorio para covers",
+    "ORIGINAL_WORK_ISRC": "ISRC original",
+    "ORIGINAL_WORK_ISWC": "ISWC original",
+    "ORIGINAL_WORK_INFO": "Información adicional",
+    "ORIGINAL_WORK_INFO_HINT": "Añade detalles si ISRC/ISWC no está disponible",
+
+    "ADDITIONAL_NOTES": "Notas adicionales",
+    "NOTES": "Notas"
   },
 
   "RIGHTS_HOLDERS": {
@@ -208,10 +252,11 @@
     "NO_RIGHTS_HOLDERS": "Aún no hay titulares de derechos",
     "CREATE_FIRST": "Añade tu primer titular de derechos"
   },
-  
+
   "COMMON": {
     "LOADING": "Cargando...",
     "SAVING": "Guardando...",
+    "SAVE": "Guardar",
     "ERROR": "Error",
     "SUCCESS": "Éxito",
     "WARNING": "Advertencia",
@@ -219,7 +264,6 @@
     "OPTIONAL": "opcional",
     "CANCEL": "Cancelar",
     "BACK": "Volver",
-    "SAVE": "Guardar",
     "DELETE": "Eliminar",
     "EDIT": "Editar",
     "CLOSE": "Cerrar",

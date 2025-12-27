@@ -27,7 +27,7 @@
   
   "AUTH": {
     "WELCOME_BACK": "З поверненням",
-    "LOGIN_SUBTITLE": "Увійдіть, щоб продовжити",
+    "LOGIN_SUBTITLE": "Увійдіть, щоб продовжити на Платформі Музичних Прав",
     "JOIN_PLATFORM": "Приєднатися до Платформи Музичних Прав",
     "EMAIL": "Електронна пошта",
     "PASSWORD": "Пароль",
@@ -132,6 +132,7 @@
     "CREATE_PROJECT": "Створити проєкт",
     "YOUR_PROJECTS": "Ваші проєкти",
     "NEW_PROJECT": "Новий проєкт",
+    "CURRENT": "Поточний",
     "NO_PROJECTS_YET": "У вас ще немає проєктів. Почніть зі створення вашого першого музичного проєкту.",
     "CREATE_FIRST_PROJECT": "Створіть свій перший проєкт",
     "CREATE_NEW_PROJECT": "Створити новий проєкт",
@@ -143,7 +144,7 @@
     "DESCRIPTION_PLACEHOLDER": "Додайте нотатки про цей проєкт (дата виходу, співавтори тощо)",
     "DESCRIPTION_HINT": "Це допомагає організувати та запам'ятати деталі вашого проєкту",
     "CREATE_PROJECT_BTN": "Створити проєкт",
-    "TYPE_SINGLE": "Окремий твір",
+    "TYPE_SINGLE": "Сингл",
     "TYPE_EP": "EP",
     "TYPE_ALBUM": "Альбом",
     "TYPE_COLLECTION": "Колекція"
@@ -151,12 +152,16 @@
 
   "DASHBOARD": {
     "WELCOME": "Ласкаво просимо на Платформу Музичних Прав",
+    "DASHBOARD": "Панель",
     "YOUR_PROFILE": "Ваш профіль",
+    "YOUR_PROJECTS": "Ваші проєкти",
     "EDIT_PROFILE": "Редагувати профіль",
     "VIEW_QR_CODE": "Переглянути QR-код",
     "YOUR_WORKSPACES": "Ваші робочі простори",
     "CURRENT_WORKSPACE": "Поточний робочий простір",
     "NO_WORKSPACES": "У вас ще немає робочих просторів",
+    "NO_PROJECTS": "Поки немає проєктів",
+    "CREATE_FIRST_PROJECT": "Почніть зі створення вашого першого музичного проєкту",
     "CREATE_FIRST_WORKSPACE": "Створіть свій перший робочий простір",
     "EMAIL": "Електронна пошта",
     "LOGOUT": "Вийти",
@@ -165,28 +170,67 @@
     "PRIMARY_ROLE": "Основна роль",
     "BIO": "Біографія",
     "SPOTIFY": "Spotify",
-    "DASHBOARD": "Панель",
-    "QUICK_ACTIONS": "Швидкі дії"
+    "QUICK_ACTIONS": "Швидкі дії",
+    "COMPLETION": "Прогрес",
+    "UPDATE_WORK_DATA": "Оновити дані твору",
+    "MANAGE_RIGHTS_HOLDERS": "Керувати правовласниками",
+    "ARCHIVE_PROJECT": "Архівувати проєкт"
   },
 
   "WORKS": {
     "WORKS": "Твори",
     "ADD_WORK": "Додати твір",
-    "ADD_WORK_DESC": "Зареєструйте новий музичний твір у цьому проєкті",
     "CREATE_WORK": "Створити твір",
     "EDIT_WORK": "Редагувати твір",
+    "CREATE_WORK_SUBTITLE": "Додайте деталі вашого музичного твору",
+    "EDIT_WORK_SUBTITLE": "Оновити інформацію про твір",
+    "CREATE_FIRST_WORK": "Створіть свій перший твір",
+    "NO_WORKS": "Поки немає творів",
+    "NO_WORKS_DESCRIPTION": "Почніть зі створення вашого першого музичного твору",
+    "NO_RESULTS": "Результатів не знайдено",
+    "NO_RESULTS_FOR": "Немає результатів для",
+    "SEARCH_PLACEHOLDER": "Пошук за назвою, ISRC, ISWC...",
+    
+    "BASIC_INFO": "Основна інформація",
     "WORK_TITLE": "Назва твору",
+    "TITLE_REQUIRED": "Назва твору обов'язкова",
     "ALTERNATIVE_TITLES": "Альтернативні назви",
+    "ALTERNATIVE_TITLES_HINT": "Додайте альтернативні або перекладені назви",
+    "ADD_ALTERNATIVE_TITLE": "Додати альтернативну назву",
+    "STATUS": "Статус",
+    
+    "IDENTIFICATION_CODES": "Коди ідентифікації",
+    "ISRC": "ISRC",
+    "ISWC": "ISWC",
+    "ISRC_FORMAT": "Формат: USRC17607839 (2 літери + 3 буквено-цифрових + 7 цифр)",
+    "ISWC_FORMAT": "Формат: T-123.456.789-0",
+    "ISRC_INVALID": "Невірний формат ISRC",
+    "ISWC_INVALID": "Невірний формат ISWC",
+    
+    "DURATION_AND_DATES": "Тривалість та дати",
     "DURATION": "Тривалість",
+    "MINUTES": "хв",
+    "SECONDS": "сек",
+    "RECORDING_DATE": "Дата запису",
+    "RELEASE_DATE": "Дата випуску",
+    
+    "GENRE_AND_LANGUAGES": "Жанр та мови",
     "GENRE": "Жанр",
+    "SELECT_GENRE": "Виберіть жанр",
     "LANGUAGES": "Мови",
-    "ISRC": "Код ISRC",
-    "ISWC": "Код ISWC",
-    "IS_COVER": "Це кавер-версія",
-    "ORIGINAL_WORK": "Оригінальний твір",
-    "IS_PUBLIC_DOMAIN": "Оригінальний твір у суспільному надбанні",
-    "NO_WORKS_YET": "У цьому проєкті ще немає творів",
-    "CREATE_FIRST_WORK": "Створіть свій перший твір"
+    "LANGUAGES_HINT": "Виберіть всі мови, що використовуються в цьому творі",
+    
+    "COVER_VERSION_INFO": "Інформація про кавер-версію",
+    "IS_COVER_VERSION": "Це кавер-версія",
+    "ORIGINAL_WORK_TITLE": "Назва оригінального твору",
+    "ORIGINAL_TITLE_REQUIRED": "Для каверів назва оригінального твору обов'язкова",
+    "ORIGINAL_WORK_ISRC": "Оригінальний ISRC",
+    "ORIGINAL_WORK_ISWC": "Оригінальний ISWC",
+    "ORIGINAL_WORK_INFO": "Додаткова інформація",
+    "ORIGINAL_WORK_INFO_HINT": "Надайте додаткові деталі, якщо ISRC/ISWC недоступні",
+    
+    "ADDITIONAL_NOTES": "Додаткові нотатки",
+    "NOTES": "Нотатки"
   },
 
   "RIGHTS_HOLDERS": {
@@ -212,6 +256,7 @@
   "COMMON": {
     "LOADING": "Завантаження...",
     "SAVING": "Збереження...",
+    "SAVE": "Зберегти",
     "ERROR": "Помилка",
     "SUCCESS": "Успіх",
     "WARNING": "Попередження",
@@ -219,7 +264,6 @@
     "OPTIONAL": "необов'язково",
     "CANCEL": "Скасувати",
     "BACK": "Назад",
-    "SAVE": "Зберегти",
     "DELETE": "Видалити",
     "EDIT": "Редагувати",
     "CLOSE": "Закрити",

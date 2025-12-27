@@ -4,7 +4,7 @@
   "WELCOME": "Willkommen bei der Musikindustrie-Plattform!",
   "DESCRIPTION": "Verwalten Sie Ihre Rechte, verbinden Sie sich mit Künstlern und erweitern Sie Ihr Netzwerk.",
   "LANGUAGE": "Sprache",
-  
+
   "BUTTONS": {
     "SAVE": "Speichern",
     "CANCEL": "Abbrechen",
@@ -24,7 +24,7 @@
     "ADD": "Hinzufügen",
     "REMOVE": "Entfernen"
   },
-  
+
   "AUTH": {
     "WELCOME_BACK": "Willkommen zurück",
     "LOGIN_SUBTITLE": "Melden Sie sich an, um fortzufahren",
@@ -71,7 +71,7 @@
     "REGISTER_FEATURE_2": "Professionelles Networking",
     "REGISTER_FEATURE_3": "Kollaborations-Tools"
   },
-  
+
   "PROFILE": {
     "SETUP_TITLE": "Profil einrichten",
     "SETUP_SUBTITLE": "Lassen Sie uns Sie besser kennenlernen",
@@ -132,6 +132,7 @@
     "CREATE_PROJECT": "Projekt erstellen",
     "YOUR_PROJECTS": "Ihre Projekte",
     "NEW_PROJECT": "Neues Projekt",
+    "CURRENT": "Aktuell",
     "NO_PROJECTS_YET": "Sie haben noch keine Projekte. Beginnen Sie mit der Erstellung Ihres ersten Musikprojekts.",
     "CREATE_FIRST_PROJECT": "Erstellen Sie Ihr erstes Projekt",
     "CREATE_NEW_PROJECT": "Neues Projekt erstellen",
@@ -151,12 +152,16 @@
 
   "DASHBOARD": {
     "WELCOME": "Willkommen bei der Musikrechte-Plattform",
+    "DASHBOARD": "Dashboard",
     "YOUR_PROFILE": "Ihr Profil",
+    "YOUR_PROJECTS": "Ihre Projekte",
     "EDIT_PROFILE": "Profil bearbeiten",
     "VIEW_QR_CODE": "QR-Code anzeigen",
     "YOUR_WORKSPACES": "Ihre Workspaces",
     "CURRENT_WORKSPACE": "Aktueller Workspace",
     "NO_WORKSPACES": "Sie haben noch keine Workspaces",
+    "NO_PROJECTS": "Noch keine Projekte",
+    "CREATE_FIRST_PROJECT": "Beginnen Sie mit der Erstellung Ihres ersten Musikprojekts",
     "CREATE_FIRST_WORKSPACE": "Erstellen Sie Ihren ersten Workspace",
     "EMAIL": "E-Mail",
     "LOGOUT": "Abmelden",
@@ -165,28 +170,67 @@
     "PRIMARY_ROLE": "Hauptrolle",
     "BIO": "Biografie",
     "SPOTIFY": "Spotify",
-    "DASHBOARD": "Dashboard",
-    "QUICK_ACTIONS": "Schnellaktionen"
+    "QUICK_ACTIONS": "Schnellaktionen",
+    "COMPLETION": "Fortschritt",
+    "UPDATE_WORK_DATA": "Werkdaten aktualisieren",
+    "MANAGE_RIGHTS_HOLDERS": "Rechteinhaber verwalten",
+    "ARCHIVE_PROJECT": "Projekt archivieren"
   },
 
   "WORKS": {
     "WORKS": "Werke",
     "ADD_WORK": "Werk hinzufügen",
-    "ADD_WORK_DESC": "Registrieren Sie ein neues Musikwerk in diesem Projekt",
     "CREATE_WORK": "Werk erstellen",
     "EDIT_WORK": "Werk bearbeiten",
+    "CREATE_WORK_SUBTITLE": "Fügen Sie Details zu Ihrem Musikwerk hinzu",
+    "EDIT_WORK_SUBTITLE": "Werk-Informationen aktualisieren",
+    "CREATE_FIRST_WORK": "Erstellen Sie Ihr erstes Werk",
+    "NO_WORKS": "Noch keine Werke",
+    "NO_WORKS_DESCRIPTION": "Beginnen Sie mit der Erstellung Ihres ersten Musikwerks",
+    "NO_RESULTS": "Keine Ergebnisse gefunden",
+    "NO_RESULTS_FOR": "Keine Ergebnisse für",
+    "SEARCH_PLACEHOLDER": "Suche nach Titel, ISRC, ISWC...",
+
+    "BASIC_INFO": "Grundinformationen",
     "WORK_TITLE": "Werktitel",
+    "TITLE_REQUIRED": "Werktitel ist erforderlich",
     "ALTERNATIVE_TITLES": "Alternative Titel",
+    "ALTERNATIVE_TITLES_HINT": "Fügen Sie alternative oder übersetzte Titel hinzu",
+    "ADD_ALTERNATIVE_TITLE": "Alternativen Titel hinzufügen",
+    "STATUS": "Status",
+
+    "IDENTIFICATION_CODES": "Identifikationscodes",
+    "ISRC": "ISRC",
+    "ISWC": "ISWC",
+    "ISRC_FORMAT": "Format: USRC17607839 (2 Buchstaben + 3 alphanumerisch + 7 Ziffern)",
+    "ISWC_FORMAT": "Format: T-123.456.789-0",
+    "ISRC_INVALID": "Ungültiges ISRC-Format",
+    "ISWC_INVALID": "Ungültiges ISWC-Format",
+
+    "DURATION_AND_DATES": "Dauer & Daten",
     "DURATION": "Dauer",
+    "MINUTES": "Min",
+    "SECONDS": "Sek",
+    "RECORDING_DATE": "Aufnahmedatum",
+    "RELEASE_DATE": "Veröffentlichungsdatum",
+
+    "GENRE_AND_LANGUAGES": "Genre & Sprachen",
     "GENRE": "Genre",
+    "SELECT_GENRE": "Genre auswählen",
     "LANGUAGES": "Sprachen",
-    "ISRC": "ISRC-Code",
-    "ISWC": "ISWC-Code",
-    "IS_COVER": "Dies ist eine Coverversion",
-    "ORIGINAL_WORK": "Originalwerk",
-    "IS_PUBLIC_DOMAIN": "Originalwerk ist gemeinfrei",
-    "NO_WORKS_YET": "Noch keine Werke in diesem Projekt",
-    "CREATE_FIRST_WORK": "Erstellen Sie Ihr erstes Werk"
+    "LANGUAGES_HINT": "Wählen Sie alle in diesem Werk verwendeten Sprachen aus",
+
+    "COVER_VERSION_INFO": "Informationen zur Coverversion",
+    "IS_COVER_VERSION": "Dies ist eine Coverversion",
+    "ORIGINAL_WORK_TITLE": "Titel des Originalwerks",
+    "ORIGINAL_TITLE_REQUIRED": "Für Cover ist der Titel des Originalwerks erforderlich",
+    "ORIGINAL_WORK_ISRC": "ISRC des Originals",
+    "ORIGINAL_WORK_ISWC": "ISWC des Originals",
+    "ORIGINAL_WORK_INFO": "Zusätzliche Informationen",
+    "ORIGINAL_WORK_INFO_HINT": "Geben Sie zusätzliche Details an, falls ISRC/ISWC nicht verfügbar sind",
+
+    "ADDITIONAL_NOTES": "Zusätzliche Notizen",
+    "NOTES": "Notizen"
   },
 
   "RIGHTS_HOLDERS": {
@@ -208,10 +252,11 @@
     "NO_RIGHTS_HOLDERS": "Noch keine Rechteinhaber",
     "CREATE_FIRST": "Fügen Sie Ihren ersten Rechteinhaber hinzu"
   },
-  
+
   "COMMON": {
     "LOADING": "Laden...",
     "SAVING": "Speichern...",
+    "SAVE": "Speichern",
     "ERROR": "Fehler",
     "SUCCESS": "Erfolg",
     "WARNING": "Warnung",
@@ -219,7 +264,6 @@
     "OPTIONAL": "optional",
     "CANCEL": "Abbrechen",
     "BACK": "Zurück",
-    "SAVE": "Speichern",
     "DELETE": "Löschen",
     "EDIT": "Bearbeiten",
     "CLOSE": "Schließen",

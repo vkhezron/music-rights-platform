@@ -347,3 +347,50 @@ label {
     font-size: 24px;
   }
 }
+
+// Add these styles to your existing login.scss
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  lucide-icon {
+    color: #667eea;
+  }
+}
+
+.error-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  
+  lucide-icon.error-icon {
+    color: #ef4444;
+    flex-shrink: 0;
+  }
+}
+
+.password-toggle {
+  lucide-icon {
+    color: #718096;
+    transition: color 0.2s;
+  }
+  
+  &:hover lucide-icon {
+    color: #4a5568;
+  }
+}
+
+.features {
+  .feature {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    
+    lucide-icon.feature-icon {
+      color: white;
+      flex-shrink: 0;
+    }
+  }
+}

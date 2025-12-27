@@ -9,7 +9,10 @@
     
     <!-- Header -->
     <div class="login-header">
-      <h1 class="logo">🎵 {{ 'APP_NAME' | translate }}</h1>
+      <h1 class="logo">
+        <lucide-icon [img]="Music" [size]="32" [strokeWidth]="2"></lucide-icon>
+        {{ 'APP_NAME' | translate }}
+      </h1>
       <h2 class="title">{{ 'AUTH.WELCOME_BACK' | translate }}</h2>
       <p class="subtitle">{{ 'AUTH.LOGIN_SUBTITLE' | translate }}</p>
     </div>
@@ -18,10 +21,12 @@
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
       
       <!-- Error Alert -->
-      <div *ngIf="errorMessage()" class="error-alert">
-        <span class="error-icon">⚠️</span>
-        <span>{{ errorMessage() }}</span>
-      </div>
+      @if (errorMessage()) {
+        <div class="error-alert">
+          <lucide-icon [img]="AlertCircle" [size]="20" class="error-icon"></lucide-icon>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
 
       <!-- Email Input -->
       <div class="form-group">
@@ -36,12 +41,16 @@
         />
         
         <!-- Email Errors -->
-        <div class="error-message" *ngIf="hasError('email', 'required')">
-          {{ 'AUTH.EMAIL_REQUIRED' | translate }}
-        </div>
-        <div class="error-message" *ngIf="hasError('email', 'email') && !hasError('email', 'required')">
-          {{ 'AUTH.EMAIL_INVALID' | translate }}
-        </div>
+        @if (hasError('email', 'required')) {
+          <div class="error-message">
+            {{ 'AUTH.REQUIRED_FIELD' | translate }}
+          </div>
+        }
+        @if (hasError('email', 'email') && !hasError('email', 'required')) {
+          <div class="error-message">
+            {{ 'AUTH.INVALID_EMAIL' | translate }}
+          </div>
+        }
       </div>
 
       <!-- Password Input -->
@@ -61,18 +70,21 @@
             class="password-toggle"
             (click)="togglePassword()"
           >
-            <span *ngIf="!showPassword()">👁️</span>
-            <span *ngIf="showPassword()">🙈</span>
+            <lucide-icon [img]="showPassword() ? EyeOff : Eye" [size]="20"></lucide-icon>
           </button>
         </div>
         
         <!-- Password Errors -->
-        <div class="error-message" *ngIf="hasError('password', 'required')">
-          {{ 'AUTH.PASSWORD_REQUIRED' | translate }}
-        </div>
-        <div class="error-message" *ngIf="hasError('password', 'minlength') && !hasError('password', 'required')">
-          {{ 'AUTH.PASSWORD_MIN_LENGTH' | translate }}
-        </div>
+        @if (hasError('password', 'required')) {
+          <div class="error-message">
+            {{ 'AUTH.REQUIRED_FIELD' | translate }}
+          </div>
+        }
+        @if (hasError('password', 'minlength') && !hasError('password', 'required')) {
+          <div class="error-message">
+            {{ 'AUTH.PASSWORD_REQUIREMENTS' | translate }}
+          </div>
+        }
       </div>
 
       <!-- Forgot Password Link -->
@@ -88,11 +100,15 @@
         class="submit-button"
         [disabled]="isLoading()"
       >
-        <span *ngIf="!isLoading()">{{ 'AUTH.LOGIN' | translate }}</span>
-        <span *ngIf="isLoading()" class="loading">
-          <span class="spinner"></span>
-          {{ 'COMMON.LOADING' | translate }}
-        </span>
+        @if (!isLoading()) {
+          <span>{{ 'AUTH.LOGIN' | translate }}</span>
+        }
+        @if (isLoading()) {
+          <span class="loading">
+            <span class="spinner"></span>
+            {{ 'COMMON.LOADING' | translate }}
+          </span>
+        }
       </button>
 
       <!-- Sign Up Link -->
@@ -113,15 +129,15 @@
       
       <div class="features">
         <div class="feature">
-          <span class="icon">✓</span>
+          <lucide-icon [img]="Check" [size]="24" class="feature-icon"></lucide-icon>
           <span>{{ 'AUTH.FEATURE_1' | translate }}</span>
         </div>
         <div class="feature">
-          <span class="icon">✓</span>
+          <lucide-icon [img]="Check" [size]="24" class="feature-icon"></lucide-icon>
           <span>{{ 'AUTH.FEATURE_2' | translate }}</span>
         </div>
         <div class="feature">
-          <span class="icon">✓</span>
+          <lucide-icon [img]="Check" [size]="24" class="feature-icon"></lucide-icon>
           <span>{{ 'AUTH.FEATURE_3' | translate }}</span>
         </div>
       </div>

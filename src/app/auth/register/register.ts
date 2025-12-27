@@ -1,9 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal, computed } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators  } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { Router, RouterLink } from '@angular/router';
 import { SupabaseService } from '../../services/supabase.service';
+
+// Import Lucide Icons
+import { LucideAngularModule, Music, AlertCircle, Eye, EyeOff, Check, CheckCircle } from 'lucide-angular';
 
 @Component({
   selector: 'app-register',
@@ -12,7 +15,8 @@ import { SupabaseService } from '../../services/supabase.service';
     CommonModule,
     ReactiveFormsModule,
     TranslateModule,
-    RouterLink
+    RouterLink,
+    LucideAngularModule
   ],
   templateUrl: './register.html',
   styleUrl: './register.scss',
@@ -21,14 +25,22 @@ export class Register {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private supabase = inject(SupabaseService);
-  
+
+  // Lucide Icons
+  readonly Music = Music;
+  readonly AlertCircle = AlertCircle;
+  readonly Eye = Eye;
+  readonly EyeOff = EyeOff;
+  readonly Check = Check;
+  readonly CheckCircle = CheckCircle;
+
   registerForm: FormGroup;
   isLoading = signal(false);
   errorMessage = signal('');
-  successMessage = signal('');  // ← ADDED THIS
+  successMessage = signal('');
   showPassword = signal(false);
   showConfirmPassword = signal(false);
-  passwordValue = signal(''); 
+  passwordValue = signal('');
 
   constructor() {
     this.registerForm = this.fb.group({
@@ -37,55 +49,54 @@ export class Register {
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
     });
-  
 
-  //Pass listener
-  this.registerForm.get('password')?.valueChanges.subscribe(value => {
+    // Password listener
+    this.registerForm.get('password')?.valueChanges.subscribe(value => {
       this.passwordValue.set(value || '');
     });
   }
 
   passwordStrength = computed(() => {
-  const password = this.passwordValue();  // ← USE THE SIGNAL, not form.get()
-  
-  if (password.length === 0) {
-    return { label: '', strength: 0, color: '' };
-  }
+    const password = this.passwordValue();
 
-  let strength = 0;
-  let label = '';
-  let color = '';
+    if (password.length === 0) {
+      return { label: '', strength: 0, color: '' };
+    }
 
-  // Check length
-  if (password.length >= 6) strength += 25;
-  if (password.length >= 10) strength += 25;
+    let strength = 0;
+    let label = '';
+    let color = '';
 
-  // Check for lowercase letters
-  if (/[a-z]/.test(password)) strength += 15;
+    // Check length
+    if (password.length >= 6) strength += 25;
+    if (password.length >= 10) strength += 25;
 
-  // Check for uppercase letters
-  if (/[A-Z]/.test(password)) strength += 15;
+    // Check for lowercase letters
+    if (/[a-z]/.test(password)) strength += 15;
 
-  // Check for numbers
-  if (/\d/.test(password)) strength += 10;
+    // Check for uppercase letters
+    if (/[A-Z]/.test(password)) strength += 15;
 
-  // Check for special characters
-  if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength += 10;
+    // Check for numbers
+    if (/\d/.test(password)) strength += 10;
 
-  // Determine label and color based on strength
-  if (strength < 40) {
-    label = 'AUTH.WEAK';
-    color = '#ef4444'; // Red
-  } else if (strength < 75) {
-    label = 'AUTH.MEDIUM';
-    color = '#f59e0b'; // Orange
-  } else {
-    label = 'AUTH.STRONG';
-    color = '#10b981'; // Green
-  }
+    // Check for special characters
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength += 10;
 
-  return { label, strength, color };
-});
+    // Determine label and color based on strength
+    if (strength < 40) {
+      label = 'AUTH.WEAK';
+      color = '#ef4444'; // Red
+    } else if (strength < 75) {
+      label = 'AUTH.MEDIUM';
+      color = '#f59e0b'; // Orange
+    } else {
+      label = 'AUTH.STRONG';
+      color = '#10b981'; // Green
+    }
+
+    return { label, strength, color };
+  });
 
   passwordsMatch(): boolean {
     const password = this.registerForm.get('password')?.value;
@@ -110,24 +121,21 @@ export class Register {
     this.isLoading.set(true);
 
     try {
-      const { displayName,email, password } = this.registerForm.value;
+      const { displayName, email, password } = this.registerForm.value;
 
-      // signUp returns { user, session }, not { data, error }
       await this.supabase.signUp(email, password, displayName);
 
       // Success!
       this.successMessage.set('AUTH.REGISTRATION_SUCCESS');
 
       setTimeout(() => {
-        // Store displayName in sessionStorage for profile setup to use
         sessionStorage.setItem('displayName', this.registerForm.value.displayName);
-        // Redirect to profile setup instead of login
         this.router.navigate(['/profile/setup']);
       }, 2000);
 
     } catch (error: any) {
       console.error('Registration error:', error);
-      
+
       if (error.message?.includes('already registered')) {
         this.errorMessage.set('AUTH.EMAIL_ALREADY_EXISTS');
       } else {

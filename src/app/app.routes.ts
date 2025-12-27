@@ -33,7 +33,7 @@ export const routes: Routes = [
     },
     {
         path: 'profile/edit'
-        ,  loadComponent: () => import('./profile/profile-edit/profile-edit').then(m => m.ProfileEditComponent)
+        ,  loadComponent: () => import('./profile/profile-edit/profile-edit').then(m => m.ProfileEdit)
         , canActivate: [AuthGuard]  
     },
     {path: 'profile/qr-code'

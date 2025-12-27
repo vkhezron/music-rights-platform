@@ -48,13 +48,13 @@ export const LANGUAGES = [
 
 // Social platform options
 export const SOCIAL_PLATFORMS = [
-  { name: 'instagram', icon: '📷', placeholder: '@username' },
-  { name: 'twitter', icon: '🐦', placeholder: '@username' },
-  { name: 'facebook', icon: '👤', placeholder: 'facebook.com/username' },
-  { name: 'tiktok', icon: '🎵', placeholder: '@username' },
-  { name: 'youtube', icon: '▶️', placeholder: 'youtube.com/@username' },
-  { name: 'website', icon: '🌐', placeholder: 'https://yourwebsite.com' },
-  { name: 'spotify', icon: '🎧', placeholder: 'open.spotify.com/artist/...' }
+  { name: 'Instagram', placeholder: '@username' },
+  { name: 'Twitter/X', placeholder: '@username' },
+  { name: 'Facebook', placeholder: 'facebook.com/username' },
+  { name: 'TikTok', placeholder: '@username' },
+  { name: 'YouTube', placeholder: 'youtube.com/@username' },
+  { name: 'Website', placeholder: 'https://yourwebsite.com' },
+  { name: 'Spotify', placeholder: 'open.spotify.com/artist/...' }
 ];
 
 // Main profile interface
@@ -109,7 +109,7 @@ export interface ProfileFormData {
     tiktok?: string;
     youtube?: string;
     website?: string;
-    spotify?: string;  // Add this
+    spotify?: string;  
   };
   spotify_artist_url?: string;  // Changed from spotify_artist_id
 }

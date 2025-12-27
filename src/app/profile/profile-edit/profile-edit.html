@@ -11,7 +11,7 @@
       <!-- Success Message -->
       @if (successMessage()) {
         <div class="success-alert">
-          <span class="success-icon">✓</span>
+          <lucide-icon [img]="CheckCircle" [size]="20" class="success-icon"></lucide-icon>
           <span>{{ successMessage() }}</span>
         </div>
       }
@@ -19,7 +19,7 @@
       <!-- Error Message -->
       @if (errorMessage()) {
         <div class="error-alert">
-          <span class="error-icon">!</span>
+          <lucide-icon [img]="AlertCircle" [size]="20" class="error-icon"></lucide-icon>
           <span>{{ errorMessage() | translate }}</span>
         </div>
       }
@@ -68,8 +68,8 @@
           class="form-select"
           [class.error]="hasError('primary_role', 'required')">
           <option value="">{{ 'PROFILE.SELECT_ROLE' | translate }}</option>
-          @for (role of primaryRoles; track role) {
-            <option [value]="role">{{ role }}</option>
+          @for (role of primaryRoles; track role.value) {
+            <option [value]="role.value">{{ role.label }}</option>
           }
         </select>
         @if (hasError('primary_role', 'required')) {
@@ -105,7 +105,7 @@
       <div class="optional-toggle" (click)="toggleOptional()">
         <h3>
           {{ 'PROFILE.OPTIONAL_INFO' | translate }}
-          <span class="toggle-icon">{{ showOptional() ? '▼' : '▶' }}</span>
+          <lucide-icon [img]="showOptional() ? ChevronDown : ChevronRight" [size]="20" class="toggle-icon"></lucide-icon>
         </h3>
       </div>
 
@@ -173,21 +173,29 @@
             <label>{{ 'PROFILE.SOCIAL_LINKS' | translate }}</label>
             
             @for (platform of socialPlatforms; track platform.name) {
-              <div class="social-input">
-                <span class="social-icon">{{ platform.icon }}</span>
+              <div class="social-input-row">
+                <div class="platform-label">{{ platform.name }}</div>
                 <input
-                  [id]="platform.name.toLowerCase()"
+                  [id]="getControlName(platform.name)"
                   type="text"
-                  [formControlName]="platform.name.toLowerCase()"
+                  [formControlName]="getControlName(platform.name)"
                   class="form-input"
                   [placeholder]="platform.placeholder"
                 />
+                <button 
+                  type="button"
+                  class="copy-btn"
+                  [disabled]="!profileForm.get(getControlName(platform.name))?.value"
+                  (click)="copySocialLink(platform.name, profileForm.get(getControlName(platform.name))?.value)"
+                  [title]="'Copy ' + platform.name">
+                      <lucide-icon [img]="Copy" [size]="18"></lucide-icon>
+                    </button>
+                  </div>
+                }
               </div>
-            }
-          </div>
 
         </div>
-      }
+      } 
 
       <!-- Action Buttons -->
       <div class="form-actions">

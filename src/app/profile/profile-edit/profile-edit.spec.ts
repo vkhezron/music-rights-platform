@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ProfileEdit } from './profile-edit';
+import {  ProfileEdit } from './profile-edit';
 
 describe('ProfileEdit', () => {
   let component: ProfileEdit;

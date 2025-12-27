@@ -10,10 +10,11 @@
     <!-- Form -->
     <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="setup-form">
       
+
       <!-- Error Message -->
       @if (errorMessage()) {
         <div class="error-alert">
-          <span class="error-icon">!</span>
+          <lucide-icon [img]="AlertCircle" [size]="20" class="error-icon"></lucide-icon>
           <span>{{ errorMessage() | translate }}</span>
         </div>
       }
@@ -38,13 +39,19 @@
               placeholder="Enter your display name"
             />
             @if (nicknameCheckLoading()) {
-              <span class="validation-icon loading">...</span>
+              <span class="validation-icon loading">
+                <div class="mini-spinner"></div>
+              </span>
             }
             @if (nicknameAvailable() === true) {
-              <span class="validation-icon success">✓</span>
+              <span class="validation-icon success">
+                <lucide-icon [img]="Check" [size]="16"></lucide-icon>
+              </span>
             }
             @if (nicknameAvailable() === false) {
-              <span class="validation-icon error">✗</span>
+              <span class="validation-icon error">
+                <lucide-icon [img]="X" [size]="16"></lucide-icon>
+              </span>
             }
           </div>
           
@@ -79,12 +86,20 @@
             id="primary_role"
             formControlName="primary_role"
             class="form-select"
+            [class.error]="hasError('primary_role', 'required')"
           >
-            @for (role of primaryRoles; track role) {
-              <option [value]="role">{{ role }}</option>
+            <option value="">{{ 'PROFILE.SELECT_ROLE' | translate }}</option>
+            @for (role of primaryRoles; track role.value) {
+              <option [value]="role.value">{{ role.label }}</option>
             }
           </select>
+          @if (hasError('primary_role', 'required')) {
+            <div class="error-message">
+              {{ 'PROFILE.PRIMARY_ROLE_REQUIRED' | translate }}
+            </div>
+          }
         </div>
+
 
         <!-- Custom Role Text (shown if "Other" selected) -->
         @if (profileForm.get('primary_role')?.value === 'other') {
@@ -113,7 +128,7 @@
         <div class="section-header" (click)="toggleOptionalFields()">
           <h2 class="section-title">{{ 'PROFILE.OPTIONAL_INFO' | translate }}</h2>
           <button type="button" class="toggle-button">
-            {{ showOptionalFields() ? '−' : '+' }}
+            <lucide-icon [img]="showOptionalFields() ? ChevronDown : ChevronRight" [size]="20"></lucide-icon>
           </button>
         </div>
 
@@ -181,20 +196,26 @@
             <div class="form-group">
               <label class="group-label">{{ 'PROFILE.SOCIAL_LINKS' | translate }}</label>
               
-              <div class="social-inputs">
-                @for (platform of socialPlatforms; track platform.name) {
-                  <div class="social-input-group">
-                    <span class="social-icon">{{ platform.icon }}</span>
-                    <input
-                      [id]="platform.name"
-                      type="text"
-                      [formControlName]="platform.name"
-                      class="form-input"
-                      [placeholder]="platform.placeholder"
-                    />
-                  </div>
-                }
-              </div>
+              @for (platform of socialPlatforms; track platform.name) {
+                <div class="social-input-row">
+                  <div class="platform-label">{{ platform.name }}</div>
+                  <input
+                    [id]="getControlName(platform.name)"
+                    type="text"
+                    [formControlName]="getControlName(platform.name)"
+                    class="form-input"
+                    [placeholder]="platform.placeholder"
+                  />
+                  <button 
+                    type="button"
+                    class="copy-btn"
+                    [disabled]="!profileForm.get(getControlName(platform.name))?.value"
+                    (click)="copySocialLink(platform.name, profileForm.get(getControlName(platform.name))?.value)"
+                    [title]="'Copy ' + platform.name">
+                    <lucide-icon [img]="Copy" [size]="18"></lucide-icon>
+                  </button>
+                </div>
+              }
             </div>
           </div>
         }
@@ -231,6 +252,7 @@
           }
         </button>
       </div>
+    
     </form>
   </div>
 </div>

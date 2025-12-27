@@ -1,36 +1,53 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import{ FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms'; 
-import { ProfileService } from '../../services/profile.service';  
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ProfileService } from '../../services/profile.service';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { PRIMARY_ROLES
-  , SECONDARY_ROLES
-  , LANGUAGES
-  , SOCIAL_PLATFORMS
-  , ProfileFormData } from '../../../models/profile.model';
+import { PRIMARY_ROLES, SECONDARY_ROLES, LANGUAGES, SOCIAL_PLATFORMS, ProfileFormData } from '../../../models/profile.model';
+
+// Import Lucide Icons
+import { LucideAngularModule, AlertCircle, Check, X, ChevronDown, ChevronRight, 
+         Camera, Twitter, Facebook, Music, Video, Globe, Headphones, Copy } from 'lucide-angular';
 
 @Component({
   selector: 'app-profile-setup',
+  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    TranslateModule
-
+    TranslateModule,
+    LucideAngularModule
   ],
   templateUrl: './profile-setup.html',
   styleUrl: './profile-setup.scss',
 })
-export class ProfileSetup {
+export class ProfileSetup implements OnInit {
   private fb = inject(FormBuilder);
   private profileService = inject(ProfileService);
   private router = inject(Router);
 
-  //Form
+  // Lucide Icons
+  readonly AlertCircle = AlertCircle;
+  readonly Check = Check;
+  readonly X = X;
+  readonly ChevronDown = ChevronDown;
+  readonly ChevronRight = ChevronRight;
+  readonly Camera = Camera;
+  readonly Twitter = Twitter;
+  readonly Facebook = Facebook;
+  readonly Music = Music;
+  readonly Video = Video;
+  readonly Globe = Globe;
+  readonly Headphones = Headphones;
+  readonly Copy = Copy;
+
+  // Form
   profileForm: FormGroup;
 
   isLoading = signal(false);
   errorMessage = signal('');
+  successMessage = signal('');
   nicknameCheckLoading = signal(false);
   nicknameAvailable = signal<boolean | null>(null);
 
@@ -43,12 +60,58 @@ export class ProfileSetup {
   // UI state
   showOptionalFields = signal(false);
 
+  // Map platform names to form control names
+  getControlName(platformName: string): string {
+    const nameMap: { [key: string]: string } = {
+      'Instagram': 'instagram',
+      'Twitter/X': 'twitter',
+      'Facebook': 'facebook',
+      'TikTok': 'tiktok',
+      'YouTube': 'youtube',
+      'Website': 'website',
+      'Spotify': 'spotify'
+    };
+    return nameMap[platformName] || platformName.toLowerCase();
+  }
+
+  // Map social platform names to icons
+  getSocialIcon(platformName: string): any {
+    const iconMap: { [key: string]: any } = {
+      'Instagram': this.Camera,
+      'Twitter/X': this.Twitter,
+      'Facebook': this.Facebook,
+      'TikTok': this.Music,
+      'YouTube': this.Video,
+      'Website': this.Globe,
+      'Spotify': this.Headphones
+    };
+    return iconMap[platformName] || this.Globe;
+  }
+
+  async copySocialLink(platformName: string, value: string) {
+    if (!value) return;
+    
+    try {
+      await navigator.clipboard.writeText(value);
+      const originalSuccess = this.successMessage();
+      this.successMessage.set(`${platformName} link copied!`);
+      
+      setTimeout(() => {
+        if (this.successMessage() === `${platformName} link copied!`) {
+          this.successMessage.set(originalSuccess);
+        }
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      this.errorMessage.set('Failed to copy to clipboard');
+    }
+  }
+
   constructor() {
     this.profileForm = this.fb.group({
-
       // Required fields
       nickname: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30)]],
-      primary_role: ['artist', Validators.required],
+      primary_role: ['', Validators.required],
       custom_role_text: [''],
       
       // Optional fields
@@ -90,7 +153,6 @@ export class ProfileSetup {
   }
 
   ngOnInit() {
-    // Pre-fill nickname from registration if available
     const displayName = sessionStorage.getItem('displayName');
     if (displayName) {
       this.profileForm.patchValue({ nickname: displayName });
@@ -106,7 +168,6 @@ export class ProfileSetup {
     );
     
     if (profile) {
-      // User already has profile, redirect to dashboard
       this.router.navigate(['/dashboard']);
     }
   }
@@ -129,10 +190,8 @@ export class ProfileSetup {
     const index = currentRoles.indexOf(roleValue);
     
     if (index > -1) {
-      // Remove role
       currentRoles.splice(index, 1);
     } else {
-      // Add role
       currentRoles.push(roleValue);
     }
     
@@ -149,7 +208,6 @@ export class ProfileSetup {
   }
 
   async onSubmit() {
-    // Validate required fields
     if (this.profileForm.get('nickname')?.invalid || 
         this.profileForm.get('primary_role')?.invalid ||
         (this.profileForm.get('primary_role')?.value === 'other' && 
@@ -159,7 +217,6 @@ export class ProfileSetup {
       return;
     }
 
-    // Check nickname availability
     if (this.nicknameAvailable() !== true) {
       this.errorMessage.set('PROFILE.NICKNAME_NOT_AVAILABLE');
       return;
@@ -170,12 +227,7 @@ export class ProfileSetup {
 
     try {
       const formValue = this.profileForm.value;
-
-      // DEBUG: Log form values
-      console.log('Form values:', formValue);
-      console.log('Spotify value:', formValue.spotify);
       
-      // Build profile data
       const profileData: ProfileFormData = {
         nickname: formValue.nickname,
         primary_role: formValue.primary_role,
@@ -192,29 +244,10 @@ export class ProfileSetup {
           website: formValue.website && formValue.website.trim() ? formValue.website : undefined,
           spotify: formValue.spotify && formValue.spotify.trim() ? formValue.spotify : undefined
         },
-        spotify_artist_url: formValue.spotify_artist_url ? formValue.spotify : undefined
+        spotify_artist_url: formValue.spotify ? formValue.spotify : undefined
       };
 
-      // DEBUG: Log what we're sending to Supabase
-      console.log('Profile data being sent:', profileData);
-      console.log('Spotify Artist URL:', profileData.spotify_artist_url);
-
-      // Create profile (includes QR code generation)
-      const profile = await this.profileService.createProfile(profileData);
-
-      //DEBUG: Log created profile
-      console.log('Created profile:', profile);
-
-      // Check if this is a new user (no previous sessions)
-      const isNewUser = true; // You can implement logic to check this
-
-      if (isNewUser) {
-        // Redirect to profile preview for new users
-        this.router.navigate(['/profile/preview']);
-      //} else {
-        // Redirect to dashboard for existing users
-       // this.router.navigate(['/dashboard']);
-      }
+      await this.profileService.createProfile(profileData);
 
       this.router.navigate(['/dashboard']);
 
@@ -227,7 +260,6 @@ export class ProfileSetup {
   }
 
   skipOptionalFields() {
-    // Submit with only required fields
     this.onSubmit();
   }
 
@@ -236,8 +268,3 @@ export class ProfileSetup {
     return field ? field.hasError(errorType) && (field.dirty || field.touched) : false;
   }
 }
-
-
-
-
-

@@ -9,10 +9,21 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Workspace } from '../services/workspace.service';
 import { WorkspaceService } from '../services/workspace.service';
 
+// Import Lucide Icons
+import { LucideAngularModule, Music, Disc, Disc3, FolderOpen, Plus, LogOut, 
+         Home, Users, Edit, Archive, Check, Circle, ChevronDown, 
+         ChevronRight, Smartphone, Camera, Twitter, Facebook, Video, 
+         Globe, Headphones, Copy, ExternalLink } from 'lucide-angular';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, AsyncPipe, TranslateModule],
+  imports: [
+    CommonModule, 
+    AsyncPipe, 
+    TranslateModule,
+    LucideAngularModule
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -22,43 +33,57 @@ export class Dashboard implements OnInit {
   private supabase = inject(SupabaseService);
   private workspaceService = inject(WorkspaceService);
 
+  // Lucide Icons (make them available to template)
+  readonly Music = Music;
+  readonly Disc = Disc;
+  readonly Disc3 = Disc3;
+  readonly FolderOpen = FolderOpen;
+  readonly Plus = Plus;
+  readonly LogOut = LogOut;
+  readonly Home = Home;
+  readonly Users = Users;
+  readonly Edit = Edit;
+  readonly Archive = Archive;
+  readonly Check = Check;
+  readonly Circle = Circle;
+  readonly ChevronDown = ChevronDown;
+  readonly ChevronRight = ChevronRight;
+  readonly Smartphone = Smartphone;
+  readonly Camera = Camera;
+  readonly Twitter = Twitter;
+  readonly Facebook = Facebook;
+  readonly Video = Video;
+  readonly Globe = Globe;
+  readonly Headphones = Headphones;
+  readonly Copy = Copy;
+  readonly ExternalLink = ExternalLink;
+
   // Public properties for template
   profile$ = this.profileService.profile$;
   user = this.supabase.currentUser;
   workspaces$!: Observable<Workspace[]>;
   currentWorkspace$ = this.workspaceService.currentWorkspace$;
-  currentWorkspace: Workspace | null = null;
 
   profileDetailsVisible = signal(false);
-
-  // Active tab
   activeTab = signal<'dashboard' | 'rights-holders' | 'works'>('dashboard');
 
   // Social platforms with icons
   socialPlatforms = [
-    { key: 'instagram', label: 'Instagram', icon: '📷', color: '#E4405F' },
-    { key: 'twitter', label: 'Twitter/X', icon: '𝕏', color: '#000000' },
-    { key: 'facebook', label: 'Facebook', icon: '👤', color: '#1877F2' },
-    { key: 'tiktok', label: 'TikTok', icon: '🎵', color: '#000000' },
-    { key: 'youtube', label: 'YouTube', icon: '▶️', color: '#FF0000' },
-    { key: 'website', label: 'Website', icon: '🌐', color: '#667eea' },
-    { key: 'spotify', label: 'Spotify', icon: '🎧', color: '#1DB954' }
+    { key: 'instagram', label: 'Instagram', icon: 'Camera', color: '#E4405F' },
+    { key: 'twitter', label: 'Twitter/X', icon: 'Twitter', color: '#000000' },
+    { key: 'facebook', label: 'Facebook', icon: 'Facebook', color: '#1877F2' },
+    { key: 'tiktok', label: 'TikTok', icon: 'Music', color: '#000000' },
+    { key: 'youtube', label: 'YouTube', icon: 'Video', color: '#FF0000' },
+    { key: 'website', label: 'Website', icon: 'Globe', color: '#667eea' },
+    { key: 'spotify', label: 'Spotify', icon: 'Headphones', color: '#1DB954' }
   ];
 
   ngOnInit() {
-    // If no user, redirect to login
     if (!this.user) {
       this.router.navigate(['/auth/login']);
       return;
     }
-
-    // Initialize observables
     this.workspaces$ = this.workspaceService.workspaces$;
-    
-    // Subscribe to current workspace
-    this.currentWorkspace$.subscribe(workspace => {
-      this.currentWorkspace = workspace;
-    });
   }
 
   toggleProfileDetails() {
@@ -67,6 +92,10 @@ export class Dashboard implements OnInit {
 
   goToWorkspaces() {
     this.router.navigate(['/workspaces']);
+  }
+
+  createNewWorkspace() {
+    this.router.navigate(['/workspaces/create']);
   }
 
   editProfile() {
@@ -91,10 +120,20 @@ export class Dashboard implements OnInit {
     return value || null;
   }
 
-  // Workspace management
+  getIconComponent(iconName: string): any {
+    const iconMap: { [key: string]: any } = {
+      'Camera': this.Camera,
+      'Twitter': this.Twitter,
+      'Facebook': this.Facebook,
+      'Music': this.Music,
+      'Video': this.Video,
+      'Globe': this.Globe,
+      'Headphones': this.Headphones
+    };
+    return iconMap[iconName];
+  }
+
   switchWorkspace(workspaceId: string) {
-    const workspaces = this.workspaceService.workspaces$ as any;
-    // Find workspace by ID
     this.workspaces$.subscribe(ws => {
       const workspace = ws.find(w => w.id === workspaceId);
       if (workspace) {
@@ -103,11 +142,13 @@ export class Dashboard implements OnInit {
     });
   }
 
-  // Navigation
+  selectProject(workspace: Workspace) {
+    this.workspaceService.setCurrentWorkspace(workspace);
+  }
+
   setActiveTab(tab: 'dashboard' | 'rights-holders' | 'works') {
     this.activeTab.set(tab);
     
-    // Navigate to appropriate route
     switch(tab) {
       case 'rights-holders':
         this.router.navigate(['/rights-holders']);
@@ -116,70 +157,50 @@ export class Dashboard implements OnInit {
         this.router.navigate(['/works']);
         break;
       default:
-        // Stay on dashboard
         break;
     }
   }
 
-  // Quick actions
-  addRightsHolder() {
-    this.router.navigate(['/rights-holders/create']);
-  }
-
-  createWork() {
+  updateWorkData(workspace: Workspace) {
+    this.workspaceService.setCurrentWorkspace(workspace);
     this.router.navigate(['/works/create']);
   }
 
-  // Add these methods after existing methods
-
-editWorkspace(workspace: Workspace) {
-  // TODO: Navigate to edit workspace or show modal
-  console.log('Edit workspace:', workspace);
-  alert('Edit workspace feature - coming soon!');
-}
-
-updateWorkData() {
-  this.router.navigate(['/works/create']);
-}
-
-manageRightsHolders() {
-  this.router.navigate(['/rights-holders']);
-}
-
-archiveWorkspace(workspace: Workspace) {
-  const confirm = window.confirm(`Archive "${workspace.name}"? You can restore it later.`);
-  if (confirm) {
-    // TODO: Implement archive functionality
-    console.log('Archive workspace:', workspace);
-    alert('Archive feature - coming soon!');
+  manageRightsHolders(workspace: Workspace) {
+    this.workspaceService.setCurrentWorkspace(workspace);
+    alert('Manage Rights Holders - Coming soon!');
   }
-}
 
-// Progress tracking methods (placeholder - will connect to actual data)
-getProjectCompletionPercentage(): number {
-  // TODO: Calculate based on actual data
-  // For now, return dummy data
-  let completion = 0;
-  if (this.hasWorkData()) completion += 33;
-  if (this.hasRightsHolders()) completion += 33;
-  if (this.hasSplits()) completion += 34;
-  return completion;
-}
+  editWorkspace(workspace: Workspace) {
+    alert(`Edit ${workspace.name} - Coming soon!`);
+  }
 
-hasWorkData(): boolean {
-  // TODO: Check if work has data (title, ISRC, etc.)
-  return false;
-}
+  archiveWorkspace(workspace: Workspace) {
+    const confirm = window.confirm(`Archive "${workspace.name}"? You can restore it later.`);
+    if (confirm) {
+      alert('Archive feature - Coming soon!');
+    }
+  }
 
-hasRightsHolders(): boolean {
-  // TODO: Check if rights holders are added
-  return false;
-}
+  getProjectCompletionPercentage(): number {
+    let completion = 0;
+    if (this.hasWorkData()) completion += 33;
+    if (this.hasRightsHolders()) completion += 33;
+    if (this.hasSplits()) completion += 34;
+    return completion;
+  }
 
-hasSplits(): boolean {
-  // TODO: Check if splits are defined and total 100%
-  return false;
-}
+  hasWorkData(): boolean {
+    return false;
+  }
+
+  hasRightsHolders(): boolean {
+    return false;
+  }
+
+  hasSplits(): boolean {
+    return false;
+  }
 
   async logout() {
     await this.supabase.signOut();

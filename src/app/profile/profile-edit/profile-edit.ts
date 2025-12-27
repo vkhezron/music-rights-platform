@@ -6,6 +6,9 @@ import { TranslateModule } from '@ngx-translate/core';
 import { ProfileService } from '../../services/profile.service';
 import { ProfileFormData, PRIMARY_ROLES, SECONDARY_ROLES, LANGUAGES, SOCIAL_PLATFORMS } from '../../../models/profile.model';
 
+// Import Lucide Icons
+import { LucideAngularModule, CheckCircle, AlertCircle, ChevronDown, ChevronRight,
+         Camera, Twitter, Facebook, Music, Video, Globe, Headphones, Copy } from 'lucide-angular';
 
 @Component({
   selector: 'app-profile-edit',
@@ -13,15 +16,30 @@ import { ProfileFormData, PRIMARY_ROLES, SECONDARY_ROLES, LANGUAGES, SOCIAL_PLAT
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    TranslateModule
+    TranslateModule,
+    LucideAngularModule
   ],
   templateUrl: './profile-edit.html',
   styleUrl: './profile-edit.scss'
 })
-export class ProfileEditComponent implements OnInit {
+export class ProfileEdit implements OnInit {
   private fb = inject(FormBuilder);
   private profileService = inject(ProfileService);
   private router = inject(Router);
+
+  // Lucide Icons
+  readonly CheckCircle = CheckCircle;
+  readonly AlertCircle = AlertCircle;
+  readonly ChevronDown = ChevronDown;
+  readonly ChevronRight = ChevronRight;
+  readonly Camera = Camera;
+  readonly Twitter = Twitter;
+  readonly Facebook = Facebook;
+  readonly Music = Music;
+  readonly Video = Video;
+  readonly Globe = Globe;
+  readonly Headphones = Headphones;
+  readonly Copy = Copy;
 
   profileForm!: FormGroup;
   isLoading = signal(false);
@@ -34,6 +52,55 @@ export class ProfileEditComponent implements OnInit {
   secondaryRoles = SECONDARY_ROLES;
   languages = LANGUAGES;
   socialPlatforms = SOCIAL_PLATFORMS;
+
+  // Map platform names to form control names
+  getControlName(platformName: string): string {
+    const nameMap: { [key: string]: string } = {
+      'Instagram': 'instagram',
+      'Twitter/X': 'twitter',
+      'Facebook': 'facebook',
+      'TikTok': 'tiktok',
+      'YouTube': 'youtube',
+      'Website': 'website',
+      'Spotify': 'spotify'
+    };
+    return nameMap[platformName] || platformName.toLowerCase();
+  }
+
+  // Map social platform names to icons
+  getSocialIcon(platformName: string): any {
+    const iconMap: { [key: string]: any } = {
+      'Instagram': this.Camera,
+      'Twitter/X': this.Twitter,
+      'Facebook': this.Facebook,
+      'TikTok': this.Music,
+      'YouTube': this.Video,
+      'Website': this.Globe,
+      'Spotify': this.Headphones
+    };
+    return iconMap[platformName] || this.Globe;
+  }
+
+  async copySocialLink(platformName: string, value: string) {
+    if (!value) return;
+    
+    try {
+      await navigator.clipboard.writeText(value);
+      // Show temporary success message
+      const originalSuccess = this.successMessage();
+      this.successMessage.set(`${platformName} link copied!`);
+      
+      // Clear after 2 seconds
+      setTimeout(() => {
+        if (this.successMessage() === `${platformName} link copied!`) {
+          this.successMessage.set(originalSuccess);
+        }
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      this.errorMessage.set('Failed to copy to clipboard');
+    }
+  }
 
   ngOnInit() {
     this.initializeForm();
@@ -76,7 +143,6 @@ export class ProfileEditComponent implements OnInit {
       const profile = await this.profileService.currentProfile;
       
       if (profile) {
-        // Populate form with current profile data
         this.profileForm.patchValue({
           nickname: profile.nickname,
           primary_role: profile.primary_role,
@@ -93,7 +159,6 @@ export class ProfileEditComponent implements OnInit {
           spotify: profile.social_links?.spotify || ''
         });
 
-        // Show optional section if there's data
         if (profile.bio || profile.secondary_roles?.length || Object.keys(profile.social_links || {}).length) {
           this.showOptional.set(true);
         }
@@ -168,7 +233,6 @@ export class ProfileEditComponent implements OnInit {
 
       this.successMessage.set('Profile updated successfully!');
       
-      // Redirect to dashboard after 2 seconds
       setTimeout(() => {
         this.router.navigate(['/dashboard']);
       }, 2000);

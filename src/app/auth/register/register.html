@@ -9,7 +9,10 @@
     
     <!-- Header -->
     <div class="register-header">
-      <h1 class="logo">🎵 {{ 'APP_NAME' | translate }}</h1>
+      <h1 class="logo">
+        <lucide-icon [img]="Music" [size]="32" [strokeWidth]="2"></lucide-icon>
+        {{ 'APP_NAME' | translate }}
+      </h1>
       <h2 class="title">{{ 'AUTH.CREATE_ACCOUNT' | translate }}</h2>
       <p class="subtitle">{{ 'AUTH.REGISTER_SUBTITLE' | translate }}</p>
     </div>
@@ -18,16 +21,20 @@
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
       
       <!-- Success Message -->
-      <div *ngIf="successMessage()" class="success-alert">
-        <span class="success-icon">✓</span>
-        <span>{{ successMessage() | translate }}</span>
-      </div>
+      @if (successMessage()) {
+        <div class="success-alert">
+          <lucide-icon [img]="CheckCircle" [size]="20" class="success-icon"></lucide-icon>
+          <span>{{ successMessage() | translate }}</span>
+        </div>
+      }
 
       <!-- Error Alert -->
-      <div *ngIf="errorMessage()" class="error-alert">
-        <span class="error-icon">⚠️</span>
-        <span>{{ errorMessage() | translate }}</span>
-      </div>
+      @if (errorMessage()) {
+        <div class="error-alert">
+          <lucide-icon [img]="AlertCircle" [size]="20" class="error-icon"></lucide-icon>
+          <span>{{ errorMessage() | translate }}</span>
+        </div>
+      }
 
       <!-- Display Name Input -->
       <div class="form-group">
@@ -41,12 +48,16 @@
           placeholder="John Doe"
         />
         
-        <div class="error-message" *ngIf="hasError('displayName', 'required')">
-          {{ 'AUTH.DISPLAY_NAME_REQUIRED' | translate }}
-        </div>
-        <div class="error-message" *ngIf="hasError('displayName', 'minlength') && !hasError('displayName', 'required')">
-          {{ 'AUTH.DISPLAY_NAME_MIN_LENGTH' | translate }}
-        </div>
+        @if (hasError('displayName', 'required')) {
+          <div class="error-message">
+            {{ 'AUTH.DISPLAY_NAME_REQUIRED' | translate }}
+          </div>
+        }
+        @if (hasError('displayName', 'minlength') && !hasError('displayName', 'required')) {
+          <div class="error-message">
+            {{ 'AUTH.DISPLAY_NAME_MIN_LENGTH' | translate }}
+          </div>
+        }
       </div>
 
       <!-- Email Input -->
@@ -61,12 +72,16 @@
           placeholder="name@example.com"
         />
         
-        <div class="error-message" *ngIf="hasError('email', 'required')">
-          {{ 'AUTH.EMAIL_REQUIRED' | translate }}
-        </div>
-        <div class="error-message" *ngIf="hasError('email', 'email') && !hasError('email', 'required')">
-          {{ 'AUTH.EMAIL_INVALID' | translate }}
-        </div>
+        @if (hasError('email', 'required')) {
+          <div class="error-message">
+            {{ 'AUTH.REQUIRED_FIELD' | translate }}
+          </div>
+        }
+        @if (hasError('email', 'email') && !hasError('email', 'required')) {
+          <div class="error-message">
+            {{ 'AUTH.INVALID_EMAIL' | translate }}
+          </div>
+        }
       </div>
 
       <!-- Password Input -->
@@ -86,31 +101,36 @@
             class="password-toggle"
             (click)="togglePassword()"
           >
-            <span *ngIf="!showPassword()">👁️</span>
-            <span *ngIf="showPassword()">🙈</span>
+            <lucide-icon [img]="showPassword() ? EyeOff : Eye" [size]="20"></lucide-icon>
           </button>
         </div>
         
         <!-- Password Strength Indicator -->
-        <div *ngIf="registerForm.get('password')?.value" class="password-strength">
-          <div class="strength-bar">
-            <div 
-              class="strength-fill" 
-              [style.width.%]="passwordStrength().strength"
-              [style.background-color]="passwordStrength().color">
+        @if (registerForm.get('password')?.value) {
+          <div class="password-strength">
+            <div class="strength-bar">
+              <div 
+                class="strength-fill" 
+                [style.width.%]="passwordStrength().strength"
+                [style.background-color]="passwordStrength().color">
+              </div>
             </div>
+            <span class="strength-label" [style.color]="passwordStrength().color">
+              {{ passwordStrength().label | translate }}
+            </span>
           </div>
-          <span class="strength-label" [style.color]="passwordStrength().color">
-            {{ passwordStrength().label | translate }}
-          </span>
-        </div>
+        }
 
-        <div class="error-message" *ngIf="hasError('password', 'required')">
-          {{ 'AUTH.PASSWORD_REQUIRED' | translate }}
-        </div>
-        <div class="error-message" *ngIf="hasError('password', 'minlength') && !hasError('password', 'required')">
-          {{ 'AUTH.PASSWORD_MIN_LENGTH' | translate }}
-        </div>
+        @if (hasError('password', 'required')) {
+          <div class="error-message">
+            {{ 'AUTH.REQUIRED_FIELD' | translate }}
+          </div>
+        }
+        @if (hasError('password', 'minlength') && !hasError('password', 'required')) {
+          <div class="error-message">
+            {{ 'AUTH.PASSWORD_REQUIREMENTS' | translate }}
+          </div>
+        }
       </div>
 
       <!-- Confirm Password Input -->
@@ -130,17 +150,20 @@
             class="password-toggle"
             (click)="toggleConfirmPassword()"
           >
-            <span *ngIf="!showConfirmPassword()">👁️</span>
-            <span *ngIf="showConfirmPassword()">🙈</span>
+            <lucide-icon [img]="showConfirmPassword() ? EyeOff : Eye" [size]="20"></lucide-icon>
           </button>
         </div>
         
-        <div class="error-message" *ngIf="hasError('confirmPassword', 'required')">
-          {{ 'AUTH.CONFIRM_PASSWORD_REQUIRED' | translate }}
-        </div>
-        <div class="error-message" *ngIf="!passwordsMatch() && registerForm.get('confirmPassword')?.touched && !hasError('confirmPassword', 'required')">
-          {{ 'AUTH.PASSWORDS_MUST_MATCH' | translate }}
-        </div>
+        @if (hasError('confirmPassword', 'required')) {
+          <div class="error-message">
+            {{ 'AUTH.CONFIRM_PASSWORD_REQUIRED' | translate }}
+          </div>
+        }
+        @if (!passwordsMatch() && registerForm.get('confirmPassword')?.touched && !hasError('confirmPassword', 'required')) {
+          <div class="error-message">
+            {{ 'AUTH.PASSWORDS_MUST_MATCH' | translate }}
+          </div>
+        }
       </div>
 
       <!-- Terms Agreement -->
@@ -154,11 +177,15 @@
         class="submit-button"
         [disabled]="isLoading()"
       >
-        <span *ngIf="!isLoading()">{{ 'AUTH.CREATE_ACCOUNT' | translate }}</span>
-        <span *ngIf="isLoading()" class="loading">
-          <span class="spinner"></span>
-          {{ 'COMMON.LOADING' | translate }}
-        </span>
+        @if (!isLoading()) {
+          <span>{{ 'AUTH.CREATE_ACCOUNT' | translate }}</span>
+        }
+        @if (isLoading()) {
+          <span class="loading">
+            <span class="spinner"></span>
+            {{ 'COMMON.LOADING' | translate }}
+          </span>
+        }
       </button>
 
       <!-- Login Link -->
@@ -179,15 +206,15 @@
       
       <div class="features">
         <div class="feature">
-          <span class="icon">✓</span>
+          <lucide-icon [img]="Check" [size]="24" class="feature-icon"></lucide-icon>
           <span>{{ 'AUTH.REGISTER_FEATURE_1' | translate }}</span>
         </div>
         <div class="feature">
-          <span class="icon">✓</span>
+          <lucide-icon [img]="Check" [size]="24" class="feature-icon"></lucide-icon>
           <span>{{ 'AUTH.REGISTER_FEATURE_2' | translate }}</span>
         </div>
         <div class="feature">
-          <span class="icon">✓</span>
+          <lucide-icon [img]="Check" [size]="24" class="feature-icon"></lucide-icon>
           <span>{{ 'AUTH.REGISTER_FEATURE_3' | translate }}</span>
         </div>
       </div>

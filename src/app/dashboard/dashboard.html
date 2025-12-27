@@ -1,5 +1,5 @@
 <div class="dashboard-container">
-  
+
   <!-- Fixed Top Bar -->
   <div class="fixed-top-bar">
     <div class="left-section">
@@ -7,17 +7,16 @@
         <lucide-icon [img]="Plus" [size]="20"></lucide-icon>
         <span>{{ 'WORKSPACE.NEW_PROJECT' | translate }}</span>
       </button>
+
       @if (currentWorkspace$ | async; as currentWorkspace) {
         <div class="current-project-display">
           <span class="label-text">{{ 'WORKSPACE.CURRENT' | translate }}:</span>
-          <lucide-icon 
-            [img]="getWorkspaceIcon(currentWorkspace.type)" 
-            [size]="20">
-          </lucide-icon>
+          <lucide-icon [img]="getWorkspaceIcon(currentWorkspace.type)" [size]="20"></lucide-icon>
           <span class="workspace-name">{{ currentWorkspace.name }}</span>
         </div>
       }
     </div>
+
     <button (click)="logout()" class="logout-btn">
       <lucide-icon [img]="LogOut" [size]="18"></lucide-icon>
       <span>{{ 'DASHBOARD.LOGOUT' | translate }}</span>
@@ -26,24 +25,17 @@
 
   <!-- Navigation Tabs -->
   <div class="navigation-tabs">
-    <button 
-      class="nav-tab"
-      [class.active]="activeTab() === 'dashboard'"
-      (click)="setActiveTab('dashboard')">
+    <button class="nav-tab" [class.active]="activeTab() === 'dashboard'" (click)="setActiveTab('dashboard')">
       <lucide-icon [img]="Home" [size]="20"></lucide-icon>
       <span class="tab-label">{{ 'DASHBOARD.DASHBOARD' | translate }}</span>
     </button>
-    <button 
-      class="nav-tab"
-      [class.active]="activeTab() === 'works'"
-      (click)="setActiveTab('works')">
+
+    <button class="nav-tab" [class.active]="activeTab() === 'works'" (click)="setActiveTab('works')">
       <lucide-icon [img]="Music" [size]="20"></lucide-icon>
       <span class="tab-label">{{ 'WORKS.WORKS' | translate }}</span>
     </button>
-    <button 
-      class="nav-tab"
-      [class.active]="activeTab() === 'rights-holders'"
-      (click)="setActiveTab('rights-holders')">
+
+    <button class="nav-tab" [class.active]="activeTab() === 'rights-holders'" (click)="setActiveTab('rights-holders')">
       <lucide-icon [img]="Users" [size]="20"></lucide-icon>
       <span class="tab-label">{{ 'RIGHTS_HOLDERS.TITLE' | translate }}</span>
     </button>
@@ -52,100 +44,33 @@
   <!-- Dashboard Content -->
   @if (activeTab() === 'dashboard') {
     <div class="dashboard-content">
-      
-      <!-- All Projects Grid -->
-      @if (workspaces$ | async; as workspaces) {
-        @if (workspaces.length > 0) {
-          <div class="projects-section">
-            <h2 class="section-title">{{ 'DASHBOARD.YOUR_PROJECTS' | translate }}</h2>
-            <div class="projects-grid">
-              @for (workspace of workspaces; track workspace.id) {
-                <div class="project-bento" 
-                  [class.current]="(currentWorkspace$ | async)?.id === workspace.id"
-                  (click)="selectProject(workspace)">
-                  
-                  <!-- Left: Project Info -->
-                  <div class="project-left">
-                    <div class="project-icon-large">
-                      <lucide-icon 
-                        [img]="getWorkspaceIcon(workspace.type)" 
-                        [size]="48"
-                        [strokeWidth]="1.5">
-                      </lucide-icon>
-                    </div>
-                    <div class="project-info">
-                      <h3 class="project-title">{{ workspace.name }}</h3>
-                      <div class="project-meta">
-                        <span class="project-type-badge">
-                          @switch (workspace.type) {
-                            @case ('single') { {{ 'WORKSPACE.TYPE_SINGLE' | translate }} }
-                            @case ('ep') { {{ 'WORKSPACE.TYPE_EP' | translate }} }
-                            @case ('album') { {{ 'WORKSPACE.TYPE_ALBUM' | translate }} }
-                            @case ('collection') { {{ 'WORKSPACE.TYPE_COLLECTION' | translate }} }
-                          }
-                        </span>
-                        @if (workspace.description) {
-                          <span class="project-description">{{ workspace.description }}</span>
-                        }
-                      </div>
 
-                      <!-- Progress for Single type -->
-                      @if (workspace.type === 'single') {
-                        <div class="compact-progress">
-                          <div class="progress-info">
-                            <span class="progress-text">{{ 'DASHBOARD.COMPLETION' | translate }}</span>
-                            <span class="progress-percentage">{{ getCompletionPercentage(workspace) }}%</span>
-                          </div>
-                          <div class="progress-bar">
-                            <div class="progress-fill" [style.width.%]="getCompletionPercentage(workspace)"></div>
-                          </div>
-                          <div class="progress-indicators">
-                            <lucide-icon 
-                              [img]="hasWorkData() ? Check : Circle" 
-                              [size]="18"
-                              [class.completed]="hasWorkData()"
-                              class="indicator">
-                            </lucide-icon>
-                            <lucide-icon 
-                              [img]="hasRightsHolders() ? Check : Circle" 
-                              [size]="18"
-                              [class.completed]="hasRightsHolders()"
-                              class="indicator">
-                            </lucide-icon>
-                            <lucide-icon 
-                              [img]="hasSplits() ? Check : Circle" 
-                              [size]="18"
-                              [class.completed]="hasSplits()"
-                              class="indicator">
-                            </lucide-icon>
-                          </div>
-                        </div>
-                      }
-                    </div>
-                  </div>
+      <!-- Projects Section -->
+      <div class="projects-section">
+        <h2 class="section-title">{{ 'DASHBOARD.YOUR_PROJECTS' | translate }}</h2>
 
-                  <!-- Right: Action Buttons -->
-                  <div class="project-actions" (click)="$event.stopPropagation()">
-                    @if (workspace.type === 'single') {
-                      <button class="action-btn primary" (click)="updateWorkData(workspace, $event)" title="{{ 'DASHBOARD.UPDATE_WORK_DATA' | translate }}">
-                        <lucide-icon [img]="Music" [size]="20"></lucide-icon>
-                      </button>
-                      <button class="action-btn secondary" (click)="manageRightsHolders(workspace, $event)" title="{{ 'DASHBOARD.MANAGE_RIGHTS_HOLDERS' | translate }}">
-                        <lucide-icon [img]="Users" [size]="20"></lucide-icon>
-                      </button>
-                    }
-                    <button class="action-btn edit" (click)="editWorkspace(workspace, $event)" title="{{ 'COMMON.EDIT' | translate }}">
-                      <lucide-icon [img]="Edit" [size]="20"></lucide-icon>
-                    </button>
-                    <button class="action-btn archive" (click)="archiveWorkspace(workspace, $event)" title="{{ 'DASHBOARD.ARCHIVE_PROJECT' | translate }}">
-                      <lucide-icon [img]="Archive" [size]="20"></lucide-icon>
-                    </button>
-                  </div>
-                </div>
-              }
-            </div>
+        <!-- ✅ Search bar (like WorkList) -->
+        <div class="projects-search">
+          <div class="search-input-wrapper">
+            <lucide-icon [img]="Search" [size]="20" class="search-icon"></lucide-icon>
+            <input
+              type="text"
+              class="search-input"
+              [placeholder]="'WORKS.SEARCH_PLACEHOLDER' | translate"
+              [value]="searchQuery()"
+              (input)="onSearchChange($any($event.target).value)"
+            />
           </div>
-        } @else {
+
+          @if (searchQuery()) {
+            <button class="clear-search" (click)="clearSearch()">
+              {{ 'COMMON.CLEAR' | translate }}
+            </button>
+          }
+        </div>
+
+        <!-- ✅ Empty state: no projects at all -->
+        @if (workspaces() && workspaces().length === 0) {
           <div class="empty-state">
             <lucide-icon [img]="Music" [size]="80" [strokeWidth]="1.5" class="empty-icon"></lucide-icon>
             <h3>{{ 'DASHBOARD.NO_PROJECTS' | translate }}</h3>
@@ -156,15 +81,133 @@
             </button>
           </div>
         }
-      }
+
+        <!-- ✅ No search results state -->
+        @if (workspaces() && workspaces().length > 0 && filteredWorkspaces().length === 0 && searchQuery()) {
+          <div class="empty-state">
+            <lucide-icon [img]="Search" [size]="80" [strokeWidth]="1.5" class="empty-icon"></lucide-icon>
+            <h3>{{ 'WORKS.NO_RESULTS' | translate }}</h3>
+            <p>{{ 'WORKS.NO_RESULTS_FOR' | translate }} "{{ searchQuery() }}"</p>
+          </div>
+        }
+
+        <!-- ✅ Projects grid (filtered) -->
+        @if (filteredWorkspaces().length > 0) {
+          <div class="projects-grid">
+            @for (workspace of filteredWorkspaces(); track workspace.id) {
+              <div
+                class="project-bento"
+                [class.current]="(currentWorkspace$ | async)?.id === workspace.id"
+                (click)="selectProject(workspace)"
+              >
+
+                <!-- Left: Project Info -->
+                <div class="project-left">
+                  <div class="project-icon-large">
+                    <lucide-icon
+                      [img]="getWorkspaceIcon(workspace.type)"
+                      [size]="48"
+                      [strokeWidth]="1.5">
+                    </lucide-icon>
+                  </div>
+
+                  <div class="project-info">
+                    <h3 class="project-title">{{ workspace.name }}</h3>
+
+                    <div class="project-meta">
+                      <span class="project-type-badge">
+                        @switch (workspace.type) {
+                          @case ('single') { {{ 'WORKSPACE.TYPE_SINGLE' | translate }} }
+                          @case ('ep') { {{ 'WORKSPACE.TYPE_EP' | translate }} }
+                          @case ('album') { {{ 'WORKSPACE.TYPE_ALBUM' | translate }} }
+                          @case ('collection') { {{ 'WORKSPACE.TYPE_COLLECTION' | translate }} }
+                        }
+                      </span>
+
+                      @if (workspace.description) {
+                        <span class="project-description">{{ workspace.description }}</span>
+                      }
+                    </div>
+
+                    <!-- Progress for Single type -->
+                    @if (workspace.type === 'single') {
+                      <div class="compact-progress">
+                        <div class="progress-info">
+                          <span class="progress-text">{{ 'DASHBOARD.COMPLETION' | translate }}</span>
+                          <span class="progress-percentage">{{ getCompletionPercentage(workspace) }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                          <div class="progress-fill" [style.width.%]="getCompletionPercentage(workspace)"></div>
+                        </div>
+                        <div class="progress-indicators">
+                          <lucide-icon
+                            [img]="hasWorkData() ? Check : Circle"
+                            [size]="18"
+                            [class.completed]="hasWorkData()"
+                            class="indicator">
+                          </lucide-icon>
+                          <lucide-icon
+                            [img]="hasRightsHolders() ? Check : Circle"
+                            [size]="18"
+                            [class.completed]="hasRightsHolders()"
+                            class="indicator">
+                          </lucide-icon>
+                          <lucide-icon
+                            [img]="hasSplits() ? Check : Circle"
+                            [size]="18"
+                            [class.completed]="hasSplits()"
+                            class="indicator">
+                          </lucide-icon>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <!-- Right: Action Buttons -->
+                <div class="project-actions" (click)="$event.stopPropagation()">
+                  @if (workspace.type === 'single') {
+                    <button
+                      class="action-btn primary"
+                      (click)="updateWorkData(workspace, $event)"
+                      title="{{ 'DASHBOARD.UPDATE_WORK_DATA' | translate }}">
+                      <lucide-icon [img]="Music" [size]="20"></lucide-icon>
+                    </button>
+
+                    <button
+                      class="action-btn secondary"
+                      (click)="manageRightsHolders(workspace, $event)"
+                      title="{{ 'DASHBOARD.MANAGE_RIGHTS_HOLDERS' | translate }}">
+                      <lucide-icon [img]="Users" [size]="20"></lucide-icon>
+                    </button>
+                  }
+
+                  <button
+                    class="action-btn edit"
+                    (click)="editWorkspace(workspace, $event)"
+                    title="{{ 'COMMON.EDIT' | translate }}">
+                    <lucide-icon [img]="Edit" [size]="20"></lucide-icon>
+                  </button>
+
+                  <button
+                    class="action-btn archive"
+                    (click)="archiveWorkspace(workspace, $event)"
+                    title="{{ 'DASHBOARD.ARCHIVE_PROJECT' | translate }}">
+                    <lucide-icon [img]="Archive" [size]="20"></lucide-icon>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
 
       <!-- Profile Section -->
       @if (profile$ | async; as profile) {
         <div class="profile-section">
           <h2 class="section-title">{{ 'DASHBOARD.YOUR_PROFILE' | translate }}</h2>
           <div class="bento-grid">
-            
-            <!-- Profile Card (Main) -->
+
             <div class="bento-card profile-main">
               <div class="profile-header-section">
                 <div class="profile-title-row">
@@ -173,6 +216,7 @@
                     <lucide-icon [img]="profileDetailsVisible() ? ChevronDown : ChevronRight" [size]="20"></lucide-icon>
                   </button>
                 </div>
+
                 <div class="profile-quick-info">
                   <div class="quick-info-item">
                     <span class="label">@{{ profile.nickname }}</span>
@@ -181,6 +225,7 @@
                     <span class="badge">{{ profile.primary_role }}</span>
                   </div>
                 </div>
+
                 <div class="profile-actions">
                   <button (click)="editProfile()" class="action-btn edit">
                     <lucide-icon [img]="Edit" [size]="18"></lucide-icon>
@@ -213,7 +258,6 @@
               }
             </div>
 
-            <!-- Social Links Cards -->
             @for (platform of socialPlatforms; track platform.key) {
               @if (getSocialLink(profile, platform.key); as link) {
                 <div class="bento-card social-card" [style.--accent-color]="platform.color">
@@ -221,29 +265,25 @@
                     <lucide-icon [img]="getIconComponent(platform.icon)" [size]="24"></lucide-icon>
                     <span class="social-name">{{ platform.label }}</span>
                   </div>
+
                   <div class="social-content">
                     <a [href]="link" target="_blank" class="social-link">
                       {{ link.length > 30 ? (link | slice:0:30) + '...' : link }}
                     </a>
                   </div>
+
                   <div class="social-actions">
-                    <button 
-                      (click)="copyToClipboard(link, platform.label)" 
-                      class="copy-btn"
-                      title="Copy link">
+                    <button (click)="copyToClipboard(link, platform.label)" class="copy-btn" title="Copy link">
                       <lucide-icon [img]="Copy" [size]="18"></lucide-icon>
                     </button>
-                    <a 
-                      [href]="link" 
-                      target="_blank" 
-                      class="visit-btn"
-                      title="Visit">
+                    <a [href]="link" target="_blank" class="visit-btn" title="Visit">
                       <lucide-icon [img]="ExternalLink" [size]="18"></lucide-icon>
                     </a>
                   </div>
                 </div>
               }
             }
+
           </div>
         </div>
       }

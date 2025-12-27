@@ -1,5 +1,5 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SupabaseService } from '../services/supabase.service';
@@ -15,7 +15,7 @@ import { UserProfile } from '../../models/profile.model';
 import { LucideAngularModule, Music, Disc, Disc3, FolderOpen, Plus, LogOut, 
          Home, Users, Edit, Archive, Check, Circle, ChevronDown, 
          ChevronRight, Smartphone, Camera, Twitter, Facebook, Video, 
-         Globe, Headphones, Copy, ExternalLink } from 'lucide-angular';
+         Globe, Headphones, Copy, ExternalLink, Search } from 'lucide-angular';
 
 @Component({
   selector: 'app-dashboard',
@@ -60,6 +60,7 @@ export class Dashboard implements OnInit {
   readonly Headphones = Headphones;
   readonly Copy = Copy;
   readonly ExternalLink = ExternalLink;
+  readonly Search = Search;
 
   // Public properties for template
   profile$ = this.profileService.profile$;
@@ -76,6 +77,22 @@ export class Dashboard implements OnInit {
   isLoading = signal(false);
   errorMessage = signal('');
   successMessage = signal('');
+  searchQuery = signal('');
+
+  // Filtered list (computed, reacts to workspaces + query)
+  filteredWorkspaces = computed(() => {
+    const query = this.searchQuery().trim().toLowerCase();
+    const list = this.workspaces() ?? [];
+
+    if (!query) return list;
+
+    return list.filter((w) => {
+      const name = (w.name ?? '').toLowerCase();
+      const desc = (w.description ?? '').toLowerCase();
+      const type = (w.type ?? '').toLowerCase();
+      return name.includes(query) || desc.includes(query) || type.includes(query);
+    });
+  });
 
   // Social platforms with icons
   socialPlatforms = [
@@ -311,6 +328,14 @@ export class Dashboard implements OnInit {
 
   toggleProfileDetails() {
     this.profileDetailsVisible.set(!this.profileDetailsVisible());
+  }
+
+  onSearchChange(value: string) {
+    this.searchQuery.set(value ?? '');
+  }
+
+  clearSearch() {
+    this.searchQuery.set('');
   }
 
   goToWorkspaces() {

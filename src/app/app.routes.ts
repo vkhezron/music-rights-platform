@@ -40,6 +40,16 @@ export const routes: Routes = [
         ,loadComponent: () => import('./profile/qr-code-display/qr-code-display').then(m => m.QrCodeDisplayComponent)
         , canActivate: [AuthGuard]  
     },
+    {
+        path: 'works'
+        , loadComponent: () => import('./works/work-list/work-list').then(m => m.WorksListComponent)
+        , canActivate: [AuthGuard]
+    },
+    {
+        path: 'works/create'
+        , loadComponent: () => import('./works/work-form/work-form').then(m => m.WorkFormComponent)
+        , canActivate: [AuthGuard]  
+    },
     {path: '**', redirectTo: 'login' }
 
 ];

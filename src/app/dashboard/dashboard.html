@@ -7,19 +7,17 @@
         <lucide-icon [img]="Plus" [size]="20"></lucide-icon>
         <span>{{ 'WORKSPACE.NEW_PROJECT' | translate }}</span>
       </button>
-
       @if (currentWorkspace$ | async; as currentWorkspace) {
         <div class="current-project-display">
           <span class="label-text">{{ 'WORKSPACE.CURRENT' | translate }}:</span>
           <lucide-icon 
-            [img]="currentWorkspace.type === 'single' ? Music : currentWorkspace.type === 'ep' ? Disc : currentWorkspace.type === 'album' ? Disc3 : FolderOpen" 
+            [img]="getWorkspaceIcon(currentWorkspace.type)" 
             [size]="20">
           </lucide-icon>
           <span class="workspace-name">{{ currentWorkspace.name }}</span>
         </div>
       }
     </div>
-
     <button (click)="logout()" class="logout-btn">
       <lucide-icon [img]="LogOut" [size]="18"></lucide-icon>
       <span>{{ 'DASHBOARD.LOGOUT' | translate }}</span>
@@ -60,23 +58,21 @@
         @if (workspaces.length > 0) {
           <div class="projects-section">
             <h2 class="section-title">{{ 'DASHBOARD.YOUR_PROJECTS' | translate }}</h2>
-            
             <div class="projects-grid">
               @for (workspace of workspaces; track workspace.id) {
                 <div class="project-bento" 
-                     [class.current]="(currentWorkspace$ | async)?.id === workspace.id"
-                     (click)="selectProject(workspace)">
+                  [class.current]="(currentWorkspace$ | async)?.id === workspace.id"
+                  (click)="selectProject(workspace)">
                   
                   <!-- Left: Project Info -->
                   <div class="project-left">
                     <div class="project-icon-large">
                       <lucide-icon 
-                        [img]="workspace.type === 'single' ? Music : workspace.type === 'ep' ? Disc : workspace.type === 'album' ? Disc3 : FolderOpen" 
+                        [img]="getWorkspaceIcon(workspace.type)" 
                         [size]="48"
                         [strokeWidth]="1.5">
                       </lucide-icon>
                     </div>
-                    
                     <div class="project-info">
                       <h3 class="project-title">{{ workspace.name }}</h3>
                       <div class="project-meta">
@@ -98,10 +94,10 @@
                         <div class="compact-progress">
                           <div class="progress-info">
                             <span class="progress-text">{{ 'DASHBOARD.COMPLETION' | translate }}</span>
-                            <span class="progress-percentage">{{ getProjectCompletionPercentage() }}%</span>
+                            <span class="progress-percentage">{{ getCompletionPercentage(workspace) }}%</span>
                           </div>
                           <div class="progress-bar">
-                            <div class="progress-fill" [style.width.%]="getProjectCompletionPercentage()"></div>
+                            <div class="progress-fill" [style.width.%]="getCompletionPercentage(workspace)"></div>
                           </div>
                           <div class="progress-indicators">
                             <lucide-icon 
@@ -131,19 +127,17 @@
                   <!-- Right: Action Buttons -->
                   <div class="project-actions" (click)="$event.stopPropagation()">
                     @if (workspace.type === 'single') {
-                      <button class="action-btn primary" (click)="updateWorkData(workspace)" title="{{ 'DASHBOARD.UPDATE_WORK_DATA' | translate }}">
+                      <button class="action-btn primary" (click)="updateWorkData(workspace, $event)" title="{{ 'DASHBOARD.UPDATE_WORK_DATA' | translate }}">
                         <lucide-icon [img]="Music" [size]="20"></lucide-icon>
                       </button>
-                      <button class="action-btn secondary" (click)="manageRightsHolders(workspace)" title="{{ 'DASHBOARD.MANAGE_RIGHTS_HOLDERS' | translate }}">
+                      <button class="action-btn secondary" (click)="manageRightsHolders(workspace, $event)" title="{{ 'DASHBOARD.MANAGE_RIGHTS_HOLDERS' | translate }}">
                         <lucide-icon [img]="Users" [size]="20"></lucide-icon>
                       </button>
                     }
-                    
-                    <button class="action-btn edit" (click)="editWorkspace(workspace)" title="{{ 'COMMON.EDIT' | translate }}">
+                    <button class="action-btn edit" (click)="editWorkspace(workspace, $event)" title="{{ 'COMMON.EDIT' | translate }}">
                       <lucide-icon [img]="Edit" [size]="20"></lucide-icon>
                     </button>
-                    
-                    <button class="action-btn archive" (click)="archiveWorkspace(workspace)" title="{{ 'DASHBOARD.ARCHIVE_PROJECT' | translate }}">
+                    <button class="action-btn archive" (click)="archiveWorkspace(workspace, $event)" title="{{ 'DASHBOARD.ARCHIVE_PROJECT' | translate }}">
                       <lucide-icon [img]="Archive" [size]="20"></lucide-icon>
                     </button>
                   </div>
@@ -179,7 +173,6 @@
                     <lucide-icon [img]="profileDetailsVisible() ? ChevronDown : ChevronRight" [size]="20"></lucide-icon>
                   </button>
                 </div>
-                
                 <div class="profile-quick-info">
                   <div class="quick-info-item">
                     <span class="label">@{{ profile.nickname }}</span>
@@ -188,7 +181,6 @@
                     <span class="badge">{{ profile.primary_role }}</span>
                   </div>
                 </div>
-
                 <div class="profile-actions">
                   <button (click)="editProfile()" class="action-btn edit">
                     <lucide-icon [img]="Edit" [size]="18"></lucide-icon>

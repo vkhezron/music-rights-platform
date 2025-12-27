@@ -1,0 +1,398 @@
+<div class="work-form-container">
+  
+  <!-- Header -->
+  <div class="form-header">
+    <div class="header-left">
+      <button class="back-btn" (click)="cancel()">
+        <lucide-icon [img]="ArrowLeft" [size]="20"></lucide-icon>
+      </button>
+      <div class="header-info">
+        <h1>{{ (isEditMode() ? 'WORKS.EDIT_WORK' : 'WORKS.CREATE_WORK') | translate }}</h1>
+        <p>{{ (isEditMode() ? 'WORKS.EDIT_WORK_SUBTITLE' : 'WORKS.CREATE_WORK_SUBTITLE') | translate }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="workForm" (ngSubmit)="onSubmit()" class="work-form">
+    
+    <!-- Success Message -->
+    @if (successMessage()) {
+      <div class="success-alert">
+        <lucide-icon [img]="CheckCircle" [size]="20" class="success-icon"></lucide-icon>
+        <span>{{ successMessage() }}</span>
+      </div>
+    }
+
+    <!-- Error Message -->
+    @if (errorMessage()) {
+      <div class="error-alert">
+        <lucide-icon [img]="AlertCircle" [size]="20" class="error-icon"></lucide-icon>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <!-- Basic Information Section -->
+    <div class="form-section">
+      <h2 class="section-title">
+        <lucide-icon [img]="Music" [size]="24"></lucide-icon>
+        {{ 'WORKS.BASIC_INFO' | translate }}
+      </h2>
+
+      <!-- Work Title -->
+      <div class="form-group">
+        <label for="work_title" class="required">
+          {{ 'WORKS.WORK_TITLE' | translate }}
+        </label>
+        <input
+          id="work_title"
+          type="text"
+          formControlName="work_title"
+          class="form-input"
+          [class.error]="hasError('work_title', 'required')"
+          placeholder="Enter the main title of the work"
+        />
+        @if (hasError('work_title', 'required')) {
+          <div class="error-message">
+            {{ 'WORKS.TITLE_REQUIRED' | translate }}
+          </div>
+        }
+      </div>
+
+      <!-- Alternative Titles -->
+      <div class="form-group">
+        <label class="group-label">
+          {{ 'WORKS.ALTERNATIVE_TITLES' | translate }}
+        </label>
+        <p class="field-hint">{{ 'WORKS.ALTERNATIVE_TITLES_HINT' | translate }}</p>
+        
+        @for (control of alternativeTitles.controls; track $index) {
+          <div class="input-with-remove">
+            <input
+              type="text"
+              [formControl]="$any(control)"
+              class="form-input"
+              placeholder="Alternative title"
+            />
+            <button
+              type="button"
+              class="remove-btn"
+              (click)="removeAlternativeTitle($index)">
+              <lucide-icon [img]="X" [size]="18"></lucide-icon>
+            </button>
+          </div>
+        }
+        
+        <button
+          type="button"
+          class="add-btn"
+          (click)="addAlternativeTitle()">
+          <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
+          <span>{{ 'WORKS.ADD_ALTERNATIVE_TITLE' | translate }}</span>
+        </button>
+      </div>
+
+      <!-- Status -->
+      <div class="form-group">
+        <label for="status" class="required">
+          {{ 'WORKS.STATUS' | translate }}
+        </label>
+        <select
+          id="status"
+          formControlName="status"
+          class="form-select">
+          @for (status of statusOptions; track status) {
+            <option [value]="status">{{ status | titlecase }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Identification Codes Section -->
+    <div class="form-section">
+      <h2 class="section-title">
+        <lucide-icon [img]="Tag" [size]="24"></lucide-icon>
+        {{ 'WORKS.IDENTIFICATION_CODES' | translate }}
+      </h2>
+
+      <div class="form-row">
+        <!-- ISRC -->
+        <div class="form-group">
+          <label for="isrc">{{ 'WORKS.ISRC' | translate }}</label>
+          <input
+            id="isrc"
+            type="text"
+            formControlName="isrc"
+            class="form-input code-input"
+            [class.error]="hasError('isrc', 'pattern')"
+            placeholder="USRC17607839"
+            maxlength="12"
+          />
+          @if (hasError('isrc', 'pattern')) {
+            <div class="error-message">
+              {{ 'WORKS.ISRC_INVALID' | translate }}
+            </div>
+          }
+          <div class="field-hint">{{ 'WORKS.ISRC_FORMAT' | translate }}</div>
+        </div>
+
+        <!-- ISWC -->
+        <div class="form-group">
+          <label for="iswc">{{ 'WORKS.ISWC' | translate }}</label>
+          <input
+            id="iswc"
+            type="text"
+            formControlName="iswc"
+            class="form-input code-input"
+            [class.error]="hasError('iswc', 'pattern')"
+            placeholder="T-123.456.789-0"
+          />
+          @if (hasError('iswc', 'pattern')) {
+            <div class="error-message">
+              {{ 'WORKS.ISWC_INVALID' | translate }}
+            </div>
+          }
+          <div class="field-hint">{{ 'WORKS.ISWC_FORMAT' | translate }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Duration & Dates Section -->
+    <div class="form-section">
+      <h2 class="section-title">
+        <lucide-icon [img]="Clock" [size]="24"></lucide-icon>
+        {{ 'WORKS.DURATION_AND_DATES' | translate }}
+      </h2>
+
+      <!-- Duration -->
+      <div class="form-group">
+        <label>{{ 'WORKS.DURATION' | translate }}</label>
+        <div class="duration-inputs">
+          <div class="duration-input-group">
+            <input
+              type="number"
+              [value]="getDurationMinutes()"
+              (input)="onDurationChange($any($event.target).value || 0, getDurationSeconds())"
+              class="form-input duration-input"
+              placeholder="0"
+              min="0"
+            />
+            <span class="duration-label">{{ 'WORKS.MINUTES' | translate }}</span>
+          </div>
+          <span class="duration-separator">:</span>
+          <div class="duration-input-group">
+            <input
+              type="number"
+              [value]="getDurationSeconds()"
+              (input)="onDurationChange(getDurationMinutes(), $any($event.target).value || 0)"
+              class="form-input duration-input"
+              placeholder="0"
+              min="0"
+              max="59"
+            />
+            <span class="duration-label">{{ 'WORKS.SECONDS' | translate }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <!-- Recording Date -->
+        <div class="form-group">
+          <label for="recording_date">
+            <lucide-icon [img]="Calendar" [size]="16"></lucide-icon>
+            {{ 'WORKS.RECORDING_DATE' | translate }}
+          </label>
+          <input
+            id="recording_date"
+            type="date"
+            formControlName="recording_date"
+            class="form-input"
+          />
+        </div>
+
+        <!-- Release Date -->
+        <div class="form-group">
+          <label for="release_date">
+            <lucide-icon [img]="Calendar" [size]="16"></lucide-icon>
+            {{ 'WORKS.RELEASE_DATE' | translate }}
+          </label>
+          <input
+            id="release_date"
+            type="date"
+            formControlName="release_date"
+            class="form-input"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Genre & Languages Section -->
+    <div class="form-section">
+      <h2 class="section-title">
+        <lucide-icon [img]="Globe" [size]="24"></lucide-icon>
+        {{ 'WORKS.GENRE_AND_LANGUAGES' | translate }}
+      </h2>
+
+      <!-- Genre -->
+      <div class="form-group">
+        <label for="genre">{{ 'WORKS.GENRE' | translate }}</label>
+        <select
+          id="genre"
+          formControlName="genre"
+          class="form-select">
+          <option value="">{{ 'WORKS.SELECT_GENRE' | translate }}</option>
+          @for (genre of genreOptions; track genre) {
+            <option [value]="genre">{{ genre }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Languages -->
+      <div class="form-group">
+        <label class="group-label">{{ 'WORKS.LANGUAGES' | translate }}</label>
+        <p class="field-hint">{{ 'WORKS.LANGUAGES_HINT' | translate }}</p>
+        <div class="checkbox-grid">
+          @for (language of languageOptions; track language) {
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [checked]="isLanguageSelected(language)"
+                (change)="onLanguageToggle(language)"
+              />
+              <span>{{ language }}</span>
+            </label>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Cover Version Section -->
+    <div class="form-section">
+      <h2 class="section-title">{{ 'WORKS.COVER_VERSION_INFO' | translate }}</h2>
+
+      <!-- Is Cover Version -->
+      <div class="form-group">
+        <label class="checkbox-label cover-checkbox">
+          <input
+            type="checkbox"
+            formControlName="is_cover_version"
+          />
+          <span>{{ 'WORKS.IS_COVER_VERSION' | translate }}</span>
+        </label>
+      </div>
+
+      @if (workForm.get('is_cover_version')?.value) {
+        <div class="cover-fields">
+          <!-- Original Work Title -->
+          <div class="form-group">
+            <label for="original_work_title" class="required">
+              {{ 'WORKS.ORIGINAL_WORK_TITLE' | translate }}
+            </label>
+            <input
+              id="original_work_title"
+              type="text"
+              formControlName="original_work_title"
+              class="form-input"
+              [class.error]="hasError('original_work_title', 'required')"
+              placeholder="Original work title"
+            />
+            @if (hasError('original_work_title', 'required')) {
+              <div class="error-message">
+                {{ 'WORKS.ORIGINAL_TITLE_REQUIRED' | translate }}
+              </div>
+            }
+          </div>
+
+          <div class="form-row">
+            <!-- Original Work ISRC -->
+            <div class="form-group">
+              <label for="original_work_isrc">
+                {{ 'WORKS.ORIGINAL_WORK_ISRC' | translate }}
+              </label>
+              <input
+                id="original_work_isrc"
+                type="text"
+                formControlName="original_work_isrc"
+                class="form-input code-input"
+                placeholder="USRC17607839"
+                maxlength="12"
+              />
+            </div>
+
+            <!-- Original Work ISWC -->
+            <div class="form-group">
+              <label for="original_work_iswc">
+                {{ 'WORKS.ORIGINAL_WORK_ISWC' | translate }}
+              </label>
+              <input
+                id="original_work_iswc"
+                type="text"
+                formControlName="original_work_iswc"
+                class="form-input code-input"
+                placeholder="T-123.456.789-0"
+              />
+            </div>
+          </div>
+
+          <!-- Original Work Info (fallback) -->
+          <div class="form-group">
+            <label for="original_work_info">
+              {{ 'WORKS.ORIGINAL_WORK_INFO' | translate }}
+            </label>
+            <input
+              id="original_work_info"
+              type="text"
+              formControlName="original_work_info"
+              class="form-input"
+              placeholder="Additional information if ISRC/ISWC not available"
+            />
+            <div class="field-hint">{{ 'WORKS.ORIGINAL_WORK_INFO_HINT' | translate }}</div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Notes Section -->
+    <div class="form-section">
+      <h2 class="section-title">{{ 'WORKS.ADDITIONAL_NOTES' | translate }}</h2>
+
+      <div class="form-group">
+        <label for="notes">{{ 'WORKS.NOTES' | translate }}</label>
+        <textarea
+          id="notes"
+          formControlName="notes"
+          class="form-textarea"
+          rows="4"
+          placeholder="Any additional information about this work..."
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="cancel-button"
+        (click)="cancel()"
+        [disabled]="isLoading()">
+        {{ 'COMMON.CANCEL' | translate }}
+      </button>
+      
+      <button
+        type="submit"
+        class="submit-button"
+        [disabled]="isLoading() || workForm.invalid">
+        @if (!isLoading()) {
+          <lucide-icon [img]="Save" [size]="20"></lucide-icon>
+          <span>{{ (isEditMode() ? 'COMMON.SAVE' : 'WORKS.CREATE_WORK') | translate }}</span>
+        }
+        @if (isLoading()) {
+          <span class="loading">
+            <span class="spinner"></span>
+            {{ 'COMMON.SAVING' | translate }}
+          </span>
+        }
+      </button>
+    </div>
+  </form>
+</div>

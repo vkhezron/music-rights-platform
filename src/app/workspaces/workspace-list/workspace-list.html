@@ -2,35 +2,57 @@
   <div class="header">
     <h1>{{ 'WORKSPACE.YOUR_PROJECTS' | translate }}</h1>
     <button (click)="createWorkspace()" class="create-btn">
-      + {{ 'WORKSPACE.NEW_PROJECT' | translate }}
+      <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
+      {{ 'WORKSPACE.NEW_PROJECT' | translate }}
     </button>
   </div>
 
   @if (workspaces$ | async; as workspaces) {
     <div class="workspaces-grid">
+
+      <!-- Empty State -->
       @if (workspaces.length === 0) {
         <div class="empty-state">
-          <div class="empty-icon">🎵</div>
+          <div class="empty-icon">
+            <lucide-icon [img]="Music" [size]="64"></lucide-icon>
+          </div>
           <p>{{ 'WORKSPACE.NO_PROJECTS_YET' | translate }}</p>
           <button (click)="createWorkspace()" class="create-btn-large">
+            <lucide-icon [img]="Plus" [size]="20"></lucide-icon>
             {{ 'WORKSPACE.CREATE_FIRST_PROJECT' | translate }}
           </button>
         </div>
       }
 
+      <!-- Workspace Cards -->
       @for (workspace of workspaces; track workspace.id) {
         <div class="workspace-card" (click)="selectWorkspace(workspace)">
+
+          <!-- Icon -->
           <div class="workspace-icon">
             @switch (workspace.type) {
-              @case ('single') { 🎵 }
-              @case ('ep') { 💿 }
-              @case ('album') { 📀 }
-              @case ('collection') { 📚 }
-              @default { 🎵 }
+              @case ('single') {
+                <lucide-icon [img]="Disc" [size]="28"></lucide-icon>
+              }
+              @case ('ep') {
+                <lucide-icon [img]="Disc3" [size]="28"></lucide-icon>
+              }
+              @case ('album') {
+                <lucide-icon [img]="FolderOpen" [size]="28"></lucide-icon>
+              }
+              @case ('collection') {
+                <lucide-icon [img]="Music" [size]="28"></lucide-icon>
+              }
+              @default {
+                <lucide-icon [img]="Music" [size]="28"></lucide-icon>
+              }
             }
           </div>
+
+          <!-- Content -->
           <div class="workspace-content">
             <h3>{{ workspace.name }}</h3>
+
             <span class="workspace-type">
               @switch (workspace.type) {
                 @case ('single') { {{ 'WORKSPACE.TYPE_SINGLE' | translate }} }
@@ -40,11 +62,18 @@
                 @default { {{ 'WORKSPACE.PROJECT' | translate }} }
               }
             </span>
+
             @if (workspace.description) {
-              <p class="workspace-description">{{ workspace.description }}</p>
+              <p class="workspace-description">
+                {{ workspace.description }}
+              </p>
             }
           </div>
-          <div class="workspace-arrow">→</div>
+
+          <!-- Arrow -->
+          <div class="workspace-arrow">
+            <lucide-icon [img]="ArrowRight" [size]="20"></lucide-icon>
+          </div>
         </div>
       }
     </div>

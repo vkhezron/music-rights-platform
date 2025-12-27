@@ -4,11 +4,13 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { WorkspaceService } from '../../services/workspace.service';
+import { LucideAngularModule, Music, Disc, Disc3, FolderOpen, AlertTriangle, Lightbulb } from 'lucide-angular';
 
 @Component({
   selector: 'app-workspace-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslateModule],
+  imports: [CommonModule, ReactiveFormsModule
+    , TranslateModule, LucideAngularModule],
   templateUrl: './workspace-create.html',
   styleUrl: './workspace-create.scss'
 })
@@ -21,30 +23,39 @@ export class WorkspaceCreateComponent {
   isLoading = signal(false);
   errorMessage = signal('');
 
+  // Lucide icons
+  readonly Music = Music;
+  readonly Disc = Disc;
+  readonly Disc3 = Disc3;
+  readonly FolderOpen = FolderOpen;
+  readonly AlertTriangle = AlertTriangle;
+  readonly Lightbulb = Lightbulb;
+  readonly MusicNote = Music;
+
   // Updated workspace types for music projects
   workspaceTypes = [
     { 
       value: 'single', 
       label: 'Single Work', 
-      icon: '🎵',
+      icon: Music,
       description: 'One song/composition with rights splits'
     },
     { 
       value: 'ep', 
       label: 'EP', 
-      icon: '💿',
+      icon: Disc,
       description: 'Extended Play - typically 3-6 tracks'
     },
     { 
       value: 'album', 
       label: 'Album', 
-      icon: '📀',
+      icon: Disc3,
       description: 'Full album - 7 or more tracks'
     },
     { 
       value: 'collection', 
       label: 'Collection', 
-      icon: '📚',
+      icon: FolderOpen,
       description: 'Other grouping of works (compilation, soundtrack, etc.)'
     }
   ];

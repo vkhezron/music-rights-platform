@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { SupabaseService } from './supabase.service';
+// Remove this import: import { WorksService } from './works';
 
 export interface Workspace {
   id: string;
@@ -31,6 +32,7 @@ export interface CreateWorkspaceData {
 })
 export class WorkspaceService {
   private supabase = inject(SupabaseService);
+  // Remove this: private worksService = inject(WorksService);
 
   // Public observables
   private workspacesSubject = new BehaviorSubject<Workspace[]>([]);
@@ -109,7 +111,6 @@ export class WorkspaceService {
     }
   }
 
-  // Updated to accept object parameter
   async createWorkspace(data: CreateWorkspaceData): Promise<Workspace> {
     const user = this.supabase.currentUser;
     

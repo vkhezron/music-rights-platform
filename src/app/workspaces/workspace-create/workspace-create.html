@@ -1,20 +1,26 @@
 <div class="workspace-create-container">
   <div class="create-card">
-    
+
     <!-- Header -->
     <div class="header">
-      <div class="workspace-icon">🎵</div>
+      <div class="workspace-icon">
+        <lucide-icon [img]="Music" [size]="40"></lucide-icon>
+      </div>
       <h1>{{ 'WORKSPACE.CREATE_NEW_PROJECT' | translate }}</h1>
       <p>{{ 'WORKSPACE.CREATE_SUBTITLE' | translate }}</p>
     </div>
 
     <!-- Form -->
     <form [formGroup]="workspaceForm" (ngSubmit)="onSubmit()" class="create-form">
-      
+
       <!-- Error Message -->
       @if (errorMessage()) {
         <div class="error-alert">
-          <span class="error-icon">⚠️</span>
+          <lucide-icon
+            class="error-icon"
+            [img]="AlertTriangle"
+            [size]="18">
+          </lucide-icon>
           <span>{{ errorMessage() }}</span>
         </div>
       }
@@ -44,7 +50,7 @@
         }
       </div>
 
-      <!-- Project Type (Dropdown) -->
+      <!-- Project Type -->
       <div class="form-group">
         <label for="type" class="required">
           {{ 'WORKSPACE.PROJECT_TYPE' | translate }}
@@ -54,10 +60,12 @@
           formControlName="type"
           class="form-select"
           [class.error]="hasError('type', 'required')">
-          <option value="">{{ 'WORKSPACE.SELECT_TYPE' | translate }}</option>
+          <option value="">
+            {{ 'WORKSPACE.SELECT_TYPE' | translate }}
+          </option>
           @for (type of workspaceTypes; track type.value) {
             <option [value]="type.value">
-              {{ type.icon }} {{ type.label }}
+              {{ type.label }}
             </option>
           }
         </select>
@@ -71,10 +79,19 @@
       <!-- Selected Type Info -->
       @if (getSelectedTypeInfo(); as selectedType) {
         <div class="selected-type-info">
-          <div class="selected-icon">{{ selectedType.icon }}</div>
+          <div class="selected-icon">
+            <lucide-icon
+              [img]="selectedType.icon"
+              [size]="28">
+            </lucide-icon>
+          </div>
           <div class="selected-content">
-            <div class="selected-label">{{ selectedType.label }}</div>
-            <div class="selected-description">{{ selectedType.description }}</div>
+            <div class="selected-label">
+              {{ selectedType.label }}
+            </div>
+            <div class="selected-description">
+              {{ selectedType.description }}
+            </div>
           </div>
         </div>
       }
@@ -90,13 +107,19 @@
           formControlName="description"
           class="form-textarea"
           rows="3"
-          [placeholder]="'WORKSPACE.DESCRIPTION_PLACEHOLDER' | translate"></textarea>
+          [placeholder]="'WORKSPACE.DESCRIPTION_PLACEHOLDER' | translate">
+        </textarea>
         <div class="field-hint">
-          💡 {{ 'WORKSPACE.DESCRIPTION_HINT' | translate }}
+          <lucide-icon
+            class="hint-icon"
+            [img]="Lightbulb"
+            [size]="16">
+          </lucide-icon>
+          {{ 'WORKSPACE.DESCRIPTION_HINT' | translate }}
         </div>
       </div>
 
-      <!-- Action Buttons -->
+      <!-- Actions -->
       <div class="form-actions">
         <button
           type="button"
@@ -105,7 +128,7 @@
           [disabled]="isLoading()">
           {{ 'COMMON.CANCEL' | translate }}
         </button>
-        
+
         <button
           type="submit"
           class="submit-button"
@@ -121,6 +144,7 @@
           }
         </button>
       </div>
+
     </form>
   </div>
 </div>

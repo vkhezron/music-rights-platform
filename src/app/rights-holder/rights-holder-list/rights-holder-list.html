@@ -1,0 +1,181 @@
+<div class="rights-holders-container">
+  
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <button class="back-btn" (click)="goBack()">
+        <lucide-icon [img]="ArrowLeft" [size]="20"></lucide-icon>
+      </button>
+      <div class="header-info">
+        <h1>{{ 'RIGHTS_HOLDERS.TITLE' | translate }}</h1>
+        @if (currentWorkspace$ | async; as workspace) {
+          <p class="workspace-name">{{ workspace.name }}</p>
+        }
+      </div>
+    </div>
+    
+    <button class="add-btn" (click)="createRightsHolder()">
+      <lucide-icon [img]="Plus" [size]="20"></lucide-icon>
+      <span>{{ 'RIGHTS_HOLDERS.ADD_RIGHTS_HOLDER' | translate }}</span>
+    </button>
+  </div>
+
+  <!-- Search & Filter Section -->
+  <div class="search-section">
+    <!-- Search Bar -->
+    <div class="search-input-wrapper">
+      <lucide-icon [img]="Search" [size]="20" class="search-icon"></lucide-icon>
+      <input
+        type="text"
+        class="search-input"
+        [placeholder]="'RIGHTS_HOLDERS.SEARCH_PLACEHOLDER' | translate"
+        [value]="searchQuery()"
+        (input)="onSearchChange($any($event.target).value)"
+      />
+      @if (searchQuery()) {
+        <button class="clear-btn" (click)="clearSearch()">
+          {{ 'COMMON.CLEAR' | translate }}
+        </button>
+      }
+    </div>
+
+    <!-- Type Filter -->
+    <div class="filter-buttons">
+      <button 
+        class="filter-btn"
+        [class.active]="typeFilter() === 'all'"
+        (click)="setTypeFilter('all')">
+        {{ 'COMMON.ALL' | translate }}
+      </button>
+      <button 
+        class="filter-btn"
+        [class.active]="typeFilter() === 'person'"
+        (click)="setTypeFilter('person')">
+        <lucide-icon [img]="User" [size]="16"></lucide-icon>
+        {{ 'RIGHTS_HOLDERS.TYPE_PERSON' | translate }}
+      </button>
+      <button 
+        class="filter-btn"
+        [class.active]="typeFilter() === 'company'"
+        (click)="setTypeFilter('company')">
+        <lucide-icon [img]="Building2" [size]="16"></lucide-icon>
+        {{ 'RIGHTS_HOLDERS.TYPE_COMPANY' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>{{ 'COMMON.LOADING' | translate }}</p>
+    </div>
+  }
+
+  <!-- Empty State (No Rights Holders) -->
+  @if (!isLoading() && rightsHolders().length === 0 && !searchQuery()) {
+    <div class="empty-state">
+      <lucide-icon [img]="User" [size]="80" [strokeWidth]="1.5" class="empty-icon"></lucide-icon>
+      <h3>{{ 'RIGHTS_HOLDERS.NO_RIGHTS_HOLDERS' | translate }}</h3>
+      <p>{{ 'RIGHTS_HOLDERS.NO_RIGHTS_HOLDERS_DESCRIPTION' | translate }}</p>
+      <button class="create-first-btn" (click)="createRightsHolder()">
+        <lucide-icon [img]="Plus" [size]="20"></lucide-icon>
+        <span>{{ 'RIGHTS_HOLDERS.CREATE_FIRST_RIGHTS_HOLDER' | translate }}</span>
+      </button>
+    </div>
+  }
+
+  <!-- No Search Results -->
+  @if (!isLoading() && rightsHolders().length > 0 && filteredRightsHolders().length === 0) {
+    <div class="empty-state">
+      <lucide-icon [img]="Search" [size]="80" [strokeWidth]="1.5" class="empty-icon"></lucide-icon>
+      <h3>{{ 'WORKS.NO_RESULTS' | translate }}</h3>
+      <p>{{ 'WORKS.NO_RESULTS_FOR' | translate }} "{{ searchQuery() }}"</p>
+      <button class="clear-btn-large" (click)="clearSearch()">
+        {{ 'COMMON.CLEAR' | translate }}
+      </button>
+    </div>
+  }
+
+  <!-- Rights Holders Grid -->
+  @if (!isLoading() && filteredRightsHolders().length > 0) {
+    <div class="rights-holders-grid">
+      @for (rh of filteredRightsHolders(); track rh.id) {
+        <div class="rh-card" (click)="editRightsHolder(rh)">
+          
+          <!-- Card Header -->
+          <div class="card-header">
+            <div class="rh-icon">
+              <lucide-icon [img]="getIcon(rh)" [size]="32" [strokeWidth]="1.5"></lucide-icon>
+            </div>
+            <div class="rh-info">
+              <h3 class="rh-name">{{ getDisplayName(rh) }}</h3>
+              <span class="type-badge" [class]="'type-' + rh.type">
+                @if (rh.type === 'person') {
+                  <lucide-icon [img]="User" [size]="14"></lucide-icon>
+                  {{ 'RIGHTS_HOLDERS.TYPE_PERSON' | translate }}
+                }
+                @if (rh.type === 'company') {
+                  <lucide-icon [img]="Building2" [size]="14"></lucide-icon>
+                  {{ 'RIGHTS_HOLDERS.TYPE_COMPANY' | translate }}
+                }
+              </span>
+            </div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="card-body">
+            
+            <!-- Contact Info -->
+            @if (rh.email) {
+              <div class="rh-detail">
+                <lucide-icon [img]="Mail" [size]="16"></lucide-icon>
+                <span>{{ rh.email }}</span>
+              </div>
+            }
+            
+            @if (rh.phone) {
+              <div class="rh-detail">
+                <lucide-icon [img]="Phone" [size]="16"></lucide-icon>
+                <span>{{ rh.phone }}</span>
+              </div>
+            }
+
+            <!-- Professional Info -->
+            <div class="professional-info">
+              @if (rh.cmo_pro) {
+                <div class="info-badge">
+                  <lucide-icon [img]="Award" [size]="14"></lucide-icon>
+                  <span>{{ rh.cmo_pro }}</span>
+                </div>
+              }
+              
+              @if (rh.ipi_number) {
+                <div class="info-badge">
+                  <lucide-icon [img]="Hash" [size]="14"></lucide-icon>
+                  <span>IPI: {{ rh.ipi_number }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Card Actions -->
+          <div class="card-actions" (click)="$event.stopPropagation()">
+            <button 
+              class="action-btn edit" 
+              (click)="editRightsHolder(rh)"
+              [title]="'COMMON.EDIT' | translate">
+              <lucide-icon [img]="Edit" [size]="18"></lucide-icon>
+            </button>
+            <button 
+              class="action-btn delete" 
+              (click)="deleteRightsHolder(rh, $event)"
+              [title]="'COMMON.DELETE' | translate">
+              <lucide-icon [img]="Trash2" [size]="18"></lucide-icon>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

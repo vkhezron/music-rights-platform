@@ -1,27 +1,55 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, from } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { WorkspaceService } from './workspace.service';
-import { RightsHolder, RightsHolderFormData } from '../../models/rights-holder.model';
+
+export interface RightsHolder {
+  id: string;
+  workspace_id: string;
+  type: 'person' | 'company';
+  
+  // Person fields
+  first_name?: string;
+  last_name?: string;
+  
+  // Company fields
+  company_name?: string;
+  
+  // Common fields
+  email?: string;
+  phone?: string;
+  cmo_pro?: string;
+  ipi_number?: string;
+  tax_id?: string;
+  notes?: string;
+  
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RightsHolderFormData {
+  type: 'person' | 'company';
+  first_name?: string;
+  last_name?: string;
+  company_name?: string;
+  email?: string;
+  phone?: string;
+  cmo_pro?: string;
+  ipi_number?: string;
+  tax_id?: string;
+  notes?: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
-export class RightsHolderService {
+export class RightsHoldersService {
   private supabase = inject(SupabaseService);
   private workspaceService = inject(WorkspaceService);
 
   private rightsHoldersSubject = new BehaviorSubject<RightsHolder[]>([]);
   public rightsHolders$ = this.rightsHoldersSubject.asObservable();
-
-  constructor() {
-    // Load rights holders when workspace changes
-    this.workspaceService.currentWorkspace$.subscribe(workspace => {
-      if (workspace) {
-        this.loadRightsHolders(workspace.id);
-      }
-    });
-  }
 
   get rightsHolders(): RightsHolder[] {
     return this.rightsHoldersSubject.value;
@@ -44,24 +72,30 @@ export class RightsHolderService {
     }
   }
 
-  async createRightsHolder(formData: RightsHolderFormData): Promise<RightsHolder> {
-    const currentWorkspace = this.workspaceService.currentWorkspace;
-    if (!currentWorkspace) {
-      throw new Error('No workspace selected');
-    }
+  async createRightsHolder(data: RightsHolderFormData): Promise<RightsHolder> {
+    const workspace = this.workspaceService.currentWorkspace;
+    const user = this.supabase.currentUser;
 
-    const currentUser = this.supabase.currentUser;
-    if (!currentUser) {
-      throw new Error('User not authenticated');
+    if (!workspace || !user) {
+      throw new Error('No workspace or user found');
     }
 
     try {
-      const { data, error } = await this.supabase.client
+      const { data: rightsHolder, error } = await this.supabase.client
         .from('rights_holders')
         .insert({
-          ...formData,
-          workspace_id: currentWorkspace.id,
-          created_by: currentUser.id
+          workspace_id: workspace.id,
+          type: data.type,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          company_name: data.company_name,
+          email: data.email,
+          phone: data.phone,
+          cmo_pro: data.cmo_pro,
+          ipi_number: data.ipi_number,
+          tax_id: data.tax_id,
+          notes: data.notes,
+          created_by: user.id
         })
         .select()
         .single();
@@ -69,21 +103,21 @@ export class RightsHolderService {
       if (error) throw error;
 
       // Update local state
-      const currentHolders = this.rightsHoldersSubject.value;
-      this.rightsHoldersSubject.next([data, ...currentHolders]);
+      const current = this.rightsHoldersSubject.value;
+      this.rightsHoldersSubject.next([rightsHolder, ...current]);
 
-      return data;
+      return rightsHolder;
     } catch (error) {
       console.error('Error creating rights holder:', error);
       throw error;
     }
   }
 
-  async updateRightsHolder(id: string, formData: Partial<RightsHolderFormData>): Promise<RightsHolder> {
+  async updateRightsHolder(id: string, data: Partial<RightsHolderFormData>): Promise<RightsHolder> {
     try {
-      const { data, error } = await this.supabase.client
+      const { data: rightsHolder, error } = await this.supabase.client
         .from('rights_holders')
-        .update(formData)
+        .update(data)
         .eq('id', id)
         .select()
         .single();
@@ -91,11 +125,11 @@ export class RightsHolderService {
       if (error) throw error;
 
       // Update local state
-      const currentHolders = this.rightsHoldersSubject.value;
-      const updatedHolders = currentHolders.map(h => h.id === id ? data : h);
-      this.rightsHoldersSubject.next(updatedHolders);
+      const current = this.rightsHoldersSubject.value;
+      const updated = current.map(rh => rh.id === id ? rightsHolder : rh);
+      this.rightsHoldersSubject.next(updated);
 
-      return data;
+      return rightsHolder;
     } catch (error) {
       console.error('Error updating rights holder:', error);
       throw error;
@@ -112,8 +146,8 @@ export class RightsHolderService {
       if (error) throw error;
 
       // Update local state
-      const currentHolders = this.rightsHoldersSubject.value;
-      this.rightsHoldersSubject.next(currentHolders.filter(h => h.id !== id));
+      const current = this.rightsHoldersSubject.value;
+      this.rightsHoldersSubject.next(current.filter(rh => rh.id !== id));
     } catch (error) {
       console.error('Error deleting rights holder:', error);
       throw error;
@@ -136,31 +170,29 @@ export class RightsHolderService {
     }
   }
 
-  // Helper to get display name
-  getDisplayName(holder: RightsHolder): string {
-    if (holder.type === 'person') {
-      return `${holder.first_name} ${holder.last_name}`;
+  // Helper method to get display name
+  getDisplayName(rh: RightsHolder): string {
+    if (rh.type === 'person') {
+      return `${rh.first_name || ''} ${rh.last_name || ''}`.trim();
     }
-    return holder.company_name || 'Unknown';
+    return rh.company_name || 'Unknown';
   }
 
-  // Search rights holders
+  // Search functionality
   searchRightsHolders(query: string): RightsHolder[] {
-    const lowerQuery = query.toLowerCase();
-    return this.rightsHolders.filter(holder => {
-      const name = this.getDisplayName(holder).toLowerCase();
-      const email = holder.email?.toLowerCase() || '';
-      return name.includes(lowerQuery) || email.includes(lowerQuery);
+    const lowerQuery = query.toLowerCase().trim();
+    if (!lowerQuery) return this.rightsHolders;
+
+    return this.rightsHolders.filter(rh => {
+      const name = this.getDisplayName(rh).toLowerCase();
+      const email = (rh.email || '').toLowerCase();
+      const ipi = (rh.ipi_number || '').toLowerCase();
+      const cmo = (rh.cmo_pro || '').toLowerCase();
+
+      return name.includes(lowerQuery) ||
+             email.includes(lowerQuery) ||
+             ipi.includes(lowerQuery) ||
+             cmo.includes(lowerQuery);
     });
-  }
-
-  // Filter by type
-  filterByType(type: 'person' | 'company'): RightsHolder[] {
-    return this.rightsHolders.filter(h => h.type === type);
-  }
-
-  // Filter by kind
-  filterByKind(kind: string): RightsHolder[] {
-    return this.rightsHolders.filter(h => h.kind === kind);
   }
 }

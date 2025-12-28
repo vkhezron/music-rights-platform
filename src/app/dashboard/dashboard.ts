@@ -391,6 +391,8 @@ export class Dashboard implements OnInit {
     });
   }
 
+  
+
   setActiveTab(tab: 'dashboard' | 'rights-holders' | 'works') {
     this.activeTab.set(tab);
     

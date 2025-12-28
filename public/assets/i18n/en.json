@@ -233,25 +233,6 @@
     "NOTES": "Notes"
   },
 
-  "RIGHTS_HOLDERS": {
-    "TITLE": "Rights Holders",
-    "ADD": "Add Rights Holder",
-    "ADD_DESC": "Add artists, composers, publishers",
-    "CREATE": "Create Rights Holder",
-    "EDIT": "Edit Rights Holder",
-    "TYPE_PERSON": "Person",
-    "TYPE_COMPANY": "Company",
-    "FIRST_NAME": "First Name",
-    "LAST_NAME": "Last Name",
-    "COMPANY_NAME": "Company Name",
-    "EMAIL": "Email",
-    "PHONE": "Phone",
-    "CMO_PRO": "CMO/PRO",
-    "IPI_NUMBER": "IPI Number",
-    "TAX_ID": "Tax ID",
-    "NO_RIGHTS_HOLDERS": "No rights holders yet",
-    "CREATE_FIRST": "Add Your First Rights Holder"
-  },
   
   "COMMON": {
     "LOADING": "Loading...",
@@ -286,6 +267,7 @@
     "NO": "No",
     "OK": "OK",
     "RETRY": "Retry",
+    "ALL": "All",
     "CREATING": "Creating..."
   },
 
@@ -339,6 +321,23 @@
     "SPOTIFY": "Spotify"
   },
 
+  "RIGHTS_HOLDERS": {
+  "TITLE": "Rights Holders",
+  "ADD_RIGHTS_HOLDER": "Add Rights Holder",
+  "CREATE_RIGHTS_HOLDER": "Create Rights Holder",
+  "EDIT_RIGHTS_HOLDER": "Edit Rights Holder",
+  "NO_RIGHTS_HOLDERS": "No Rights Holders Yet",
+  "NO_RIGHTS_HOLDERS_DESCRIPTION": "Add artists, composers, producers, and publishers to manage splits",
+  "CREATE_FIRST_RIGHTS_HOLDER": "Add Your First Rights Holder",
+  "SEARCH_PLACEHOLDER": "Search by name, email, IPI, CMO...",
+  
+  "TYPE": "Type",
+  "TYPE_PERSON": "Person",
+  "TYPE_COMPANY": "Company"
+  },
+
+  
+
   "NOTIFICATIONS": {
     "PROFILE_CREATED": "Profile created successfully!",
     "PROFILE_UPDATED": "Profile updated successfully!",
@@ -387,4 +386,6 @@
     "TERMS": "Terms of Service",
     "CONTACT": "Contact Us"
   }
+  
 }
+

@@ -50,6 +50,21 @@ export const routes: Routes = [
         , loadComponent: () => import('./works/work-form/work-form').then(m => m.WorkFormComponent)
         , canActivate: [AuthGuard]  
     },
+    { 
+        path: 'rights-holders'
+        , loadComponent: () => import('./rights-holder/rights-holder-list/rights-holder-list').then(m => m.RightsHolderListComponent)
+        , canActivate: [AuthGuard]  
+    },
+    {   
+        path: 'rights-holders/create'
+        , loadComponent: () => import('./rights-holder/rights-holder-form/rights-holder-form').then(m => m.RightsHolderForm)
+        , canActivate: [AuthGuard]          
+    },
+    {
+        path: 'rights-holders/edit/:id'
+        , loadComponent: () => import('./rights-holder/rights-holder-form/rights-holder-form').then(m => m.RightsHolderForm)
+        , canActivate: [AuthGuard]
+    },
     {path: '**', redirectTo: 'login' }
 
 ];

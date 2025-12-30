@@ -27,7 +27,7 @@
 
   "AUTH": {
     "WELCOME_BACK": "Bienvenido de nuevo",
-    "LOGIN_SUBTITLE": "Inicia sesión para continuar",
+    "LOGIN_SUBTITLE": "Inicia sesión para continuar en la Plataforma de Derechos Musicales",
     "JOIN_PLATFORM": "Únete a la Plataforma de Derechos Musicales",
     "EMAIL": "Correo electrónico",
     "PASSWORD": "Contraseña",
@@ -230,27 +230,51 @@
     "ORIGINAL_WORK_INFO_HINT": "Añade detalles si ISRC/ISWC no está disponible",
 
     "ADDITIONAL_NOTES": "Notas adicionales",
-    "NOTES": "Notas"
+    "NOTES": "Notas",
+
+    "MANAGE_SPLITS": "Gestionar divisiones"
   },
 
   "RIGHTS_HOLDERS": {
     "TITLE": "Titulares de derechos",
-    "ADD": "Añadir titular de derechos",
-    "ADD_DESC": "Añade artistas, compositores, editoriales",
-    "CREATE": "Crear titular de derechos",
-    "EDIT": "Editar titular de derechos",
+    "ADD_RIGHTS_HOLDER": "Añadir titular de derechos",
+    "CREATE_RIGHTS_HOLDER": "Crear titular de derechos",
+    "EDIT_RIGHTS_HOLDER": "Editar titular de derechos",
+    "NO_RIGHTS_HOLDERS": "Aún no hay titulares de derechos",
+    "NO_RIGHTS_HOLDERS_DESCRIPTION": "Añade artistas, compositores, productores y editoriales para gestionar divisiones",
+    "CREATE_FIRST_RIGHTS_HOLDER": "Añade tu primer titular de derechos",
+    "SEARCH_PLACEHOLDER": "Buscar por nombre, correo, IPI, CMO...",
+
+    "TYPE": "Tipo",
     "TYPE_PERSON": "Persona",
     "TYPE_COMPANY": "Empresa",
+    "TYPE_PERSON_DESC": "Artista individual, compositor o productor",
+    "TYPE_COMPANY_DESC": "Empresa de edición, sello o organización",
+
+    "BASIC_INFO": "Información básica",
     "FIRST_NAME": "Nombre",
     "LAST_NAME": "Apellido",
     "COMPANY_NAME": "Nombre de la empresa",
+    "FIRST_NAME_REQUIRED": "El nombre es obligatorio",
+    "LAST_NAME_REQUIRED": "El apellido es obligatorio",
+    "COMPANY_NAME_REQUIRED": "El nombre de la empresa es obligatorio",
+    "NAME_MIN_LENGTH": "El nombre debe tener al menos 2 caracteres",
+
+    "CONTACT_INFO": "Información de contacto",
     "EMAIL": "Correo electrónico",
     "PHONE": "Teléfono",
+
+    "PROFESSIONAL_DETAILS": "Detalles profesionales",
     "CMO_PRO": "CMO/PRO",
+    "CMO_HINT": "Organización de Gestión Colectiva u Organización de Derechos de Ejecución",
     "IPI_NUMBER": "Número IPI",
+    "IPI_FORMAT": "Formato: 9-11 dígitos (ej. 123456789)",
+    "IPI_INVALID": "Formato de IPI no válido (debe ser 9-11 dígitos)",
     "TAX_ID": "NIF/CIF",
-    "NO_RIGHTS_HOLDERS": "Aún no hay titulares de derechos",
-    "CREATE_FIRST": "Añade tu primer titular de derechos"
+    "TAX_ID_HINT": "Número de identificación fiscal o número de IVA",
+
+    "NOTES": "Notas",
+    "ADDITIONAL_INFO": "Información adicional"
   },
 
   "COMMON": {
@@ -286,6 +310,7 @@
     "NO": "No",
     "OK": "OK",
     "RETRY": "Reintentar",
+    "ALL": "Todos",
     "CREATING": "Creando..."
   },
 
@@ -386,5 +411,65 @@
     "PRIVACY": "Política de Privacidad",
     "TERMS": "Términos de Servicio",
     "CONTACT": "Contáctanos"
+  },
+
+  "SPLITS": {
+    "SPLIT_EDITOR": "Editor de divisiones",
+    "IP_RIGHTS": "Derechos de PI",
+    "IP_RIGHTS_LONG": "Derechos de Propiedad Intelectual",
+    "IP_RIGHTS_DESC": "Derechos de autor de la obra musical",
+    "NEIGHBORING_RIGHTS": "Derechos afines",
+    "NEIGHBORING_RIGHTS_DESC": "Derechos sobre la grabación maestra",
+    "RIGHTS_HOLDERS": "Titulares de derechos",
+    "NO_RIGHTS_HOLDERS_ADDED": "Aún no se han añadido titulares de derechos",
+    "ADD_RIGHTS_HOLDER": "Añadir titular de derechos",
+    "SCAN_QR_CODE": "Escanear código QR",
+    "SCAN_QR": "Escanear QR",
+    "ADD_MANUALLY": "Añadir manualmente",
+    "SELECT_RIGHTS_HOLDER": "Selecciona titular de derechos...",
+    "NO_RIGHTS_HOLDERS_AVAILABLE": "Todos los titulares de derechos han sido añadidos. Crea nuevos para continuar.",
+    "SCAN_INSTRUCTION": "Posiciona el código QR dentro del marco",
+    "SCANNING_FOR": "Escaneando para",
+    "SAVE_SPLIT_SHEET": "Guardar hoja de división",
+    "SPLIT_SHEET_SAVED": "¡Hoja de división guardada exitosamente!",
+    "NO_IP_SPLITS_YET": "Aún no hay divisiones de PI",
+    "NO_NEIGHBORING_SPLITS_YET": "Aún no hay divisiones de derechos afines",
+    "ADD_HOLDER_AND_ENSURE_100": "Añade al menos un titular de derechos y asegúrate de que el total sea 100%",
+    "UNKNOWN_RIGHTS_HOLDER": "Titular de derechos desconocido",
+    "SPLIT_TYPE": "Tipo de división",
+    "PERCENTAGE": "Porcentaje",
+    "NOTES": "Notas",
+    "REMOVE": "Eliminar",
+    "INTELLECTUAL_PROPERTY_SPLITS": "Divisiones de Propiedad Intelectual",
+    "NEIGHBORING_RIGHTS_SPLITS": "Divisiones de derechos afines"
+  },
+
+  "GDPR": {
+    "COOKIES_TITLE": "Usamos cookies",
+    "COOKIES_DESCRIPTION": "Usamos cookies para mejorar tu experiencia en nuestro sitio web. Al usar nuestro sitio, aceptas nuestro uso de cookies.",
+    "COOKIES_DETAILS": "Tu privacidad es importante para nosotros. Obtén más información sobre cómo usamos cookies y cómo puedes controlarlas.",
+    "CUSTOMIZE": "Personalizar",
+    "ACCEPT_ALL": "Aceptar todo",
+    "ACCEPT_SELECTED": "Aceptar seleccionados",
+    "REJECT_ALL": "Rechazar todo",
+    "COOKIE_PREFERENCES": "Preferencias de cookies",
+    "ESSENTIAL": "Cookies esenciales",
+    "ESSENTIAL_DESC": "Requeridas para que el sitio web funcione correctamente. No se pueden desactivar.",
+    "ANALYTICS": "Cookies de análisis",
+    "ANALYTICS_DESC": "Nos ayudan a entender cómo usas nuestro sitio web para mejorarlo.",
+    "MARKETING": "Cookies de marketing",
+    "MARKETING_DESC": "Se utilizan para rastrear tu actividad y personalizar contenido y anuncios.",
+    "THIRD_PARTY": "Cookies de terceros",
+    "THIRD_PARTY_DESC": "Utilizadas por servicios externos para mejorar la funcionalidad.",
+    "DATA_EXPORT": "Exportar mis datos",
+    "DATA_EXPORT_TITLE": "Descargar tus datos personales",
+    "DATA_EXPORT_DESC": "Obtén una copia de todos tus datos personales en formato JSON",
+    "DELETE_ACCOUNT": "Eliminar mi cuenta",
+    "DELETE_ACCOUNT_TITLE": "Eliminar cuenta",
+    "DELETE_ACCOUNT_DESC": "Elimina permanentemente tu cuenta y todos los datos asociados. Esta acción no se puede deshacer.",
+    "DELETE_CONFIRM": "Entiendo que esto no se puede deshacer",
+    "DELETE_BUTTON": "Eliminar cuenta",
+    "PRIVACY_POLICY": "Política de Privacidad",
+    "TERMS_OF_SERVICE": "Términos de Servicio"
   }
 }

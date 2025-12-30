@@ -15,10 +15,12 @@
     <button (click)="switchLanguage('es')" [class.active]="currentLang === 'es'">
       🇪🇸 Español
     </button>
-    <button (click)="switchLanguage('ua')" [class.active]="currentLang === 'uk'">
+    <button (click)="switchLanguage('ua')" [class.active]="currentLang === 'ua'">
       🇺🇦 Українська
     </button>
   </div>
 </div>
 
 <router-outlet />
+
+<app-cookie-consent></app-cookie-consent>

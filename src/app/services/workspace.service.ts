@@ -225,4 +225,96 @@ export class WorkspaceService {
       return [];
     }
   }
+
+  /**
+   * Get user's role in workspace
+   */
+  async getUserRoleInWorkspace(workspaceId: string, userId: string): Promise<'owner' | 'admin' | 'member' | null> {
+    try {
+      const { data, error } = await this.supabase.client
+        .from('workspace_members')
+        .select('role')
+        .eq('workspace_id', workspaceId)
+        .eq('user_id', userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      return data?.role || null;
+
+    } catch (error) {
+      console.error('Error getting user role:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Add member to workspace by email
+   */
+  async inviteMember(workspaceId: string, email: string, role: 'admin' | 'member'): Promise<void> {
+    try {
+      // Find user by email
+      const { data: users, error: searchError } = await this.supabase.client.auth.admin.listUsers();
+      
+      if (searchError) throw searchError;
+
+      const user = users?.users?.find(u => u.email === email);
+      if (!user) {
+        throw new Error('User not found with that email');
+      }
+
+      // Add member
+      const { error } = await this.supabase.client
+        .from('workspace_members')
+        .insert({
+          workspace_id: workspaceId,
+          user_id: user.id,
+          role: role,
+          joined_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+
+    } catch (error) {
+      console.error('Error inviting member:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remove member from workspace
+   */
+  async removeMember(workspaceId: string, userId: string): Promise<void> {
+    try {
+      const { error } = await this.supabase.client
+        .from('workspace_members')
+        .delete()
+        .eq('workspace_id', workspaceId)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+    } catch (error) {
+      console.error('Error removing member:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update member role
+   */
+  async updateMemberRole(workspaceId: string, userId: string, role: 'admin' | 'member'): Promise<void> {
+    try {
+      const { error } = await this.supabase.client
+        .from('workspace_members')
+        .update({ role })
+        .eq('workspace_id', workspaceId)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+    } catch (error) {
+      console.error('Error updating member role:', error);
+      throw error;
+    }
+  }
 }

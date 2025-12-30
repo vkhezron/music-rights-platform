@@ -57,13 +57,27 @@ export const routes: Routes = [
     },
     {   
         path: 'rights-holders/create'
-        , loadComponent: () => import('./rights-holder/rights-holder-form/rights-holder-form').then(m => m.RightsHolderForm)
+        , loadComponent: () => import('./rights-holder/rights-holder-form/rights-holder-form').then(m => m.RightsHolderFormComponent)
         , canActivate: [AuthGuard]          
     },
     {
         path: 'rights-holders/edit/:id'
-        , loadComponent: () => import('./rights-holder/rights-holder-form/rights-holder-form').then(m => m.RightsHolderForm)
+        , loadComponent: () => import('./rights-holder/rights-holder-form/rights-holder-form').then(m => m.RightsHolderFormComponent)
         , canActivate: [AuthGuard]
+    },
+    {
+    path: 'works/:id/splits',
+    canActivate: [AuthGuard],
+    loadComponent: () => import('./split-editor/split-editor')
+      .then(m => m.SplitEditorComponent)
+  },
+    {
+        path: 'privacy-policy',
+        loadComponent: () => import('./legal/privacy-policy/privacy-policy').then(m => m.PrivacyPolicyComponent)
+    },
+    {
+        path: 'terms-of-service',
+        loadComponent: () => import('./legal/terms-of-service/terms-of-service').then(m => m.TermsOfServiceComponent)
     },
     {path: '**', redirectTo: 'login' }
 

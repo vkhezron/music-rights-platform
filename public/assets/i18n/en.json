@@ -230,7 +230,9 @@
     "ORIGINAL_WORK_INFO_HINT": "Provide any additional details if ISRC/ISWC not available",
     
     "ADDITIONAL_NOTES": "Additional Notes",
-    "NOTES": "Notes"
+    "NOTES": "Notes",
+
+    "MANAGE_SPLITS": "Manage Splits"
   },
 
   
@@ -333,8 +335,35 @@
   
   "TYPE": "Type",
   "TYPE_PERSON": "Person",
-  "TYPE_COMPANY": "Company"
-  },
+  "TYPE_COMPANY": "Company",
+  "TYPE_PERSON_DESC": "Individual artist, composer, or producer",
+  "TYPE_COMPANY_DESC": "Publishing company, label, or organization",
+  
+  "BASIC_INFO": "Basic Information",
+  "FIRST_NAME": "First Name",
+  "LAST_NAME": "Last Name",
+  "COMPANY_NAME": "Company Name",
+  "FIRST_NAME_REQUIRED": "First name is required",
+  "LAST_NAME_REQUIRED": "Last name is required",
+  "COMPANY_NAME_REQUIRED": "Company name is required",
+  "NAME_MIN_LENGTH": "Name must be at least 2 characters",
+  
+  "CONTACT_INFO": "Contact Information",
+  "EMAIL": "Email",
+  "PHONE": "Phone",
+  
+  "PROFESSIONAL_DETAILS": "Professional Details",
+  "CMO_PRO": "CMO/PRO",
+  "CMO_HINT": "Collective Management Organization or Performing Rights Organization",
+  "IPI_NUMBER": "IPI Number",
+  "IPI_FORMAT": "Format: 9-11 digits (e.g., 123456789)",
+  "IPI_INVALID": "Invalid IPI format (must be 9-11 digits)",
+  "TAX_ID": "Tax ID / VAT",
+  "TAX_ID_HINT": "Tax identification number or VAT number",
+  
+  "NOTES": "Notes",
+  "ADDITIONAL_INFO": "Additional Information"
+},
 
   
 
@@ -385,7 +414,68 @@
     "PRIVACY": "Privacy Policy",
     "TERMS": "Terms of Service",
     "CONTACT": "Contact Us"
+  },
+
+  "SPLITS": {
+    "SPLIT_EDITOR": "Split Editor",
+    "IP_RIGHTS": "IP Rights",
+    "IP_RIGHTS_LONG": "Intellectual Property Rights",
+    "IP_RIGHTS_DESC": "Copyright on the musical work",
+    "NEIGHBORING_RIGHTS": "Neighboring Rights",
+    "NEIGHBORING_RIGHTS_DESC": "Rights on the master recording",
+    "RIGHTS_HOLDERS": "Rights Holders",
+    "NO_RIGHTS_HOLDERS_ADDED": "No rights holders added yet",
+    "ADD_RIGHTS_HOLDER": "Add Rights Holder",
+    "SCAN_QR_CODE": "Scan QR Code",
+    "SCAN_QR": "Scan QR",
+    "ADD_MANUALLY": "Add Manually",
+    "SELECT_RIGHTS_HOLDER": "Select rights holder...",
+    "NO_RIGHTS_HOLDERS_AVAILABLE": "All rights holders have been added. Create new ones to continue.",
+    "SCAN_INSTRUCTION": "Position the QR code within the frame",
+    "SCANNING_FOR": "Scanning for",
+    "SAVE_SPLIT_SHEET": "Save Split Sheet",
+    "SPLIT_SHEET_SAVED": "Split sheet saved successfully!",
+    "NO_IP_SPLITS_YET": "No IP splits yet",
+    "NO_NEIGHBORING_SPLITS_YET": "No Neighboring splits yet",
+    "ADD_HOLDER_AND_ENSURE_100": "Add at least one rights holder and make sure total is 100%",
+    "UNKNOWN_RIGHTS_HOLDER": "Unknown rights holder",
+    "SPLIT_TYPE": "Split type",
+    "PERCENTAGE": "Percentage",
+    "NOTES": "Notes",
+    "REMOVE": "Remove",
+    "INTELLECTUAL_PROPERTY_SPLITS": "Intellectual Property splits",
+    "NEIGHBORING_RIGHTS_SPLITS": "Neighboring rights splits"
+  },
+
+  "GDPR": {
+    "COOKIES_TITLE": "We use cookies",
+    "COOKIES_DESCRIPTION": "We use cookies to improve your experience on our website. By using our site, you consent to our use of cookies.",
+    "COOKIES_DETAILS": "Your privacy is important to us. Learn more about how we use cookies and how you can control them.",
+    "CUSTOMIZE": "Customize",
+    "ACCEPT_ALL": "Accept All",
+    "ACCEPT_SELECTED": "Accept Selected",
+    "REJECT_ALL": "Reject All",
+    "COOKIE_PREFERENCES": "Cookie Preferences",
+    "ESSENTIAL": "Essential Cookies",
+    "ESSENTIAL_DESC": "Required for the website to function properly. These cannot be disabled.",
+    "ANALYTICS": "Analytics Cookies",
+    "ANALYTICS_DESC": "Help us understand how you use our website so we can improve it.",
+    "MARKETING": "Marketing Cookies",
+    "MARKETING_DESC": "Used to track your activity and personalize content and ads.",
+    "THIRD_PARTY": "Third-Party Cookies",
+    "THIRD_PARTY_DESC": "Used by external services to enhance functionality.",
+    "DATA_EXPORT": "Export My Data",
+    "DATA_EXPORT_TITLE": "Download Your Personal Data",
+    "DATA_EXPORT_DESC": "Get a copy of all your personal data in JSON format",
+    "DELETE_ACCOUNT": "Delete My Account",
+    "DELETE_ACCOUNT_TITLE": "Delete Account",
+    "DELETE_ACCOUNT_DESC": "Permanently delete your account and all associated data. This action cannot be undone.",
+    "DELETE_CONFIRM": "I understand this cannot be undone",
+    "DELETE_BUTTON": "Delete Account",
+    "PRIVACY_POLICY": "Privacy Policy",
+    "TERMS_OF_SERVICE": "Terms of Service"
   }
+
   
 }
 

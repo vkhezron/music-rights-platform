@@ -32,6 +32,8 @@
     "@ngx-translate/core": "^17.0.0",
     "@ngx-translate/http-loader": "^17.0.0",
     "@supabase/supabase-js": "^2.89.0",
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.3",
     "lucide-angular": "^0.562.0",
     "qrcode": "^1.5.4",
     "rxjs": "~7.8.0",

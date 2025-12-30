@@ -2,25 +2,25 @@ import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';  // ← ADD THIS LINE
+import { HttpClient } from '@angular/common/http';
+import { CookieConsentComponent } from './legal/cookie-consent/cookie-consent';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, TranslateModule, CommonModule],
+  imports: [RouterOutlet, TranslateModule, CommonModule, CookieConsentComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App {
   private translate = inject(TranslateService);
-  private http = inject(HttpClient);  // ← ADD THIS LINE
+  private http = inject(HttpClient);
   
-  currentLang = 'en';  // ← ADD THIS LINE
+  currentLang = 'en';
   
   constructor() {
-    this.loadTranslations('en');  // ← CHANGE THIS LINE
+    this.loadTranslations('en');
   }
   
-  // ← ADD THIS ENTIRE METHOD
   loadTranslations(lang: string) {
     this.http.get(`/assets/i18n/${lang}.json`).subscribe((translations: any) => {
       this.translate.setTranslation(lang, translations);
@@ -30,9 +30,8 @@ export class App {
   }
   
   switchLanguage(lang: string) {
-    this.loadTranslations(lang);  // ← CHANGE THIS LINE
+    this.loadTranslations(lang);
   }
-
 
   protected readonly title = signal('My Music Rights App');
 }

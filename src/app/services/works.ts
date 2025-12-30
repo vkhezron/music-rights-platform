@@ -234,6 +234,72 @@ export class WorksService {
     }
   }
 
+  // =====================================================
+  // BATCH SAVE SPLITS (IP + NEIGHBORING)
+  // =====================================================
+  
+  /**
+   * Save all splits for a work (both IP and Neighboring Rights)
+   * Deletes existing splits and creates new ones atomically
+   */
+  async saveWorkSplits(
+    workId: string,
+    ipSplits: any[],
+    neighboringSplits: any[]
+  ): Promise<void> {
+    const currentUser = this.supabase.currentUser;
+    if (!currentUser) {
+      throw new Error('User not authenticated');
+    }
+
+    try {
+      // Step 1: Delete all existing splits for this work
+      const { error: deleteError } = await this.supabase.client
+        .from('work_splits')
+        .delete()
+        .eq('work_id', workId);
+
+      if (deleteError) throw deleteError;
+
+      // Step 2: Combine all splits into one array
+      const allSplits = [
+        ...ipSplits.map(s => ({
+          work_id: workId,
+          rights_holder_id: s.rights_holder_id,
+          split_type: s.split_type,
+          percentage: Number(s.percentage) || 0,
+          notes: s.notes || null,
+          created_by: currentUser.id,
+          is_active: true
+        })),
+        ...neighboringSplits.map(s => ({
+          work_id: workId,
+          rights_holder_id: s.rights_holder_id,
+          split_type: s.split_type,
+          percentage: Number(s.percentage) || 0,
+          notes: s.notes || null,
+          created_by: currentUser.id,
+          is_active: true
+        }))
+      ];
+
+      // Step 3: Bulk insert all splits
+      if (allSplits.length > 0) {
+        const { error: insertError } = await this.supabase.client
+          .from('work_splits')
+          .insert(allSplits);
+
+        if (insertError) throw insertError;
+      }
+
+      // Success - splits saved
+      console.log(`Successfully saved ${allSplits.length} splits for work ${workId}`);
+    } catch (error) {
+      console.error('Error saving work splits:', error);
+      throw error;
+    }
+  }
+
   // Validate splits total 100%
   async validateSplits(workId: string, splitType: SplitType): Promise<{ valid: boolean; total: number }> {
     const splits = await this.getWorkSplits(workId);

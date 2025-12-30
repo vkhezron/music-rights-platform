@@ -1,0 +1,329 @@
+<!-- src/app/split-editor/split-editor.html -->
+<!-- Split Editor Component - Manages IP and Neighboring Rights Splits -->
+
+<div class="split-editor-container">
+  
+  <!-- =========================
+       HEADER WITH NAVIGATION
+  ========================== -->
+  <div class="split-editor-header">
+    <div class="header-left">
+      <button class="back-btn" (click)="cancel()" [disabled]="isSaving() || isLoading()">
+        <lucide-icon [img]="ArrowLeft" [size]="20"></lucide-icon>
+        <span>{{ 'COMMON.BACK' | translate }}</span>
+      </button>
+      
+      <div class="header-info">
+        <h1 class="work-title">{{ work()?.work_title || ('SPLITS.SPLIT_EDITOR' | translate) }}</h1>
+        <p class="work-subtitle">{{ 'SPLITS.SPLIT_EDITOR' | translate }}</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button
+        type="button"
+        class="secondary-btn download-btn"
+        (click)="downloadPDF()"
+        [disabled]="isSaving() || isLoading() || !overallValid()"
+        [title]="'Download split sheet PDF'">
+        <lucide-icon [img]="FileText" [size]="18"></lucide-icon>
+        <span class="btn-text">{{ 'COMMON.DOWNLOAD' | translate }}</span>
+      </button>
+
+      <button
+        class="primary-btn save-btn"
+        type="button"
+        (click)="saveSplits()"
+        [disabled]="isSaving() || isLoading() || !overallValid()">
+        <lucide-icon [img]="Save" [size]="18"></lucide-icon>
+        @if (!isSaving()) {
+          <span class="btn-text">{{ 'COMMON.SAVE' | translate }}</span>
+        } @else {
+          <span class="btn-text">{{ 'COMMON.SAVING' | translate }}...</span>
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================
+       MESSAGES (ERROR/SUCCESS)
+  ========================== -->
+  @if (errorMessage()) {
+    <div class="alert alert-error">
+      <lucide-icon [img]="AlertCircle" [size]="20"></lucide-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      <lucide-icon [img]="CheckCircle" [size]="20"></lucide-icon>
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+
+  <!-- =========================
+       LOADING STATE
+  ========================== -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>{{ 'COMMON.LOADING' | translate }}</p>
+    </div>
+  } @else {
+
+    <!-- =========================
+         TAB NAVIGATION
+    ========================== -->
+    <div class="tabs-container">
+      <div class="tabs-nav">
+        <button
+          class="tab-btn"
+          [class.active]="activeTab() === 'ip'"
+          (click)="setActiveTab('ip')">
+          <lucide-icon [img]="Music" [size]="18"></lucide-icon>
+          <span>{{ 'SPLITS.IP_RIGHTS' | translate }}</span>
+          <span class="tab-total" [class.valid]="ipValidation().isValid">
+            {{ ipTotal().toFixed(2) }}%
+          </span>
+        </button>
+
+        <button
+          class="tab-btn"
+          [class.active]="activeTab() === 'neighboring'"
+          (click)="setActiveTab('neighboring')">
+          <lucide-icon [img]="Music" [size]="18"></lucide-icon>
+          <span>{{ 'SPLITS.NEIGHBORING_RIGHTS' | translate }}</span>
+          <span class="tab-total" [class.valid]="neighboringValidation().isValid">
+            {{ neighboringTotal().toFixed(2) }}%
+          </span>
+        </button>
+      </div>
+
+      <!-- Validation indicator bar -->
+      <div class="validation-bar" [class]="'validation-' + currentValidation().class">
+        <span class="validation-text">{{ currentValidation().message }}</span>
+      </div>
+    </div>
+
+    <!-- =========================
+         CURRENT SPLITS SECTION
+    ========================== -->
+    <div class="splits-content">
+
+      <!-- Empty State -->
+      @if (currentSplits().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">
+            <lucide-icon [img]="User" [size]="48"></lucide-icon>
+          </div>
+          <p class="empty-title">
+            @if (activeTab() === 'ip') {
+              {{ 'SPLITS.NO_IP_SPLITS_YET' | translate }}
+            } @else {
+              {{ 'SPLITS.NO_NEIGHBORING_SPLITS_YET' | translate }}
+            }
+          </p>
+          <p class="empty-text">{{ 'SPLITS.ADD_HOLDER_AND_ENSURE_100' | translate }}</p>
+        </div>
+      }
+
+      <!-- Existing Splits List -->
+      @if (currentSplits().length > 0) {
+        <div class="splits-list">
+          @for (split of currentSplits(); track $index; let index = $index) {
+            <div class="split-item">
+              <!-- Rights Holder Info -->
+              <div class="split-holder-info">
+                @if (split.rights_holder) {
+                  <lucide-icon 
+                    [img]="getRightsHolderIcon(split.rights_holder)" 
+                    [size]="24"
+                    class="holder-icon">
+                  </lucide-icon>
+                  <div class="holder-details">
+                    <h4 class="holder-name">{{ getRightsHolderName(split.rights_holder) }}</h4>
+                    @if (split.rights_holder.email) {
+                      <p class="holder-email">{{ split.rights_holder.email }}</p>
+                    }
+                  </div>
+                } @else {
+                  <div class="holder-details">
+                    <h4 class="holder-name">{{ 'SPLITS.UNKNOWN_RIGHTS_HOLDER' | translate }}</h4>
+                  </div>
+                }
+              </div>
+
+              <!-- Split Type Selector -->
+              <div class="split-controls">
+                <div class="control-group">
+                  <label class="control-label">{{ 'SPLITS.SPLIT_TYPE' | translate }}</label>
+                  <select
+                    class="type-select"
+                    [value]="split.split_type"
+                    (change)="updateSplitType(index, $any($event.target).value)">
+                    @for (option of currentTypeOptions(); track option.value) {
+                      <option [value]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
+                </div>
+
+                <!-- Percentage Input -->
+                <div class="control-group">
+                  <label class="control-label">{{ 'SPLITS.PERCENTAGE' | translate }}</label>
+                  <div class="percentage-input-wrapper">
+                    <input
+                      type="number"
+                      class="percentage-input"
+                      [value]="split.percentage"
+                      (input)="updateSplitPercentage(index, $any($event.target).value)"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      placeholder="0.00"
+                    />
+                    <span class="percentage-symbol">%</span>
+                  </div>
+                </div>
+
+                <!-- Notes Input -->
+                <div class="control-group">
+                  <label class="control-label">{{ 'COMMON.NOTES' | translate }}</label>
+                  <input
+                    type="text"
+                    class="notes-input"
+                    [value]="split.notes || ''"
+                    (input)="updateSplitNotes(index, $any($event.target).value)"
+                    [placeholder]="'Add notes...' | translate"
+                  />
+                </div>
+
+                <!-- Remove Button -->
+                <button
+                  class="remove-btn"
+                  (click)="removeSplit(index)"
+                  type="button"
+                  [title]="'Remove this split' | translate">
+                  <lucide-icon [img]="Trash2" [size]="18"></lucide-icon>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Add Rights Holder Section -->
+      <div class="add-section">
+        @if (!addingManually()) {
+          <div class="add-actions">
+            @if (availableRightsHolders().length > 0) {
+              <button
+                class="action-btn manual-btn"
+                (click)="addingManually.set(true)"
+                type="button">
+                <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
+                <span>{{ 'SPLITS.ADD_MANUALLY' | translate }}</span>
+              </button>
+            }
+
+            @if (hasCameraSupport()) {
+              <button
+                class="action-btn qr-btn"
+                (click)="startScanning()"
+                type="button">
+                <lucide-icon [img]="QrCode" [size]="18"></lucide-icon>
+                <span>{{ 'SPLITS.SCAN_QR_CODE' | translate }}</span>
+              </button>
+            }
+
+            @if (availableRightsHolders().length === 0 && currentSplits().length > 0) {
+              <p class="no-more-holders">{{ 'SPLITS.NO_RIGHTS_HOLDERS_AVAILABLE' | translate }}</p>
+            }
+          </div>
+        }
+
+        <!-- Manual Add Form -->
+        @if (addingManually()) {
+          <div class="manual-add-form">
+            <label class="form-label">{{ 'SPLITS.SELECT_RIGHTS_HOLDER' | translate }}</label>
+            <div class="form-row">
+              <select
+                class="holder-select"
+                [(ngModel)]="selectedRightsHolderId">
+                <option value="">{{ 'SPLITS.SELECT_RIGHTS_HOLDER' | translate }}</option>
+                @for (rh of availableRightsHolders(); track rh.id) {
+                  <option [value]="rh.id">
+                    {{ getRightsHolderName(rh) }}
+                  </option>
+                }
+              </select>
+
+              <button
+                class="btn-add-holder"
+                (click)="addSplit()"
+                [disabled]="!selectedRightsHolderId"
+                type="button">
+                <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+                {{ 'COMMON.ADD' | translate }}
+              </button>
+
+              <button
+                class="btn-cancel-add"
+                (click)="addingManually.set(false)"
+                type="button">
+                <lucide-icon [img]="X" [size]="16"></lucide-icon>
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- QR Scanner Modal -->
+        @if (isScanning()) {
+          <div class="qr-scanner-modal">
+            <div class="qr-scanner-content">
+              <div class="qr-header">
+                <h3>{{ 'SPLITS.SCANNING_FOR' | translate }}
+                  @if (activeTab() === 'ip') {
+                    {{ 'SPLITS.IP_RIGHTS' | translate }}
+                  } @else {
+                    {{ 'SPLITS.NEIGHBORING_RIGHTS' | translate }}
+                  }
+                </h3>
+                <button
+                  class="close-btn"
+                  (click)="stopScanning()"
+                  type="button">
+                  <lucide-icon [img]="X" [size]="20"></lucide-icon>
+                </button>
+              </div>
+
+              <video
+                #videoElement
+                class="qr-video"
+                playsinline
+              ></video>
+
+              <p class="qr-instruction">{{ 'SPLITS.SCAN_INSTRUCTION' | translate }}</p>
+
+              @if (scanError()) {
+                <div class="scan-error">
+                  <lucide-icon [img]="AlertCircle" [size]="18"></lucide-icon>
+                  <span>{{ scanError() }}</span>
+                </div>
+              }
+
+              <button
+                class="btn-stop-scan"
+                (click)="stopScanning()"
+                type="button">
+                {{ 'COMMON.CANCEL' | translate }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+  }
+
+</div>

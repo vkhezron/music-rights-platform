@@ -5,9 +5,11 @@ import { TranslateModule } from '@ngx-translate/core';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorksService } from '../../services/works';
 import { Work } from '../../../models/work.model';
+import { WorkSplit } from '../../../models/work-split.model';
 
 // Lucide Icons
-import { LucideAngularModule, Music, Plus, Edit, Trash2, Search, Calendar, Clock, Globe, ArrowLeft } from 'lucide-angular';
+import { LucideAngularModule, Music,
+   Plus, Edit, Trash2, Search, Calendar, Clock, Globe, ArrowLeft } from 'lucide-angular';
 
 @Component({
   selector: 'app-works-list',
@@ -113,6 +115,14 @@ export class WorksListComponent implements OnInit {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  manageSplits(work: Work, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+      //event.preventDefault();
+    }
+    this.router.navigate(['/works', work.id, 'splits']);
   }
 
   goBack() {

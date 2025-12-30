@@ -1,1 +1,324 @@
-<p>rights-holder-form works!</p>
+<div class="rh-form-container">
+  
+  <!-- Header -->
+  <div class="form-header">
+    <div class="header-left">
+      <button class="back-btn" (click)="cancel()">
+        <lucide-icon [img]="ArrowLeft" [size]="20"></lucide-icon>
+      </button>
+      <div class="header-info">
+        <h1>{{ (isEditMode() ? 'RIGHTS_HOLDERS.EDIT_RIGHTS_HOLDER' : 'RIGHTS_HOLDERS.CREATE_RIGHTS_HOLDER') | translate }}</h1>
+        <p>{{ getDisplayName() }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form [formGroup]="rhForm" (ngSubmit)="onSubmit()" class="rh-form">
+    
+    <!-- Success Message -->
+    @if (successMessage()) {
+      <div class="success-alert">
+        <lucide-icon [img]="CheckCircle" [size]="20" class="success-icon"></lucide-icon>
+        <span>{{ successMessage() }}</span>
+      </div>
+    }
+
+    <!-- Error Message -->
+    @if (errorMessage()) {
+      <div class="error-alert">
+        <lucide-icon [img]="AlertCircle" [size]="20" class="error-icon"></lucide-icon>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <!-- Type Selection -->
+    <div class="form-section">
+      <h2 class="section-title">{{ 'RIGHTS_HOLDERS.TYPE' | translate }}</h2>
+      
+      <div class="type-selector">
+        <label class="type-option" [class.selected]="rhForm.get('type')?.value === 'person'">
+          <input
+            type="radio"
+            formControlName="type"
+            value="person"
+            class="type-radio"
+          />
+          <div class="type-card">
+            <div class="type-icon">
+              <lucide-icon [img]="User" [size]="32"></lucide-icon>
+            </div>
+            <div class="type-info">
+              <h3>{{ 'RIGHTS_HOLDERS.TYPE_PERSON' | translate }}</h3>
+              <p>{{ 'RIGHTS_HOLDERS.TYPE_PERSON_DESC' | translate }}</p>
+            </div>
+          </div>
+        </label>
+
+        <label class="type-option" [class.selected]="rhForm.get('type')?.value === 'company'">
+          <input
+            type="radio"
+            formControlName="type"
+            value="company"
+            class="type-radio"
+          />
+          <div class="type-card">
+            <div class="type-icon">
+              <lucide-icon [img]="Building2" [size]="32"></lucide-icon>
+            </div>
+            <div class="type-info">
+              <h3>{{ 'RIGHTS_HOLDERS.TYPE_COMPANY' | translate }}</h3>
+              <p>{{ 'RIGHTS_HOLDERS.TYPE_COMPANY_DESC' | translate }}</p>
+            </div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Basic Information -->
+    <div class="form-section">
+      <h2 class="section-title">
+        @if (rhForm.get('type')?.value === 'person') {
+          <lucide-icon [img]="User" [size]="24"></lucide-icon>
+        }
+        @if (rhForm.get('type')?.value === 'company') {
+          <lucide-icon [img]="Building2" [size]="24"></lucide-icon>
+        }
+        {{ 'RIGHTS_HOLDERS.BASIC_INFO' | translate }}
+      </h2>
+
+      <!-- Person Fields -->
+      @if (rhForm.get('type')?.value === 'person') {
+        <div class="form-row">
+          <div class="form-group">
+            <label for="first_name" class="required">
+              {{ 'RIGHTS_HOLDERS.FIRST_NAME' | translate }}
+            </label>
+            <input
+              id="first_name"
+              type="text"
+              formControlName="first_name"
+              class="form-input"
+              [class.error]="hasError('first_name', 'required') || hasError('first_name', 'minlength')"
+              placeholder="John"
+            />
+            @if (hasError('first_name', 'required')) {
+              <div class="error-message">
+                {{ 'RIGHTS_HOLDERS.FIRST_NAME_REQUIRED' | translate }}
+              </div>
+            }
+            @if (hasError('first_name', 'minlength')) {
+              <div class="error-message">
+                {{ 'RIGHTS_HOLDERS.NAME_MIN_LENGTH' | translate }}
+              </div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="last_name" class="required">
+              {{ 'RIGHTS_HOLDERS.LAST_NAME' | translate }}
+            </label>
+            <input
+              id="last_name"
+              type="text"
+              formControlName="last_name"
+              class="form-input"
+              [class.error]="hasError('last_name', 'required') || hasError('last_name', 'minlength')"
+              placeholder="Doe"
+            />
+            @if (hasError('last_name', 'required')) {
+              <div class="error-message">
+                {{ 'RIGHTS_HOLDERS.LAST_NAME_REQUIRED' | translate }}
+              </div>
+            }
+            @if (hasError('last_name', 'minlength')) {
+              <div class="error-message">
+                {{ 'RIGHTS_HOLDERS.NAME_MIN_LENGTH' | translate }}
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Company Field -->
+      @if (rhForm.get('type')?.value === 'company') {
+        <div class="form-group">
+          <label for="company_name" class="required">
+            {{ 'RIGHTS_HOLDERS.COMPANY_NAME' | translate }}
+          </label>
+          <input
+            id="company_name"
+            type="text"
+            formControlName="company_name"
+            class="form-input"
+            [class.error]="hasError('company_name', 'required') || hasError('company_name', 'minlength')"
+            placeholder="Big Music Publishing Inc."
+          />
+          @if (hasError('company_name', 'required')) {
+            <div class="error-message">
+              {{ 'RIGHTS_HOLDERS.COMPANY_NAME_REQUIRED' | translate }}
+            </div>
+          }
+          @if (hasError('company_name', 'minlength')) {
+            <div class="error-message">
+              {{ 'RIGHTS_HOLDERS.NAME_MIN_LENGTH' | translate }}
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Contact Information -->
+    <div class="form-section">
+      <h2 class="section-title">
+        <lucide-icon [img]="Mail" [size]="24"></lucide-icon>
+        {{ 'RIGHTS_HOLDERS.CONTACT_INFO' | translate }}
+      </h2>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">
+            <lucide-icon [img]="Mail" [size]="16"></lucide-icon>
+            {{ 'RIGHTS_HOLDERS.EMAIL' | translate }}
+          </label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            class="form-input"
+            [class.error]="hasError('email', 'email')"
+            placeholder="email@example.com"
+          />
+          @if (hasError('email', 'email')) {
+            <div class="error-message">
+              {{ 'AUTH.INVALID_EMAIL' | translate }}
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="phone">
+            <lucide-icon [img]="Phone" [size]="16"></lucide-icon>
+            {{ 'RIGHTS_HOLDERS.PHONE' | translate }}
+          </label>
+          <input
+            id="phone"
+            type="tel"
+            formControlName="phone"
+            class="form-input"
+            placeholder="+1 (555) 123-4567"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Professional Details -->
+    <div class="form-section">
+      <h2 class="section-title">
+        <lucide-icon [img]="Award" [size]="24"></lucide-icon>
+        {{ 'RIGHTS_HOLDERS.PROFESSIONAL_DETAILS' | translate }}
+      </h2>
+
+      <div class="form-group">
+        <label for="cmo_pro">
+          <lucide-icon [img]="Award" [size]="16"></lucide-icon>
+          {{ 'RIGHTS_HOLDERS.CMO_PRO' | translate }}
+        </label>
+        <select
+          id="cmo_pro"
+          formControlName="cmo_pro"
+          class="form-select">
+          @for (cmo of cmoOptions; track cmo.value) {
+            <option [value]="cmo.value">{{ cmo.label }}</option>
+          }
+        </select>
+        <div class="field-hint">{{ 'RIGHTS_HOLDERS.CMO_HINT' | translate }}</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="ipi_number">
+            <lucide-icon [img]="Hash" [size]="16"></lucide-icon>
+            {{ 'RIGHTS_HOLDERS.IPI_NUMBER' | translate }}
+          </label>
+          <input
+            id="ipi_number"
+            type="text"
+            formControlName="ipi_number"
+            class="form-input code-input"
+            [class.error]="hasError('ipi_number', 'pattern')"
+            placeholder="123456789"
+            maxlength="11"
+          />
+          @if (hasError('ipi_number', 'pattern')) {
+            <div class="error-message">
+              {{ 'RIGHTS_HOLDERS.IPI_INVALID' | translate }}
+            </div>
+          }
+          <div class="field-hint">{{ 'RIGHTS_HOLDERS.IPI_FORMAT' | translate }}</div>
+        </div>
+
+        <div class="form-group">
+          <label for="tax_id">
+            <lucide-icon [img]="Hash" [size]="16"></lucide-icon>
+            {{ 'RIGHTS_HOLDERS.TAX_ID' | translate }}
+          </label>
+          <input
+            id="tax_id"
+            type="text"
+            formControlName="tax_id"
+            class="form-input code-input"
+            placeholder="12-3456789"
+          />
+          <div class="field-hint">{{ 'RIGHTS_HOLDERS.TAX_ID_HINT' | translate }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="form-section">
+      <h2 class="section-title">
+        <lucide-icon [img]="FileText" [size]="24"></lucide-icon>
+        {{ 'RIGHTS_HOLDERS.NOTES' | translate }}
+      </h2>
+
+      <div class="form-group">
+        <label for="notes">{{ 'RIGHTS_HOLDERS.ADDITIONAL_INFO' | translate }}</label>
+        <textarea
+          id="notes"
+          formControlName="notes"
+          class="form-textarea"
+          rows="4"
+          placeholder="Any additional information about this rights holder..."
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="cancel-button"
+        (click)="cancel()"
+        [disabled]="isLoading()">
+        {{ 'COMMON.CANCEL' | translate }}
+      </button>
+      
+      <button
+        type="submit"
+        class="submit-button"
+        [disabled]="isLoading() || rhForm.invalid">
+        @if (!isLoading()) {
+          <lucide-icon [img]="Save" [size]="20"></lucide-icon>
+          <span>{{ (isEditMode() ? 'COMMON.SAVE' : 'RIGHTS_HOLDERS.CREATE_RIGHTS_HOLDER') | translate }}</span>
+        }
+        @if (isLoading()) {
+          <span class="loading">
+            <span class="spinner"></span>
+            {{ 'COMMON.SAVING' | translate }}
+          </span>
+        }
+      </button>
+    </div>
+  </form>
+</div>

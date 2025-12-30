@@ -1,0 +1,592 @@
+<div class="protocol-form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <h1>{{ 'PROTOCOL.PROTOCOL_FORM' | translate }}</h1>
+    <p class="subtitle">{{ 'PROTOCOL.MUSIC_WORK_REGISTRATION' | translate }}</p>
+  </div>
+
+  <!-- Error/Success Messages -->
+  <div class="alert-container">
+    <div *ngIf="submitError()" class="alert alert-error">
+      <strong>{{ 'ERROR' | translate }}:</strong> {{ submitError() }}
+    </div>
+    <div *ngIf="submitSuccess()" class="alert alert-success">
+      {{ 'PROTOCOL.SUBMISSION_SUCCESS' | translate }}
+    </div>
+  </div>
+
+  <form (ngSubmit)="submitProtocol()">
+    <!-- ============ WORK INFORMATION ============ -->
+    <div class="form-card">
+      <div class="card-header">
+        <h2>{{ 'PROTOCOL.WORK_INFORMATION' | translate }}</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>{{ 'PROTOCOL.WORK_TITLE' | translate }} *</label>
+          <input
+            type="text"
+            [(ngModel)]="work_title"
+            name="work_title"
+            placeholder="{{ 'PROTOCOL.WORK_TITLE' | translate }}"
+            class="form-input"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'PROTOCOL.ALTERNATIVE_TITLE' | translate }}</label>
+          <input
+            type="text"
+            [(ngModel)]="alternative_title"
+            name="alternative_title"
+            placeholder="{{ 'PROTOCOL.ALTERNATIVE_TITLE' | translate }}"
+            class="form-input"
+          />
+        </div>
+
+        <!-- Advanced Options Toggle -->
+        <button type="button" class="btn btn-secondary" (click)="toggleAdvanced()">
+          <i class="icon">{{ show_advanced() ? '−' : '+' }}</i>
+          {{ 'PROTOCOL.ADVANCED_OPTIONS' | translate }}
+        </button>
+
+        <!-- Advanced Options -->
+        <div *ngIf="show_advanced()" class="advanced-section">
+          <div class="form-group">
+            <label>{{ 'PROTOCOL.RELEASE_TITLE' | translate }}</label>
+            <input
+              type="text"
+              [(ngModel)]="release_title"
+              name="release_title"
+              placeholder="{{ 'PROTOCOL.RELEASE_TITLE' | translate }}"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>ISWC</label>
+              <input
+                type="text"
+                [(ngModel)]="iswc"
+                name="iswc"
+                placeholder="ISWC"
+                class="form-input"
+              />
+            </div>
+            <div class="form-group">
+              <label>ISRC</label>
+              <input
+                type="text"
+                [(ngModel)]="isrc"
+                name="isrc"
+                placeholder="ISRC"
+                class="form-input"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>EAN</label>
+              <input
+                type="text"
+                [(ngModel)]="ean"
+                name="ean"
+                placeholder="EAN"
+                class="form-input"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>{{ 'PROTOCOL.PRIMARY_LANGUAGE' | translate }}</label>
+              <input
+                type="text"
+                [(ngModel)]="primary_language"
+                name="primary_language"
+                placeholder="{{ 'PROTOCOL.PRIMARY_LANGUAGE' | translate }}"
+                class="form-input"
+              />
+            </div>
+            <div class="form-group">
+              <label>{{ 'PROTOCOL.SECONDARY_LANGUAGE' | translate }}</label>
+              <input
+                type="text"
+                [(ngModel)]="secondary_language"
+                name="secondary_language"
+                placeholder="{{ 'PROTOCOL.SECONDARY_LANGUAGE' | translate }}"
+                class="form-input"
+              />
+            </div>
+          </div>
+
+          <!-- Cover Version -->
+          <div class="form-group checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                [(ngModel)]="is_cover_version"
+                name="is_cover_version"
+              />
+              {{ 'PROTOCOL.IS_COVER_VERSION' | translate }}
+            </label>
+          </div>
+
+          <div *ngIf="is_cover_version()" class="form-group">
+            <label>{{ 'PROTOCOL.ORIGINAL_WORK_TITLE' | translate }}</label>
+            <input
+              type="text"
+              [(ngModel)]="original_work_title"
+              name="original_work_title"
+              placeholder="{{ 'PROTOCOL.ORIGINAL_WORK_TITLE' | translate }}"
+              class="form-input"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ LYRIC AUTHORS ============ -->
+    <div class="form-card">
+      <div class="card-header">
+        <h2>{{ 'PROTOCOL.LYRIC_AUTHORS' | translate }}</h2>
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm"
+          (click)="clearLyricAuthors()"
+        >
+          {{ 'CLEAR' | translate }}
+        </button>
+      </div>
+      <div class="card-body">
+        <div *ngFor="let author of lyric_authors(); let i = index" class="author-row">
+          <div class="author-header">
+            <span class="author-number">{{ 'PROTOCOL.LYRIC_AUTHOR' | translate }} {{ i + 1 }}</span>
+            <button
+              *ngIf="lyric_authors().length > 0"
+              type="button"
+              class="btn-remove"
+              (click)="removeLyricAuthor(i)"
+              title="{{ 'DELETE' | translate }}"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>{{ 'PROTOCOL.NAME' | translate }} *</label>
+              <input
+                type="text"
+                [(ngModel)]="author.name"
+                [name]="'lyric_name_' + i"
+                class="form-input"
+                placeholder="{{ 'PROTOCOL.NAME' | translate }}"
+              />
+            </div>
+            <div class="form-group">
+              <label>{{ 'PROTOCOL.MIDDLE_NAME' | translate }}</label>
+              <input
+                type="text"
+                [(ngModel)]="author.middle_name"
+                [name]="'lyric_middle_' + i"
+                class="form-input"
+                placeholder="{{ 'PROTOCOL.MIDDLE_NAME' | translate }}"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>{{ 'PROTOCOL.SURNAME' | translate }} *</label>
+              <input
+                type="text"
+                [(ngModel)]="author.surname"
+                [name]="'lyric_surname_' + i"
+                class="form-input"
+                placeholder="{{ 'PROTOCOL.SURNAME' | translate }}"
+              />
+            </div>
+            <div class="form-group">
+              <label>{{ 'PROTOCOL.AKA' | translate }}</label>
+              <input
+                type="text"
+                [(ngModel)]="author.aka"
+                [name]="'lyric_aka_' + i"
+                class="form-input"
+                placeholder="{{ 'PROTOCOL.AKA' | translate }}"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>CMO {{ 'PROTOCOL.NAME' | translate }}</label>
+              <input
+                type="text"
+                [(ngModel)]="author.cmo_name"
+                [name]="'lyric_cmo_' + i"
+                class="form-input"
+                placeholder="CMO"
+              />
+            </div>
+            <div class="form-group">
+              <label>PRO {{ 'PROTOCOL.NAME' | translate }}</label>
+              <input
+                type="text"
+                [(ngModel)]="author.pro_name"
+                [name]="'lyric_pro_' + i"
+                class="form-input"
+                placeholder="PRO"
+              />
+            </div>
+            <div class="form-group">
+              <label>% *</label>
+              <input
+                type="number"
+                [(ngModel)]="author.participation_percentage"
+                [name]="'lyric_percent_' + i"
+                class="form-input"
+                placeholder="%"
+                min="0"
+                max="100"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+          <div class="progress-bar" [style.width.%]="lyric_total()" [style.background-color]="lyricProgressColor">
+          </div>
+        </div>
+        <div class="progress-text">
+          {{ 'PROTOCOL.TOTAL' | translate }}: {{ lyric_total() }}%
+        </div>
+
+        <button type="button" class="btn btn-primary" (click)="addLyricAuthor()">
+          + {{ 'PROTOCOL.ADD_LYRIC_AUTHOR' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <!-- ============ MUSIC AUTHORS ============ -->
+    <div class="form-card">
+      <div class="card-header">
+        <h2>{{ 'PROTOCOL.MUSIC_AUTHORS' | translate }}</h2>
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm"
+          (click)="clearMusicAuthors()"
+        >
+          {{ 'CLEAR' | translate }}
+        </button>
+      </div>
+      <div class="card-body">
+        <div *ngFor="let author of music_authors(); let i = index" class="author-row">
+          <div class="author-header">
+            <span class="author-number">{{ 'PROTOCOL.MUSIC_AUTHOR' | translate }} {{ i + 1 }}</span>
+            <button
+              *ngIf="music_authors().length > 0"
+              type="button"
+              class="btn-remove"
+              (click)="removeMusicAuthor(i)"
+              title="{{ 'DELETE' | translate }}"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>{{ 'PROTOCOL.NAME' | translate }} *</label>
+              <input
+                type="text"
+                [(ngModel)]="author.name"
+                [name]="'music_name_' + i"
+                class="form-input"
+                placeholder="{{ 'PROTOCOL.NAME' | translate }}"
+              />
+            </div>
+            <div class="form-group">
+              <label>{{ 'PROTOCOL.MIDDLE_NAME' | translate }}</label>
+              <input
+                type="text"
+                [(ngModel)]="author.middle_name"
+                [name]="'music_middle_' + i"
+                class="form-input"
+                placeholder="{{ 'PROTOCOL.MIDDLE_NAME' | translate }}"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>{{ 'PROTOCOL.SURNAME' | translate }} *</label>
+              <input
+                type="text"
+                [(ngModel)]="author.surname"
+                [name]="'music_surname_' + i"
+                class="form-input"
+                placeholder="{{ 'PROTOCOL.SURNAME' | translate }}"
+              />
+            </div>
+            <div class="form-group">
+              <label>{{ 'PROTOCOL.AKA' | translate }}</label>
+              <input
+                type="text"
+                [(ngModel)]="author.aka"
+                [name]="'music_aka_' + i"
+                class="form-input"
+                placeholder="{{ 'PROTOCOL.AKA' | translate }}"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>CMO {{ 'PROTOCOL.NAME' | translate }}</label>
+              <input
+                type="text"
+                [(ngModel)]="author.cmo_name"
+                [name]="'music_cmo_' + i"
+                class="form-input"
+                placeholder="CMO"
+              />
+            </div>
+            <div class="form-group">
+              <label>PRO {{ 'PROTOCOL.NAME' | translate }}</label>
+              <input
+                type="text"
+                [(ngModel)]="author.pro_name"
+                [name]="'music_pro_' + i"
+                class="form-input"
+                placeholder="PRO"
+              />
+            </div>
+            <div class="form-group">
+              <label>% *</label>
+              <input
+                type="number"
+                [(ngModel)]="author.participation_percentage"
+                [name]="'music_percent_' + i"
+                class="form-input"
+                placeholder="%"
+                min="0"
+                max="100"
+              />
+            </div>
+          </div>
+
+          <!-- Contributions -->
+          <div class="form-row checkbox-row">
+            <label class="checkbox">
+              <input
+                type="checkbox"
+                [(ngModel)]="author.melody"
+                [name]="'music_melody_' + i"
+              />
+              {{ 'PROTOCOL.MELODY' | translate }}
+            </label>
+            <label class="checkbox">
+              <input
+                type="checkbox"
+                [(ngModel)]="author.harmony"
+                [name]="'music_harmony_' + i"
+              />
+              {{ 'PROTOCOL.HARMONY' | translate }}
+            </label>
+            <label class="checkbox">
+              <input
+                type="checkbox"
+                [(ngModel)]="author.arrangement"
+                [name]="'music_arrangement_' + i"
+              />
+              {{ 'PROTOCOL.ARRANGEMENT' | translate }}
+            </label>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+          <div class="progress-bar" [style.width.%]="music_total()" [style.background-color]="musicProgressColor">
+          </div>
+        </div>
+        <div class="progress-text">
+          {{ 'PROTOCOL.TOTAL' | translate }}: {{ music_total() }}%
+        </div>
+
+        <button type="button" class="btn btn-primary" (click)="addMusicAuthor()">
+          + {{ 'PROTOCOL.ADD_MUSIC_AUTHOR' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <!-- ============ NEIGHBOURING RIGHTSHOLDERS ============ -->
+    <div class="form-card">
+      <div class="card-header">
+        <h2>{{ 'PROTOCOL.NEIGHBOURING_RIGHTSHOLDERS' | translate }}</h2>
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm"
+          (click)="clearNeighbouringRightsholders()"
+        >
+          {{ 'CLEAR' | translate }}
+        </button>
+      </div>
+      <div class="card-body">
+        <div *ngFor="let rh of neighbouring_rightsholders(); let i = index" class="author-row">
+          <div class="author-header">
+            <span class="author-number">{{ 'PROTOCOL.NEIGHBOURING_RIGHTSHOLDER' | translate }} {{ i + 1 }}</span>
+            <button
+              *ngIf="neighbouring_rightsholders().length > 0"
+              type="button"
+              class="btn-remove"
+              (click)="removeNeighbouringRightsholder(i)"
+              title="{{ 'DELETE' | translate }}"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>{{ 'PROTOCOL.NAME' | translate }} *</label>
+              <input
+                type="text"
+                [(ngModel)]="rh.name"
+                [name]="'neighbouring_name_' + i"
+                class="form-input"
+                placeholder="{{ 'PROTOCOL.NAME' | translate }}"
+              />
+            </div>
+            <div class="form-group">
+              <label>{{ 'PROTOCOL.MIDDLE_NAME' | translate }}</label>
+              <input
+                type="text"
+                [(ngModel)]="rh.middle_name"
+                [name]="'neighbouring_middle_' + i"
+                class="form-input"
+                placeholder="{{ 'PROTOCOL.MIDDLE_NAME' | translate }}"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>{{ 'PROTOCOL.SURNAME' | translate }} *</label>
+              <input
+                type="text"
+                [(ngModel)]="rh.surname"
+                [name]="'neighbouring_surname_' + i"
+                class="form-input"
+                placeholder="{{ 'PROTOCOL.SURNAME' | translate }}"
+              />
+            </div>
+            <div class="form-group">
+              <label>{{ 'PROTOCOL.AKA' | translate }}</label>
+              <input
+                type="text"
+                [(ngModel)]="rh.aka"
+                [name]="'neighbouring_aka_' + i"
+                class="form-input"
+                placeholder="{{ 'PROTOCOL.AKA' | translate }}"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>CMO {{ 'PROTOCOL.NAME' | translate }}</label>
+              <input
+                type="text"
+                [(ngModel)]="rh.cmo_name"
+                [name]="'neighbouring_cmo_' + i"
+                class="form-input"
+                placeholder="CMO"
+              />
+            </div>
+            <div class="form-group">
+              <label>PRO {{ 'PROTOCOL.NAME' | translate }}</label>
+              <input
+                type="text"
+                [(ngModel)]="rh.pro_name"
+                [name]="'neighbouring_pro_' + i"
+                class="form-input"
+                placeholder="PRO"
+              />
+            </div>
+            <div class="form-group">
+              <label>% *</label>
+              <input
+                type="number"
+                [(ngModel)]="rh.participation_percentage"
+                [name]="'neighbouring_percent_' + i"
+                class="form-input"
+                placeholder="%"
+                min="0"
+                max="100"
+              />
+            </div>
+          </div>
+
+          <!-- Roles -->
+          <div class="roles-section">
+            <label>{{ 'PROTOCOL.ROLES' | translate }} *</label>
+            <div *ngFor="let role of rh.roles; let j = index" class="role-row">
+              <select [(ngModel)]="rh.roles![j]" [name]="'neighbouring_role_' + i + '_' + j" class="form-select">
+                <option value="" disabled>{{ 'PROTOCOL.SELECT_ROLE' | translate }}</option>
+                <option *ngFor="let availableRole of protocolRoles" [value]="availableRole.value">
+                  {{ availableRole.label }}
+                </option>
+              </select>
+              <button
+                type="button"
+                class="btn-remove-role"
+                (click)="removeRole(i, j)"
+                title="{{ 'DELETE' | translate }}"
+              >
+                ✕
+              </button>
+            </div>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              (click)="addRole(i)"
+            >
+              + {{ 'PROTOCOL.ADD_ROLE' | translate }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+          <div class="progress-bar" [style.width.%]="neighbouring_total()" [style.background-color]="neighbouringProgressColor">
+          </div>
+        </div>
+        <div class="progress-text">
+          {{ 'PROTOCOL.TOTAL' | translate }}: {{ neighbouring_total() }}%
+        </div>
+
+        <button type="button" class="btn btn-primary" (click)="addNeighbouringRightsholder()">
+          + {{ 'PROTOCOL.ADD_NEIGHBOURING_RIGHTSHOLDER' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <!-- ============ ACTIONS ============ -->
+    <div class="form-actions">
+      <button
+        type="submit"
+        class="btn btn-primary btn-lg"
+        [disabled]="isSubmitting()"
+      >
+        <span *ngIf="!isSubmitting()">{{ 'PROTOCOL.SUBMIT' | translate }}</span>
+        <span *ngIf="isSubmitting()">{{ 'SUBMITTING' | translate }}...</span>
+      </button>
+    </div>
+  </form>
+</div>

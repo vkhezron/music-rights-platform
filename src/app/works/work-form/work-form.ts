@@ -8,7 +8,7 @@ import { WorkspaceService } from '../../services/workspace.service';
 import { WorkFormData } from '../../../models/work.model';
 
 // Lucide Icons
-import { LucideAngularModule, ArrowLeft, Save, Plus, X, Music, Clock, Calendar, Globe, Tag, CheckCircle, AlertCircle } from 'lucide-angular';
+import { LucideAngularModule, ArrowLeft, Save, Plus, X, Music, Clock, Calendar, Globe, Tag, CheckCircle, AlertCircle, Edit } from 'lucide-angular';
 
 @Component({
   selector: 'app-work-form',
@@ -41,6 +41,7 @@ export class WorkFormComponent implements OnInit {
   readonly Tag = Tag;
   readonly CheckCircle = CheckCircle;
   readonly AlertCircle = AlertCircle;
+  readonly Edit = Edit;
 
   workForm!: FormGroup;
   isLoading = signal(false);
@@ -238,20 +239,38 @@ export class WorkFormComponent implements OnInit {
       if (this.isEditMode() && this.workId()) {
         await this.worksService.updateWork(this.workId()!, workData);
         this.successMessage.set('Work updated successfully!');
+        setTimeout(() => {
+          this.router.navigate(['/works']);
+        }, 1500);
       } else {
-        await this.worksService.createWork(workData);
+        const newWork = await this.worksService.createWork(workData);
         this.successMessage.set('Work created successfully!');
+        
+        // Ensure we have the work ID before navigating
+        if (newWork && newWork.id) {
+          console.log('Navigating to split editor for work:', newWork.id);
+          setTimeout(() => {
+            this.router.navigate(['/works', newWork.id, 'splits']);
+          }, 1500);
+        } else {
+          console.error('Work created but no ID returned:', newWork);
+          setTimeout(() => {
+            this.router.navigate(['/works']);
+          }, 1500);
+        }
       }
-
-      setTimeout(() => {
-        this.router.navigate(['/works']);
-      }, 1500);
 
     } catch (error: any) {
       console.error('Error saving work:', error);
       this.errorMessage.set(error.message || 'Failed to save work');
     } finally {
       this.isLoading.set(false);
+    }
+  }
+
+  editRightsHolders() {
+    if (this.workId()) {
+      this.router.navigate([`/works/${this.workId()}/splits`]);
     }
   }
 

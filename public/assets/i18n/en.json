@@ -181,7 +181,9 @@
     "WORKS": "Works",
     "ADD_WORK": "Add Work",
     "CREATE_WORK": "Create Work",
+    "SAVE_AND_ADD_HOLDER": "Save & Add Rights Holder",
     "EDIT_WORK": "Edit Work",
+    "EDIT_RIGHTS_HOLDERS": "Edit Rights Holders",
     "CREATE_WORK_SUBTITLE": "Add details about your musical work",
     "EDIT_WORK_SUBTITLE": "Update work information",
     "CREATE_FIRST_WORK": "Create Your First Work",
@@ -426,6 +428,19 @@
     "RIGHTS_HOLDERS": "Rights Holders",
     "NO_RIGHTS_HOLDERS_ADDED": "No rights holders added yet",
     "ADD_RIGHTS_HOLDER": "Add Rights Holder",
+    "ADD_ME": "Add Me",
+    "CREATE_NEW": "Create New",
+    "CREATE_NEW_RIGHTS_HOLDER": "Create New Rights Holder",
+    "CREATE_AND_ADD": "Create & Add",
+    "TYPE": "Type",
+    "ROLE": "Role/Kind",
+    "PERSON": "Person",
+    "COMPANY": "Company",
+    "FIRST_NAME": "First Name",
+    "LAST_NAME": "Last Name",
+    "COMPANY_NAME": "Company Name",
+    "EMAIL": "Email",
+    "PHONE": "Phone",
     "SCAN_QR_CODE": "Scan QR Code",
     "SCAN_QR": "Scan QR",
     "ADD_MANUALLY": "Add Manually",
@@ -474,8 +489,53 @@
     "DELETE_BUTTON": "Delete Account",
     "PRIVACY_POLICY": "Privacy Policy",
     "TERMS_OF_SERVICE": "Terms of Service"
-  }
+  },
 
-  
+  "PROTOCOL": {
+    "PROTOCOL_FORM": "Music Work Protocol Form",
+    "MUSIC_WORK_REGISTRATION": "Register your musical work with complete rights holder information",
+    "WORK_INFORMATION": "Work Information",
+    "WORK_TITLE": "Work Title",
+    "ALTERNATIVE_TITLE": "Alternative Title",
+    "RELEASE_TITLE": "Release Title",
+    "PRIMARY_LANGUAGE": "Primary Language",
+    "SECONDARY_LANGUAGE": "Secondary Language",
+    "IS_COVER_VERSION": "This is a cover version",
+    "ORIGINAL_WORK_TITLE": "Original Work Title",
+    "ADVANCED_OPTIONS": "Advanced Options",
+    
+    "LYRIC_AUTHORS": "Lyric Authors",
+    "LYRIC_AUTHOR": "Lyric Author",
+    "ADD_LYRIC_AUTHOR": "Add Lyric Author",
+    
+    "MUSIC_AUTHORS": "Music Authors",
+    "MUSIC_AUTHOR": "Music Author",
+    "ADD_MUSIC_AUTHOR": "Add Music Author",
+    "MELODY": "Melody",
+    "HARMONY": "Harmony",
+    "ARRANGEMENT": "Arrangement",
+    
+    "NEIGHBOURING_RIGHTSHOLDERS": "Neighbouring Rightsholders",
+    "NEIGHBOURING_RIGHTSHOLDER": "Neighbouring Rightsholder",
+    "ADD_NEIGHBOURING_RIGHTSHOLDER": "Add Neighbouring Rightsholder",
+    
+    "NAME": "Name",
+    "MIDDLE_NAME": "Middle Name",
+    "SURNAME": "Surname",
+    "AKA": "AKA (Also Known As)",
+    "ROLES": "Roles",
+    "SELECT_ROLE": "Select a role",
+    "ADD_ROLE": "Add Role",
+    "TOTAL": "Total",
+    
+    "SUBMIT": "Submit Protocol",
+    "SUBMISSION_SUCCESS": "Protocol submitted successfully! Redirecting to dashboard..."
+  },
+
+  "CLEAR": "Clear",
+  "DELETE": "Delete",
+  "ERROR": "Error",
+  "SUBMITTING": "Submitting",
+  "CANCEL": "Cancel"
 }
 

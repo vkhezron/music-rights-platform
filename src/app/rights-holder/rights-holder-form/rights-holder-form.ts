@@ -48,6 +48,7 @@ export class RightsHolderFormComponent implements OnInit {
   errorMessage = signal('');
   successMessage = signal('');
   currentRightsHolder = signal<RightsHolder | null>(null);
+  workId = signal<string | null>(null);
 
   // CMO/PRO options (major organizations)
   cmoOptions = [
@@ -97,6 +98,13 @@ export class RightsHolderFormComponent implements OnInit {
   }
 
   async ngOnInit() {
+    // Check if workId is passed from work-form
+    this.route.queryParams.subscribe(params => {
+      if (params['workId']) {
+        this.workId.set(params['workId']);
+      }
+    });
+
     // Check if edit mode
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -201,16 +209,24 @@ export class RightsHolderFormComponent implements OnInit {
           formData
         );
         this.successMessage.set('Rights holder updated successfully!');
+        // Navigate back after short delay
+        setTimeout(() => {
+          this.router.navigate(['/rights-holders']);
+        }, 1500);
       } else {
         // Create new rights holder
         await this.rightsHoldersService.createRightsHolder(formData);
         this.successMessage.set('Rights holder created successfully!');
-      }
 
-      // Navigate back after short delay
-      setTimeout(() => {
-        this.router.navigate(['/rights-holders']);
-      }, 1500);
+        // If workId is provided, navigate to split editor; otherwise go to rights-holders list
+        setTimeout(() => {
+          if (this.workId()) {
+            this.router.navigate([`/works/${this.workId()}/splits`]);
+          } else {
+            this.router.navigate(['/rights-holders']);
+          }
+        }, 1500);
+      }
 
     } catch (error: any) {
       console.error('Error saving rights holder:', error);

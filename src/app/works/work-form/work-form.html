@@ -378,13 +378,24 @@
         {{ 'COMMON.CANCEL' | translate }}
       </button>
       
+      @if (isEditMode()) {
+        <button
+          type="button"
+          class="secondary-button edit-holders-button"
+          (click)="editRightsHolders()"
+          [disabled]="isLoading()">
+          <lucide-icon [img]="Edit" [size]="20"></lucide-icon>
+          <span>{{ 'WORKS.EDIT_RIGHTS_HOLDERS' | translate }}</span>
+        </button>
+      }
+      
       <button
         type="submit"
         class="submit-button"
         [disabled]="isLoading() || workForm.invalid">
         @if (!isLoading()) {
           <lucide-icon [img]="Save" [size]="20"></lucide-icon>
-          <span>{{ (isEditMode() ? 'COMMON.SAVE' : 'WORKS.CREATE_WORK') | translate }}</span>
+          <span>{{ (isEditMode() ? 'COMMON.SAVE' : 'WORKS.SAVE_AND_ADD_HOLDER') | translate }}</span>
         }
         @if (isLoading()) {
           <span class="loading">

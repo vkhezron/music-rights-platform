@@ -472,6 +472,40 @@ label {
   }
 }
 
+.secondary-button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 2rem;
+  background: #dbeafe;
+  border: 2px solid #bfdbfe;
+  border-radius: 10px;
+  color: #0284c7;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  lucide-icon {
+    color: #0284c7;
+  }
+
+  &:hover:not(:disabled) {
+    background: #bfdbfe;
+    border-color: #7dd3fc;
+    color: #0369a1;
+
+    lucide-icon {
+      color: #0369a1;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 .submit-button {
   display: flex;
   align-items: center;
@@ -479,7 +513,7 @@ label {
   padding: 0.875rem 2rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  border: none;
+  border: white;
   border-radius: 10px;
   font-weight: 600;
   font-size: 0.95rem;

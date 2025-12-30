@@ -17,11 +17,15 @@ import { TranslateModule } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { WorksService } from '../services/works';
-import { RightsHoldersService, RightsHolder } from '../services/rights-holder';
+import { RightsHoldersService } from '../services/rights-holder';
 import { QRScannerService } from '../services/qr-scanner.service';
 import { WorkspaceService } from '../services/workspace.service';
 import { PdfGeneratorService } from '../services/pdf-generator.service';
-import { Work } from '../../models/work.model';
+import { SupabaseService } from '../services/supabase.service';
+import { ProtocolService } from '../services/protocol.service';
+import { Work } from '../models/work.model';
+import { RightsHolder, RightsHolderKind, RightsHolderType, RIGHTS_HOLDER_KINDS } from '../../models/rights-holder.model';
+import { LyricAuthor, MusicAuthor, NeighbouringRightsholder, PROTOCOL_ROLES, ProtocolRoleKind } from '../models/protocol.model';
 
 // Lucide Icons
 import {
@@ -38,6 +42,7 @@ import {
   X,
   FileText,
   Music,
+  Edit,
 } from 'lucide-angular';
 
 /**
@@ -119,6 +124,8 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   private qrScannerService = inject(QRScannerService);
   private workspaceService = inject(WorkspaceService);
   private pdfGenerator = inject(PdfGeneratorService);
+  private supabase = inject(SupabaseService);
+  private protocolService = inject(ProtocolService);
 
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
 
@@ -135,6 +142,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   readonly X = X;
   readonly FileText = FileText;
   readonly Music = Music;
+  readonly Edit = Edit;
 
   // State
   work = signal<Work | null>(null);
@@ -148,6 +156,11 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   errorMessage = signal('');
   successMessage = signal('');
 
+  // Protocol Authors (integrated into tabs)
+  lyric_authors = signal<LyricAuthor[]>([]);
+  music_authors = signal<MusicAuthor[]>([]);
+  neighbouring_rightsholders = signal<NeighbouringRightsholder[]>([]);
+
   // Tabs
   activeTab = signal<SplitTab>('ip');
 
@@ -160,6 +173,31 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   // Add rights holder
   selectedRightsHolderId = '';
   addingManually = signal(false);
+  creatingNewHolder = signal(false);
+  editingFormMode = signal(false); // For editing in the main form
+  editingFormHolderId = signal<string | null>(null); // Which holder is being edited
+  editingHolder = signal(false); // For the modal edit
+  editingHolderId = signal<string | null>(null); // Modal: which holder is being edited
+
+  // New rights holder form data
+  newHolderForm = signal({
+    type: 'person' as RightsHolderType,
+    kind: 'other' as RightsHolderKind,
+    first_name: '',
+    last_name: '',
+    company_name: '',
+    email: '',
+    phone: '',
+  });
+
+  // Rights holder kind options
+  readonly rightsHolderKinds = RIGHTS_HOLDER_KINDS;
+
+  // Protocol roles (for neighbouring rightsholders)
+  readonly protocolRoles = PROTOCOL_ROLES;
+
+  // Collapsible card state (track which splits are expanded)
+  expandedSplits = signal<Set<number>>(new Set([0])); // First card expanded by default
 
   // Options for DB split types within each tab
   ipTypeOptions = IP_SPLIT_TYPES.map((v) => ({
@@ -249,7 +287,8 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
     return this.rightsHoldersService.getDisplayName(rh);
   }
 
-  getRightsHolderIcon(rh: RightsHolder): any {
+  getRightsHolderIcon(rh: RightsHolder | undefined): any {
+    if (!rh) return this.User;
     return rh.type === 'person' ? this.User : this.Building2;
   }
 
@@ -434,6 +473,146 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
     this.addingManually.set(false);
   }
 
+  /**
+   * Add current user as rights holder to the current split tab
+   */
+  async addCurrentUserAsRightsHolder() {
+    const currentUser = this.supabase.currentUser;
+    const workspace = this.workspaceService.currentWorkspace;
+
+    if (!currentUser || !workspace) {
+      this.errorMessage.set('User or workspace not found');
+      return;
+    }
+
+    this.isSaving.set(true);
+    this.errorMessage.set('');
+
+    try {
+      // Check if current user already exists as a rights holder in this workspace
+      let currentUserRightsHolder = this.rightsHolders().find(
+        (rh) => rh.created_by === currentUser.id
+      );
+
+      // If not found, create one based on user's profile
+      if (!currentUserRightsHolder) {
+        const userEmail = currentUser.email || '';
+        const displayName = currentUser.user_metadata?.['display_name'] || 
+                           userEmail.split('@')[0] || 
+                           'User';
+
+        const newRightsHolder = await this.rightsHoldersService.createRightsHolder({
+          type: 'person',
+          kind: 'artist',
+          first_name: displayName,
+          email: userEmail,
+        });
+
+        currentUserRightsHolder = newRightsHolder;
+        
+        // Add to the local list
+        this.rightsHolders.update((arr) => [...arr, newRightsHolder]);
+      }
+
+      // Check if already in current tab
+      const alreadyExists = this.currentSplits().some(
+        (s) => s.rights_holder_id === currentUserRightsHolder!.id
+      );
+
+      if (alreadyExists) {
+        this.errorMessage.set('You are already added to this split sheet');
+        return;
+      }
+
+      // Add as split
+      this.addSplit(currentUserRightsHolder!.id);
+
+      this.successMessage.set('You have been added to this split sheet!');
+      setTimeout(() => this.successMessage.set(''), 3000);
+    } catch (error: any) {
+      console.error('Error adding current user as rights holder:', error);
+      this.errorMessage.set(error?.message || 'Failed to add you as rights holder');
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
+
+  /**
+   * Create a new rights holder and add them to the split
+   */
+  async createAndAddRightsHolder() {
+    const form = this.newHolderForm();
+
+    // Validate form
+    if (form.type === 'person' && !form.first_name) {
+      this.errorMessage.set('First name is required');
+      return;
+    }
+
+    if (form.type === 'company' && !form.company_name) {
+      this.errorMessage.set('Company name is required');
+      return;
+    }
+
+    if (!form.email) {
+      this.errorMessage.set('Email is required');
+      return;
+    }
+
+    this.isSaving.set(true);
+    this.errorMessage.set('');
+
+    try {
+      const newRightsHolder = await this.rightsHoldersService.createRightsHolder({
+        type: form.type,
+        kind: form.kind,
+        first_name: form.type === 'person' ? form.first_name : undefined,
+        last_name: form.type === 'person' ? form.last_name : undefined,
+        company_name: form.type === 'company' ? form.company_name : undefined,
+        email: form.email,
+        phone: form.phone || undefined,
+      });
+
+      // Add to local list
+      this.rightsHolders.update((arr) => [...arr, newRightsHolder]);
+
+      // Add to split
+      this.addSplit(newRightsHolder.id);
+
+      this.successMessage.set(
+        `${form.type === 'person' ? form.first_name : form.company_name} added successfully!`
+      );
+      setTimeout(() => this.successMessage.set(''), 3000);
+
+      // Reset form
+      this.newHolderForm.set({
+        type: 'person',
+        kind: 'other',
+        first_name: '',
+        last_name: '',
+        company_name: '',
+        email: '',
+        phone: '',
+      });
+      this.creatingNewHolder.set(false);
+    } catch (error: any) {
+      console.error('Error creating rights holder:', error);
+      this.errorMessage.set(error?.message || 'Failed to create rights holder');
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
+
+  /**
+   * Update new holder form field
+   */
+  updateNewHolderField(field: string, value: any) {
+    this.newHolderForm.update((form) => ({
+      ...form,
+      [field]: value,
+    }));
+  }
+
   removeSplit(index: number) {
     if (this.activeTab() === 'ip') {
       this.ipSplits.update((arr) => arr.filter((_, i) => i !== index));
@@ -493,6 +672,31 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
         return copy;
       });
     }
+  }
+
+  // =========================
+  // Card Collapsible State
+  // =========================
+  /**
+   * Toggle the expanded state of a split card
+   */
+  toggleSplitExpanded(index: number) {
+    this.expandedSplits.update((set) => {
+      const newSet = new Set(set);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  }
+
+  /**
+   * Check if a split card is expanded
+   */
+  isSplitExpanded(index: number): boolean {
+    return this.expandedSplits().has(index);
   }
 
   // =========================
@@ -591,6 +795,281 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
     } catch (error: any) {
       console.error('Error downloading PDF:', error);
       this.errorMessage.set('Failed to download split sheet');
+    }
+  }
+
+  /**
+   * ============ PROTOCOL AUTHORS - IP RIGHTS TAB ============
+   */
+
+  addLyricAuthor() {
+    const current = this.lyric_authors();
+    this.lyric_authors.set([
+      ...current,
+      {
+        name: '',
+        surname: '',
+        middle_name: '',
+        aka: '',
+        cmo_name: '',
+        pro_name: '',
+        participation_percentage: 0,
+      }
+    ]);
+  }
+
+  removeLyricAuthor(index: number) {
+    const current = this.lyric_authors();
+    this.lyric_authors.set(current.filter((_, i) => i !== index));
+  }
+
+  addMusicAuthor() {
+    const current = this.music_authors();
+    this.music_authors.set([
+      ...current,
+      {
+        name: '',
+        surname: '',
+        middle_name: '',
+        aka: '',
+        cmo_name: '',
+        pro_name: '',
+        participation_percentage: 0,
+        melody: false,
+        harmony: false,
+        arrangement: false,
+      }
+    ]);
+  }
+
+  removeMusicAuthor(index: number) {
+    const current = this.music_authors();
+    this.music_authors.set(current.filter((_, i) => i !== index));
+  }
+
+  /**
+   * ============ PROTOCOL AUTHORS - NEIGHBOURING RIGHTS TAB ============
+   */
+
+  addNeighbouringRightsholder() {
+    const current = this.neighbouring_rightsholders();
+    this.neighbouring_rightsholders.set([
+      ...current,
+      {
+        name: '',
+        surname: '',
+        middle_name: '',
+        aka: '',
+        cmo_name: '',
+        pro_name: '',
+        participation_percentage: 0,
+        roles: [],
+      }
+    ]);
+  }
+
+  removeNeighbouringRightsholder(index: number) {
+    const current = this.neighbouring_rightsholders();
+    this.neighbouring_rightsholders.set(current.filter((_, i) => i !== index));
+  }
+
+  addRoleToRightsholder(holderIndex: number) {
+    const current = this.neighbouring_rightsholders();
+    const updated = [...current];
+    if (!updated[holderIndex].roles) {
+      updated[holderIndex].roles = [];
+    }
+    updated[holderIndex].roles!.push('other');
+    this.neighbouring_rightsholders.set(updated);
+  }
+
+  removeRoleFromRightsholder(holderIndex: number, roleIndex: number) {
+    const current = this.neighbouring_rightsholders();
+    const updated = [...current];
+    updated[holderIndex].roles!.splice(roleIndex, 1);
+    this.neighbouring_rightsholders.set(updated);
+  }
+
+  updateRightsholderRole(holderIndex: number, roleIndex: number, role: ProtocolRoleKind) {
+    const current = this.neighbouring_rightsholders();
+    const updated = [...current];
+    updated[holderIndex].roles![roleIndex] = role;
+    this.neighbouring_rightsholders.set(updated);
+  }
+
+  /**
+   * ============ EDIT RIGHTS HOLDER ============
+   */
+
+  openEditHolder(holderId: string) {
+    const holder = this.rightsHolders().find(h => h.id === holderId);
+    if (holder) {
+      this.editingHolderId.set(holderId);
+      this.newHolderForm.set({
+        type: holder.type === 'company' ? 'company' : 'person',
+        kind: (holder.kind as RightsHolderKind) || 'other',
+        first_name: holder.first_name || '',
+        last_name: holder.last_name || '',
+        company_name: holder.company_name || '',
+        email: holder.email || '',
+        phone: holder.phone || '',
+      });
+      this.editingHolder.set(true);
+    }
+  }
+
+  closeEditHolder() {
+    this.editingHolder.set(false);
+    this.editingHolderId.set(null);
+    this.newHolderForm.set({
+      type: 'person',
+      kind: 'other',
+      first_name: '',
+      last_name: '',
+      company_name: '',
+      email: '',
+      phone: '',
+    });
+  }
+
+  async saveEditedHolder() {
+    const holderId = this.editingHolderId();
+    if (!holderId) return;
+
+    const formData = this.newHolderForm();
+    const holderIndex = this.rightsHolders().findIndex(h => h.id === holderId);
+    if (holderIndex === -1) return;
+
+    try {
+      this.isSaving.set(true);
+      
+      // Update in database
+      const { error } = await this.supabase.client
+        .from('rights_holders')
+        .update({
+          type: formData.type,
+          kind: formData.kind,
+          first_name: formData.type === 'person' ? formData.first_name : undefined,
+          last_name: formData.type === 'person' ? formData.last_name : undefined,
+          company_name: formData.type === 'company' ? formData.company_name : undefined,
+          email: formData.email || undefined,
+          phone: formData.phone || undefined,
+        })
+        .eq('id', holderId);
+
+      if (error) throw error;
+
+      // Update local state
+      const updated = [...this.rightsHolders()];
+      updated[holderIndex] = {
+        ...updated[holderIndex],
+        type: formData.type,
+        kind: formData.kind,
+        first_name: formData.type === 'person' ? formData.first_name : undefined,
+        last_name: formData.type === 'person' ? formData.last_name : undefined,
+        company_name: formData.type === 'company' ? formData.company_name : undefined,
+        email: formData.email || undefined,
+        phone: formData.phone || undefined,
+      };
+      this.rightsHolders.set(updated);
+
+      this.successMessage.set('Rights holder updated successfully!');
+      this.closeEditHolder();
+      setTimeout(() => this.successMessage.set(''), 3000);
+    } catch (error: any) {
+      console.error('Error updating rights holder:', error);
+      this.errorMessage.set(`Failed to update rights holder: ${error.message}`);
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
+
+  // =====================================================
+  // EDIT RIGHTS HOLDER IN MAIN FORM
+  // =====================================================
+
+  openEditFormMode(holderId: string) {
+    const holder = this.rightsHolders().find(h => h.id === holderId);
+    if (holder) {
+      this.editingFormHolderId.set(holderId);
+      this.newHolderForm.set({
+        type: holder.type as RightsHolderType,
+        kind: holder.kind,
+        first_name: holder.first_name || '',
+        last_name: holder.last_name || '',
+        company_name: holder.company_name || '',
+        email: holder.email || '',
+        phone: holder.phone || '',
+      });
+      this.editingFormMode.set(true);
+      this.creatingNewHolder.set(true); // Show the form
+    }
+  }
+
+  closeEditFormMode() {
+    this.editingFormMode.set(false);
+    this.editingFormHolderId.set(null);
+    this.creatingNewHolder.set(false);
+    this.newHolderForm.set({
+      type: 'person',
+      kind: 'other',
+      first_name: '',
+      last_name: '',
+      company_name: '',
+      email: '',
+      phone: '',
+    });
+  }
+
+  async saveEditFormMode() {
+    const holderId = this.editingFormHolderId();
+    if (!holderId) return;
+
+    const formData = this.newHolderForm();
+    const holderIndex = this.rightsHolders().findIndex(h => h.id === holderId);
+    if (holderIndex === -1) return;
+
+    try {
+      this.isSaving.set(true);
+
+      // Update in database
+      const { error } = await this.supabase.client
+        .from('rights_holders')
+        .update({
+          type: formData.type,
+          kind: formData.kind,
+          first_name: formData.type === 'person' ? formData.first_name : undefined,
+          last_name: formData.type === 'person' ? formData.last_name : undefined,
+          company_name: formData.type === 'company' ? formData.company_name : undefined,
+          email: formData.email || undefined,
+          phone: formData.phone || undefined,
+        })
+        .eq('id', holderId);
+
+      if (error) throw error;
+
+      // Update local state
+      const updated = [...this.rightsHolders()];
+      updated[holderIndex] = {
+        ...updated[holderIndex],
+        type: formData.type,
+        kind: formData.kind,
+        first_name: formData.type === 'person' ? formData.first_name : undefined,
+        last_name: formData.type === 'person' ? formData.last_name : undefined,
+        company_name: formData.type === 'company' ? formData.company_name : undefined,
+        email: formData.email || undefined,
+        phone: formData.phone || undefined,
+      };
+      this.rightsHolders.set(updated);
+
+      this.successMessage.set('Rights holder updated successfully!');
+      this.closeEditFormMode();
+      setTimeout(() => this.successMessage.set(''), 3000);
+    } catch (error: any) {
+      console.error('Error updating rights holder:', error);
+      this.errorMessage.set(`Failed to update rights holder: ${error.message}`);
+    } finally {
+      this.isSaving.set(false);
     }
   }
 }

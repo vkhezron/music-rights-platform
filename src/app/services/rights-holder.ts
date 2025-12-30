@@ -2,44 +2,10 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { WorkspaceService } from './workspace.service';
+import { RightsHolder, RightsHolderFormData } from '../../models/rights-holder.model';
 
-export interface RightsHolder {
-  id: string;
-  workspace_id: string;
-  type: 'person' | 'company';
-  
-  // Person fields
-  first_name?: string;
-  last_name?: string;
-  
-  // Company fields
-  company_name?: string;
-  
-  // Common fields
-  email?: string;
-  phone?: string;
-  cmo_pro?: string;
-  ipi_number?: string;
-  tax_id?: string;
-  notes?: string;
-  
-  created_by: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface RightsHolderFormData {
-  type: 'person' | 'company';
-  first_name?: string;
-  last_name?: string;
-  company_name?: string;
-  email?: string;
-  phone?: string;
-  cmo_pro?: string;
-  ipi_number?: string;
-  tax_id?: string;
-  notes?: string;
-}
+// Re-export for backward compatibility
+export type { RightsHolder, RightsHolderFormData };
 
 @Injectable({
   providedIn: 'root'
@@ -81,22 +47,28 @@ export class RightsHoldersService {
     }
 
     try {
+      // Build insert object with only non-undefined values
+      const insertData: any = {
+        workspace_id: workspace.id,
+        type: data.type,
+        kind: data.kind,
+        created_by: user.id
+      };
+
+      // Only include fields that have values
+      if (data.first_name !== undefined && data.first_name !== '') insertData.first_name = data.first_name;
+      if (data.last_name !== undefined && data.last_name !== '') insertData.last_name = data.last_name;
+      if (data.company_name !== undefined && data.company_name !== '') insertData.company_name = data.company_name;
+      if (data.email !== undefined && data.email !== '') insertData.email = data.email;
+      if (data.phone !== undefined && data.phone !== '') insertData.phone = data.phone;
+      if (data.cmo_pro !== undefined && data.cmo_pro !== '') insertData.cmo_pro = data.cmo_pro;
+      if (data.ipi_number !== undefined && data.ipi_number !== '') insertData.ipi_number = data.ipi_number;
+      if (data.tax_id !== undefined && data.tax_id !== '') insertData.tax_id = data.tax_id;
+      if (data.notes !== undefined && data.notes !== '') insertData.notes = data.notes;
+
       const { data: rightsHolder, error } = await this.supabase.client
         .from('rights_holders')
-        .insert({
-          workspace_id: workspace.id,
-          type: data.type,
-          first_name: data.first_name,
-          last_name: data.last_name,
-          company_name: data.company_name,
-          email: data.email,
-          phone: data.phone,
-          cmo_pro: data.cmo_pro,
-          ipi_number: data.ipi_number,
-          tax_id: data.tax_id,
-          notes: data.notes,
-          created_by: user.id
-        })
+        .insert(insertData)
         .select()
         .single();
 

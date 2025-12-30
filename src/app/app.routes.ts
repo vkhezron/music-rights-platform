@@ -50,6 +50,11 @@ export const routes: Routes = [
         , loadComponent: () => import('./works/work-form/work-form').then(m => m.WorkFormComponent)
         , canActivate: [AuthGuard]  
     },
+    {
+        path: 'works/edit/:id'
+        , loadComponent: () => import('./works/work-form/work-form').then(m => m.WorkFormComponent)
+        , canActivate: [AuthGuard]
+    },
     { 
         path: 'rights-holders'
         , loadComponent: () => import('./rights-holder/rights-holder-list/rights-holder-list').then(m => m.RightsHolderListComponent)
@@ -71,6 +76,11 @@ export const routes: Routes = [
     loadComponent: () => import('./split-editor/split-editor')
       .then(m => m.SplitEditorComponent)
   },
+    {
+        path: 'works/:id/protocol',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./protocol/protocol-form/protocol-form').then(m => m.ProtocolFormComponent)
+    },
     {
         path: 'privacy-policy',
         loadComponent: () => import('./legal/privacy-policy/privacy-policy').then(m => m.PrivacyPolicyComponent)

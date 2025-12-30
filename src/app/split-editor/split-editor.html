@@ -107,221 +107,780 @@
     </div>
 
     <!-- =========================
-         CURRENT SPLITS SECTION
+         CURRENT SPLITS SECTION (CARD-BASED WORKFLOW)
     ========================== -->
     <div class="splits-content">
 
-      <!-- Empty State -->
+      <!-- Empty State Card -->
       @if (currentSplits().length === 0) {
-        <div class="empty-state">
-          <div class="empty-icon">
-            <lucide-icon [img]="User" [size]="48"></lucide-icon>
+        <div class="split-card empty-state-card">
+          <div class="card-body empty-state">
+            <div class="empty-icon">
+              <lucide-icon [img]="User" [size]="48"></lucide-icon>
+            </div>
+            <p class="empty-title">
+              @if (activeTab() === 'ip') {
+                {{ 'SPLITS.NO_IP_SPLITS_YET' | translate }}
+              } @else {
+                {{ 'SPLITS.NO_NEIGHBORING_SPLITS_YET' | translate }}
+              }
+            </p>
+            <p class="empty-text">{{ 'SPLITS.ADD_HOLDER_AND_ENSURE_100' | translate }}</p>
           </div>
-          <p class="empty-title">
-            @if (activeTab() === 'ip') {
-              {{ 'SPLITS.NO_IP_SPLITS_YET' | translate }}
-            } @else {
-              {{ 'SPLITS.NO_NEIGHBORING_SPLITS_YET' | translate }}
-            }
-          </p>
-          <p class="empty-text">{{ 'SPLITS.ADD_HOLDER_AND_ENSURE_100' | translate }}</p>
         </div>
       }
 
-      <!-- Existing Splits List -->
+      <!-- Existing Splits as Collapsible Cards -->
       @if (currentSplits().length > 0) {
         <div class="splits-list">
           @for (split of currentSplits(); track $index; let index = $index) {
-            <div class="split-item">
-              <!-- Rights Holder Info -->
-              <div class="split-holder-info">
-                @if (split.rights_holder) {
-                  <lucide-icon 
-                    [img]="getRightsHolderIcon(split.rights_holder)" 
-                    [size]="24"
-                    class="holder-icon">
-                  </lucide-icon>
-                  <div class="holder-details">
-                    <h4 class="holder-name">{{ getRightsHolderName(split.rights_holder) }}</h4>
-                    @if (split.rights_holder.email) {
-                      <p class="holder-email">{{ split.rights_holder.email }}</p>
+            <div class="split-card">
+              <!-- Card Header (Collapsible) -->
+              <div class="card-header" (click)="toggleSplitExpanded(index)">
+                <div class="header-content">
+                  <button class="expand-toggle" type="button">
+                    <lucide-icon 
+                      [img]="getRightsHolderIcon(split.rights_holder)" 
+                      [size]="24"
+                      class="holder-icon">
+                    </lucide-icon>
+                  </button>
+                  
+                  <div class="holder-info">
+                    @if (split.rights_holder) {
+                      <h3 class="holder-name">{{ getRightsHolderName(split.rights_holder) }}</h3>
+                      @if (split.rights_holder.email) {
+                        <p class="holder-email">{{ split.rights_holder.email }}</p>
+                      }
+                    } @else {
+                      <h3 class="holder-name">{{ 'SPLITS.UNKNOWN_RIGHTS_HOLDER' | translate }}</h3>
                     }
                   </div>
-                } @else {
-                  <div class="holder-details">
-                    <h4 class="holder-name">{{ 'SPLITS.UNKNOWN_RIGHTS_HOLDER' | translate }}</h4>
-                  </div>
-                }
-              </div>
 
-              <!-- Split Type Selector -->
-              <div class="split-controls">
-                <div class="control-group">
-                  <label class="control-label">{{ 'SPLITS.SPLIT_TYPE' | translate }}</label>
-                  <select
-                    class="type-select"
-                    [value]="split.split_type"
-                    (change)="updateSplitType(index, $any($event.target).value)">
-                    @for (option of currentTypeOptions(); track option.value) {
-                      <option [value]="option.value">{{ option.label }}</option>
-                    }
-                  </select>
+                  <!-- Percentage Badge -->
+                  <div class="percentage-badge">
+                    <span class="percentage-value">{{ split.percentage.toFixed(2) }}%</span>
+                  </div>
                 </div>
 
-                <!-- Percentage Input -->
-                <div class="control-group">
-                  <label class="control-label">{{ 'SPLITS.PERCENTAGE' | translate }}</label>
-                  <div class="percentage-input-wrapper">
+                <!-- Edit and Delete Buttons in Header -->
+                <div class="header-actions">
+                  <button
+                    class="edit-btn"
+                    (click)="openEditFormMode(split.rights_holder!.id); $event.stopPropagation()"
+                    type="button"
+                    [disabled]="isSaving()"
+                    [title]="'Edit this rights holder' | translate">
+                    <lucide-icon [img]="Edit" [size]="18"></lucide-icon>
+                  </button>
+                  <button
+                    class="delete-btn"
+                    (click)="removeSplit(index); $event.stopPropagation()"
+                    type="button"
+                    [title]="'Remove this split' | translate">
+                    <lucide-icon [img]="Trash2" [size]="18"></lucide-icon>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Card Body (Collapsible Content) -->
+              @if (isSplitExpanded(index)) {
+                <div class="card-body split-controls">
+                  <div class="control-group">
+                    <label class="control-label">{{ 'SPLITS.SPLIT_TYPE' | translate }}</label>
+                    <select
+                      class="type-select"
+                      [value]="split.split_type"
+                      (change)="updateSplitType(index, $any($event.target).value)">
+                      @for (option of currentTypeOptions(); track option.value) {
+                        <option [value]="option.value">{{ option.label }}</option>
+                      }
+                    </select>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label">{{ 'SPLITS.PERCENTAGE' | translate }}</label>
+                    <div class="percentage-input-wrapper">
+                      <input
+                        type="number"
+                        class="percentage-input"
+                        [value]="split.percentage"
+                        (input)="updateSplitPercentage(index, $any($event.target).value)"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        placeholder="0.00"
+                      />
+                      <span class="percentage-symbol">%</span>
+                    </div>
+                  </div>
+
+                  <div class="control-group">
+                    <label class="control-label">{{ 'COMMON.NOTES' | translate }}</label>
                     <input
-                      type="number"
-                      class="percentage-input"
-                      [value]="split.percentage"
-                      (input)="updateSplitPercentage(index, $any($event.target).value)"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      placeholder="0.00"
+                      type="text"
+                      class="notes-input"
+                      [value]="split.notes || ''"
+                      (input)="updateSplitNotes(index, $any($event.target).value)"
+                      [placeholder]="'Add notes...' | translate"
                     />
-                    <span class="percentage-symbol">%</span>
                   </div>
                 </div>
-
-                <!-- Notes Input -->
-                <div class="control-group">
-                  <label class="control-label">{{ 'COMMON.NOTES' | translate }}</label>
-                  <input
-                    type="text"
-                    class="notes-input"
-                    [value]="split.notes || ''"
-                    (input)="updateSplitNotes(index, $any($event.target).value)"
-                    [placeholder]="'Add notes...' | translate"
-                  />
-                </div>
-
-                <!-- Remove Button -->
-                <button
-                  class="remove-btn"
-                  (click)="removeSplit(index)"
-                  type="button"
-                  [title]="'Remove this split' | translate">
-                  <lucide-icon [img]="Trash2" [size]="18"></lucide-icon>
-                </button>
-              </div>
+              }
             </div>
           }
         </div>
       }
 
-      <!-- Add Rights Holder Section -->
-      <div class="add-section">
-        @if (!addingManually()) {
-          <div class="add-actions">
-            @if (availableRightsHolders().length > 0) {
+      <!-- Add Rights Holder Section (Card-Based) -->
+      <div class="split-card add-card">
+        <div class="card-header">
+          <div class="header-content">
+            <lucide-icon [img]="Plus" [size]="24" class="add-icon"></lucide-icon>
+            <h3 class="add-title">{{ 'SPLITS.ADD_RIGHTS_HOLDER' | translate }}</h3>
+          </div>
+        </div>
+
+        <div class="card-body add-section">
+          @if (!addingManually() && !creatingNewHolder()) {
+            <div class="add-actions">
               <button
-                class="action-btn manual-btn"
-                (click)="addingManually.set(true)"
+                class="action-btn me-btn"
+                (click)="addCurrentUserAsRightsHolder()"
+                [disabled]="isSaving()"
+                type="button"
+                title="Add yourself as a rights holder">
+                <lucide-icon [img]="User" [size]="18"></lucide-icon>
+                <span>{{ 'SPLITS.ADD_ME' | translate }}</span>
+              </button>
+
+              <button
+                class="action-btn create-btn"
+                (click)="creatingNewHolder.set(true)"
                 type="button">
                 <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
-                <span>{{ 'SPLITS.ADD_MANUALLY' | translate }}</span>
-              </button>
-            }
-
-            @if (hasCameraSupport()) {
-              <button
-                class="action-btn qr-btn"
-                (click)="startScanning()"
-                type="button">
-                <lucide-icon [img]="QrCode" [size]="18"></lucide-icon>
-                <span>{{ 'SPLITS.SCAN_QR_CODE' | translate }}</span>
-              </button>
-            }
-
-            @if (availableRightsHolders().length === 0 && currentSplits().length > 0) {
-              <p class="no-more-holders">{{ 'SPLITS.NO_RIGHTS_HOLDERS_AVAILABLE' | translate }}</p>
-            }
-          </div>
-        }
-
-        <!-- Manual Add Form -->
-        @if (addingManually()) {
-          <div class="manual-add-form">
-            <label class="form-label">{{ 'SPLITS.SELECT_RIGHTS_HOLDER' | translate }}</label>
-            <div class="form-row">
-              <select
-                class="holder-select"
-                [(ngModel)]="selectedRightsHolderId">
-                <option value="">{{ 'SPLITS.SELECT_RIGHTS_HOLDER' | translate }}</option>
-                @for (rh of availableRightsHolders(); track rh.id) {
-                  <option [value]="rh.id">
-                    {{ getRightsHolderName(rh) }}
-                  </option>
-                }
-              </select>
-
-              <button
-                class="btn-add-holder"
-                (click)="addSplit()"
-                [disabled]="!selectedRightsHolderId"
-                type="button">
-                <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
-                {{ 'COMMON.ADD' | translate }}
+                <span>{{ 'SPLITS.CREATE_NEW' | translate }}</span>
               </button>
 
-              <button
-                class="btn-cancel-add"
-                (click)="addingManually.set(false)"
-                type="button">
-                <lucide-icon [img]="X" [size]="16"></lucide-icon>
-              </button>
-            </div>
-          </div>
-        }
-
-        <!-- QR Scanner Modal -->
-        @if (isScanning()) {
-          <div class="qr-scanner-modal">
-            <div class="qr-scanner-content">
-              <div class="qr-header">
-                <h3>{{ 'SPLITS.SCANNING_FOR' | translate }}
-                  @if (activeTab() === 'ip') {
-                    {{ 'SPLITS.IP_RIGHTS' | translate }}
-                  } @else {
-                    {{ 'SPLITS.NEIGHBORING_RIGHTS' | translate }}
-                  }
-                </h3>
+              @if (availableRightsHolders().length > 0) {
                 <button
-                  class="close-btn"
-                  (click)="stopScanning()"
+                  class="action-btn manual-btn"
+                  (click)="addingManually.set(true)"
                   type="button">
-                  <lucide-icon [img]="X" [size]="20"></lucide-icon>
+                  <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
+                  <span>{{ 'SPLITS.ADD_MANUALLY' | translate }}</span>
+                </button>
+              }
+
+              @if (hasCameraSupport()) {
+                <button
+                  class="action-btn qr-btn"
+                  (click)="startScanning()"
+                  type="button">
+                  <lucide-icon [img]="QrCode" [size]="18"></lucide-icon>
+                  <span>{{ 'SPLITS.SCAN_QR_CODE' | translate }}</span>
+                </button>
+              }
+
+              @if (availableRightsHolders().length === 0 && currentSplits().length > 0) {
+                <p class="no-more-holders">{{ 'SPLITS.NO_RIGHTS_HOLDERS_AVAILABLE' | translate }}</p>
+              }
+            </div>
+          }
+
+          <!-- Manual Add Form -->
+          @if (addingManually()) {
+            <div class="manual-add-form">
+              <label class="form-label">{{ 'SPLITS.SELECT_RIGHTS_HOLDER' | translate }}</label>
+              <div class="form-row">
+                <select
+                  class="holder-select"
+                  [(ngModel)]="selectedRightsHolderId">
+                  <option value="">{{ 'SPLITS.SELECT_RIGHTS_HOLDER' | translate }}</option>
+                  @for (rh of availableRightsHolders(); track rh.id) {
+                    <option [value]="rh.id">
+                      {{ getRightsHolderName(rh) }}
+                    </option>
+                  }
+                </select>
+
+                <button
+                  class="btn-add-holder"
+                  (click)="addSplit()"
+                  [disabled]="!selectedRightsHolderId"
+                  type="button">
+                  <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+                  {{ 'COMMON.ADD' | translate }}
+                </button>
+
+                <button
+                  class="btn-cancel-add"
+                  (click)="addingManually.set(false)"
+                  type="button">
+                  <lucide-icon [img]="X" [size]="16"></lucide-icon>
                 </button>
               </div>
+            </div>
+          }
 
-              <video
-                #videoElement
-                class="qr-video"
-                playsinline
-              ></video>
+          <!-- Create New Rights Holder Form -->
+          @if (creatingNewHolder()) {
+            <div class="create-holder-form">
+              <h4 class="form-title">
+                @if (editingFormMode()) {
+                  {{ 'SPLITS.EDIT_RIGHTS_HOLDER' | translate }}
+                } @else {
+                  {{ 'SPLITS.CREATE_NEW_RIGHTS_HOLDER' | translate }}
+                }
+              </h4>
 
-              <p class="qr-instruction">{{ 'SPLITS.SCAN_INSTRUCTION' | translate }}</p>
+              <!-- Type Selector -->
+              <div class="form-group">
+                <label class="control-label">{{ 'SPLITS.TYPE' | translate }}</label>
+                <div class="type-toggle">
+                  <button
+                    [class.active]="newHolderForm().type === 'person'"
+                    (click)="updateNewHolderField('type', 'person')"
+                    type="button"
+                    class="toggle-btn">
+                    <lucide-icon [img]="User" [size]="16"></lucide-icon>
+                    {{ 'SPLITS.PERSON' | translate }}
+                  </button>
+                  <button
+                    [class.active]="newHolderForm().type === 'company'"
+                    (click)="updateNewHolderField('type', 'company')"
+                    type="button"
+                    class="toggle-btn">
+                    <lucide-icon [img]="Building2" [size]="16"></lucide-icon>
+                    {{ 'SPLITS.COMPANY' | translate }}
+                  </button>
+                </div>
+              </div>
 
-              @if (scanError()) {
-                <div class="scan-error">
-                  <lucide-icon [img]="AlertCircle" [size]="18"></lucide-icon>
-                  <span>{{ scanError() }}</span>
+              <!-- Kind/Role Selector -->
+              <div class="form-group">
+                <label class="control-label">{{ 'SPLITS.ROLE' | translate }}</label>
+                <select
+                  class="form-input"
+                  [value]="newHolderForm().kind"
+                  (change)="updateNewHolderField('kind', $any($event.target).value)">
+                  @for (option of rightsHolderKinds; track option.value) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <!-- Person Fields -->
+              @if (newHolderForm().type === 'person') {
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="control-label">{{ 'SPLITS.FIRST_NAME' | translate }}</label>
+                    <input
+                      type="text"
+                      class="form-input"
+                      [value]="newHolderForm().first_name"
+                      (input)="updateNewHolderField('first_name', $any($event.target).value)"
+                      [placeholder]="'First name' | translate"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="control-label">{{ 'SPLITS.LAST_NAME' | translate }}</label>
+                    <input
+                      type="text"
+                      class="form-input"
+                      [value]="newHolderForm().last_name"
+                      (input)="updateNewHolderField('last_name', $any($event.target).value)"
+                      [placeholder]="'Last name' | translate"
+                    />
+                  </div>
                 </div>
               }
 
+              <!-- Company Field -->
+              @if (newHolderForm().type === 'company') {
+                <div class="form-group">
+                  <label class="control-label">{{ 'SPLITS.COMPANY_NAME' | translate }}</label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    [value]="newHolderForm().company_name"
+                    (input)="updateNewHolderField('company_name', $any($event.target).value)"
+                    [placeholder]="'Company name' | translate"
+                  />
+                </div>
+              }
+
+              <!-- Email -->
+              <div class="form-group">
+                <label class="control-label">{{ 'SPLITS.EMAIL' | translate }} *</label>
+                <input
+                  type="email"
+                  class="form-input"
+                  [value]="newHolderForm().email"
+                  (input)="updateNewHolderField('email', $any($event.target).value)"
+                  [placeholder]="'Email' | translate"
+                  required
+                />
+              </div>
+
+              <!-- Phone -->
+              <div class="form-group">
+                <label class="control-label">{{ 'SPLITS.PHONE' | translate }}</label>
+                <input
+                  type="tel"
+                  class="form-input"
+                  [value]="newHolderForm().phone"
+                  (input)="updateNewHolderField('phone', $any($event.target).value)"
+                  [placeholder]="'Phone number' | translate"
+                />
+              </div>
+
+              <!-- Buttons -->
+              <div class="form-row form-actions">
+                @if (editingFormMode()) {
+                  <button
+                    class="btn-create"
+                    (click)="saveEditFormMode()"
+                    [disabled]="isSaving()"
+                    type="button">
+                    <lucide-icon [img]="Save" [size]="16"></lucide-icon>
+                    {{ 'COMMON.SAVE' | translate }}
+                  </button>
+                } @else {
+                  <button
+                    class="btn-create"
+                    (click)="createAndAddRightsHolder()"
+                    [disabled]="isSaving()"
+                    type="button">
+                    <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+                    {{ 'SPLITS.CREATE_AND_ADD' | translate }}
+                  </button>
+                }
+
+                <button
+                  class="btn-cancel-create"
+                  (click)="editingFormMode() ? closeEditFormMode() : creatingNewHolder.set(false)"
+                  type="button">
+                  <lucide-icon [img]="X" [size]="16"></lucide-icon>
+                  {{ 'COMMON.CANCEL' | translate }}
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Edit Rights Holder Modal -->
+          @if (editingHolder()) {
+            <div class="modal-overlay" (click)="closeEditHolder()">
+              <div class="modal-content" (click)="$event.stopPropagation()">
+                <div class="modal-header">
+                  <h3 class="modal-title">{{ 'SPLITS.EDIT_RIGHTS_HOLDER' | translate }}</h3>
+                  <button
+                    class="modal-close"
+                    (click)="closeEditHolder()"
+                    type="button">
+                    <lucide-icon [img]="X" [size]="20"></lucide-icon>
+                  </button>
+                </div>
+
+                <div class="modal-body edit-holder-form">
+                  <!-- Type Selector -->
+                  <div class="form-group">
+                    <label class="control-label">{{ 'SPLITS.TYPE' | translate }}</label>
+                    <div class="type-toggle">
+                      <button
+                        [class.active]="newHolderForm().type === 'person'"
+                        (click)="updateNewHolderField('type', 'person')"
+                        type="button"
+                        class="toggle-btn">
+                        <lucide-icon [img]="User" [size]="16"></lucide-icon>
+                        {{ 'SPLITS.PERSON' | translate }}
+                      </button>
+                      <button
+                        [class.active]="newHolderForm().type === 'company'"
+                        (click)="updateNewHolderField('type', 'company')"
+                        type="button"
+                        class="toggle-btn">
+                        <lucide-icon [img]="Building2" [size]="16"></lucide-icon>
+                        {{ 'SPLITS.COMPANY' | translate }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Kind Selector -->
+                  <div class="form-group">
+                    <label class="control-label">{{ 'SPLITS.KIND' | translate }}</label>
+                    <select
+                      class="form-input"
+                      [value]="newHolderForm().kind"
+                      (change)="updateNewHolderField('kind', $any($event.target).value)">
+                      @for (kindOption of rightsHolderKinds; track kindOption.value) {
+                        <option [value]="kindOption.value">{{ kindOption.label }}</option>
+                      }
+                    </select>
+                  </div>
+
+                  <!-- Person Fields -->
+                  @if (newHolderForm().type === 'person') {
+                    <div class="form-group">
+                      <label class="control-label">{{ 'SPLITS.FIRST_NAME' | translate }}</label>
+                      <input
+                        type="text"
+                        class="form-input"
+                        [value]="newHolderForm().first_name"
+                        (input)="updateNewHolderField('first_name', $any($event.target).value)"
+                        [placeholder]="'First name' | translate"
+                      />
+                    </div>
+
+                    <div class="form-group">
+                      <label class="control-label">{{ 'SPLITS.LAST_NAME' | translate }}</label>
+                      <input
+                        type="text"
+                        class="form-input"
+                        [value]="newHolderForm().last_name"
+                        (input)="updateNewHolderField('last_name', $any($event.target).value)"
+                        [placeholder]="'Last name' | translate"
+                      />
+                    </div>
+                  }
+
+                  <!-- Company Field -->
+                  @if (newHolderForm().type === 'company') {
+                    <div class="form-group">
+                      <label class="control-label">{{ 'SPLITS.COMPANY_NAME' | translate }}</label>
+                      <input
+                        type="text"
+                        class="form-input"
+                        [value]="newHolderForm().company_name"
+                        (input)="updateNewHolderField('company_name', $any($event.target).value)"
+                        [placeholder]="'Company name' | translate"
+                      />
+                    </div>
+                  }
+
+                  <!-- Email -->
+                  <div class="form-group">
+                    <label class="control-label">{{ 'SPLITS.EMAIL' | translate }}</label>
+                    <input
+                      type="email"
+                      class="form-input"
+                      [value]="newHolderForm().email"
+                      (input)="updateNewHolderField('email', $any($event.target).value)"
+                      [placeholder]="'Email' | translate"
+                    />
+                  </div>
+
+                  <!-- Phone -->
+                  <div class="form-group">
+                    <label class="control-label">{{ 'SPLITS.PHONE' | translate }}</label>
+                    <input
+                      type="tel"
+                      class="form-input"
+                      [value]="newHolderForm().phone"
+                      (input)="updateNewHolderField('phone', $any($event.target).value)"
+                      [placeholder]="'Phone number' | translate"
+                    />
+                  </div>
+                </div>
+
+                <div class="modal-footer">
+                  <button
+                    class="btn-save"
+                    (click)="saveEditedHolder()"
+                    [disabled]="isSaving()"
+                    type="button">
+                    <lucide-icon [img]="Save" [size]="16"></lucide-icon>
+                    {{ 'COMMON.SAVE' | translate }}
+                  </button>
+                  <button
+                    class="btn-cancel"
+                    (click)="closeEditHolder()"
+                    type="button">
+                    <lucide-icon [img]="X" [size]="16"></lucide-icon>
+                    {{ 'COMMON.CANCEL' | translate }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- ===================== PROTOCOL AUTHORS SECTION ===================== -->
+          
+          <!-- IP RIGHTS: LYRIC & MUSIC AUTHORS -->
+          @if (activeTab() === 'ip') {
+            <div class="protocol-authors-section">
+              <h3 class="section-title">{{ 'PROTOCOL.LYRIC_AUTHORS' | translate }}</h3>
+              
+              <div class="authors-list">
+                @for (author of lyric_authors(); track $index; let index = $index) {
+                  <div class="author-card">
+                    <div class="author-header">
+                      <div class="author-name">
+                        {{ author.name }} {{ author.surname }}
+                      </div>
+                      <button 
+                        class="remove-btn"
+                        (click)="removeLyricAuthor(index)"
+                        type="button"
+                        [title]="'Remove' | translate">
+                        <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                      </button>
+                    </div>
+                    <div class="author-row">
+                      <div class="form-group">
+                        <label class="control-label">{{ 'PROTOCOL.FIRST_NAME' | translate }}</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="author.name"
+                          class="input-field"
+                          placeholder="First name">
+                      </div>
+                      <div class="form-group">
+                        <label class="control-label">{{ 'PROTOCOL.LAST_NAME' | translate }}</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="author.surname"
+                          class="input-field"
+                          placeholder="Last name">
+                      </div>
+                      <div class="form-group">
+                        <label class="control-label">{{ 'PROTOCOL.PERCENTAGE' | translate }}</label>
+                        <input
+                          type="number"
+                          [(ngModel)]="author.participation_percentage"
+                          class="input-field"
+                          min="0"
+                          max="100"
+                          placeholder="%">
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+
               <button
-                class="btn-stop-scan"
-                (click)="stopScanning()"
+                class="add-author-btn"
+                (click)="addLyricAuthor()"
                 type="button">
-                {{ 'COMMON.CANCEL' | translate }}
+                <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+                {{ 'PROTOCOL.ADD_LYRIC_AUTHOR' | translate }}
               </button>
             </div>
-          </div>
-        }
+
+            <div class="protocol-authors-section">
+              <h3 class="section-title">{{ 'PROTOCOL.MUSIC_AUTHORS' | translate }}</h3>
+              
+              <div class="authors-list">
+                @for (author of music_authors(); track $index; let index = $index) {
+                  <div class="author-card">
+                    <div class="author-header">
+                      <div class="author-name">
+                        {{ author.name }} {{ author.surname }}
+                      </div>
+                      <button 
+                        class="remove-btn"
+                        (click)="removeMusicAuthor(index)"
+                        type="button"
+                        [title]="'Remove' | translate">
+                        <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                      </button>
+                    </div>
+                    <div class="author-row">
+                      <div class="form-group">
+                        <label class="control-label">{{ 'PROTOCOL.FIRST_NAME' | translate }}</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="author.name"
+                          class="input-field"
+                          placeholder="First name">
+                      </div>
+                      <div class="form-group">
+                        <label class="control-label">{{ 'PROTOCOL.LAST_NAME' | translate }}</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="author.surname"
+                          class="input-field"
+                          placeholder="Last name">
+                      </div>
+                      <div class="form-group">
+                        <label class="control-label">{{ 'PROTOCOL.PERCENTAGE' | translate }}</label>
+                        <input
+                          type="number"
+                          [(ngModel)]="author.participation_percentage"
+                          class="input-field"
+                          min="0"
+                          max="100"
+                          placeholder="%">
+                      </div>
+                    </div>
+                    <div class="author-checkboxes">
+                      <label class="checkbox-label">
+                        <input type="checkbox" [(ngModel)]="author.melody">
+                        {{ 'PROTOCOL.MELODY' | translate }}
+                      </label>
+                      <label class="checkbox-label">
+                        <input type="checkbox" [(ngModel)]="author.harmony">
+                        {{ 'PROTOCOL.HARMONY' | translate }}
+                      </label>
+                      <label class="checkbox-label">
+                        <input type="checkbox" [(ngModel)]="author.arrangement">
+                        {{ 'PROTOCOL.ARRANGEMENT' | translate }}
+                      </label>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <button
+                class="add-author-btn"
+                (click)="addMusicAuthor()"
+                type="button">
+                <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+                {{ 'PROTOCOL.ADD_MUSIC_AUTHOR' | translate }}
+              </button>
+            </div>
+          }
+
+          <!-- NEIGHBOURING RIGHTS: NEIGHBOURING RIGHTSHOLDERS -->
+          @if (activeTab() === 'neighboring') {
+            <div class="protocol-authors-section">
+              <h3 class="section-title">{{ 'PROTOCOL.NEIGHBOURING_RIGHTSHOLDERS' | translate }}</h3>
+              
+              <div class="authors-list">
+                @for (holder of neighbouring_rightsholders(); track $index; let index = $index) {
+                  <div class="author-card">
+                    <div class="author-header">
+                      <div class="author-name">
+                        {{ holder.name }} {{ holder.surname }}
+                      </div>
+                      <button 
+                        class="remove-btn"
+                        (click)="removeNeighbouringRightsholder(index)"
+                        type="button"
+                        [title]="'Remove' | translate">
+                        <lucide-icon [img]="Trash2" [size]="16"></lucide-icon>
+                      </button>
+                    </div>
+                    <div class="author-row">
+                      <div class="form-group">
+                        <label class="control-label">{{ 'PROTOCOL.FIRST_NAME' | translate }}</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="holder.name"
+                          class="input-field"
+                          placeholder="First name">
+                      </div>
+                      <div class="form-group">
+                        <label class="control-label">{{ 'PROTOCOL.LAST_NAME' | translate }}</label>
+                        <input
+                          type="text"
+                          [(ngModel)]="holder.surname"
+                          class="input-field"
+                          placeholder="Last name">
+                      </div>
+                      <div class="form-group">
+                        <label class="control-label">{{ 'PROTOCOL.PERCENTAGE' | translate }}</label>
+                        <input
+                          type="number"
+                          [(ngModel)]="holder.participation_percentage"
+                          class="input-field"
+                          min="0"
+                          max="100"
+                          placeholder="%">
+                      </div>
+                    </div>
+                    <div class="roles-section">
+                      <label class="control-label">{{ 'PROTOCOL.ROLES' | translate }}</label>
+                      <div class="roles-list">
+                        @for (role of holder.roles; track $index; let roleIndex = $index) {
+                          <div class="role-item">
+                            <select
+                              class="role-select"
+                              [(ngModel)]="holder.roles![roleIndex]"
+                              (change)="updateRightsholderRole(index, roleIndex, holder.roles![roleIndex])">
+                              @for (protocolRole of protocolRoles; track protocolRole.value) {
+                                <option [value]="protocolRole.value">{{ protocolRole.label }}</option>
+                              }
+                            </select>
+                            <button
+                              class="remove-role-btn"
+                              (click)="removeRoleFromRightsholder(index, roleIndex)"
+                              type="button"
+                              [title]="'Remove role' | translate">
+                              <lucide-icon [img]="X" [size]="14"></lucide-icon>
+                            </button>
+                          </div>
+                        }
+                      </div>
+                      <button
+                        class="add-role-btn"
+                        (click)="addRoleToRightsholder(index)"
+                        type="button">
+                        <lucide-icon [img]="Plus" [size]="14"></lucide-icon>
+                        {{ 'PROTOCOL.ADD_ROLE' | translate }}
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <button
+                class="add-author-btn"
+                (click)="addNeighbouringRightsholder()"
+                type="button">
+                <lucide-icon [img]="Plus" [size]="16"></lucide-icon>
+                {{ 'PROTOCOL.ADD_NEIGHBOURING_RIGHTSHOLDER' | translate }}
+              </button>
+            </div>
+          }
+
+          <!-- QR Scanner Modal -->
+          @if (isScanning()) {
+            <div class="qr-scanner-modal">
+              <div class="qr-scanner-content">
+                <div class="qr-header">
+                  <h3>{{ 'SPLITS.SCANNING_FOR' | translate }}
+                    @if (activeTab() === 'ip') {
+                      {{ 'SPLITS.IP_RIGHTS' | translate }}
+                    } @else {
+                      {{ 'SPLITS.NEIGHBORING_RIGHTS' | translate }}
+                    }
+                  </h3>
+                  <button
+                    class="close-btn"
+                    (click)="stopScanning()"
+                    type="button">
+                    <lucide-icon [img]="X" [size]="20"></lucide-icon>
+                  </button>
+                </div>
+
+                <video
+                  #videoElement
+                  class="qr-video"
+                  playsinline
+                ></video>
+
+                <p class="qr-instruction">{{ 'SPLITS.SCAN_INSTRUCTION' | translate }}</p>
+
+                @if (scanError()) {
+                  <div class="scan-error">
+                    <lucide-icon [img]="AlertCircle" [size]="18"></lucide-icon>
+                    <span>{{ scanError() }}</span>
+                  </div>
+                }
+
+                <button
+                  class="btn-stop-scan"
+                  (click)="stopScanning()"
+                  type="button">
+                  {{ 'COMMON.CANCEL' | translate }}
+                </button>
+              </div>
+            </div>
+          }
+        </div>
       </div>
+
     </div>
 
   }

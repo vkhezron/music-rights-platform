@@ -4,7 +4,6 @@
   "WELCOME": "¡Bienvenido a la Plataforma de la Industria Musical!",
   "DESCRIPTION": "Gestiona tus derechos, conéctate con artistas y amplía tu red.",
   "LANGUAGE": "Idioma",
-
   "BUTTONS": {
     "SAVE": "Guardar",
     "CANCEL": "Cancelar",
@@ -24,7 +23,6 @@
     "ADD": "Añadir",
     "REMOVE": "Eliminar"
   },
-
   "AUTH": {
     "WELCOME_BACK": "Bienvenido de nuevo",
     "LOGIN_SUBTITLE": "Inicia sesión para continuar en la Plataforma de Derechos Musicales",
@@ -71,7 +69,6 @@
     "REGISTER_FEATURE_2": "Networking profesional",
     "REGISTER_FEATURE_3": "Herramientas de colaboración"
   },
-
   "PROFILE": {
     "SETUP_TITLE": "Configura tu perfil",
     "SETUP_SUBTITLE": "Conozcámonos mejor",
@@ -113,7 +110,6 @@
     "PROFILE_DETAILS": "Detalles del perfil",
     "QR_CODE": "Código QR"
   },
-
   "WORKSPACE": {
     "CREATE_TITLE": "Crear espacio de trabajo",
     "CREATE_SUBTITLE": "Configura tu espacio de trabajo para gestionar derechos y colaborar",
@@ -149,7 +145,6 @@
     "TYPE_ALBUM": "Álbum",
     "TYPE_COLLECTION": "Colección"
   },
-
   "DASHBOARD": {
     "WELCOME": "Bienvenido a la Plataforma de Derechos Musicales",
     "DASHBOARD": "Panel",
@@ -176,7 +171,6 @@
     "MANAGE_RIGHTS_HOLDERS": "Gestionar titulares de derechos",
     "ARCHIVE_PROJECT": "Archivar proyecto"
   },
-
   "WORKS": {
     "WORKS": "Obras",
     "ADD_WORK": "Añadir Obra",
@@ -192,7 +186,6 @@
     "NO_RESULTS": "No se han encontrado resultados",
     "NO_RESULTS_FOR": "Sin resultados para",
     "SEARCH_PLACEHOLDER": "Buscar por título, ISRC, ISWC...",
-
     "BASIC_INFO": "Información básica",
     "WORK_TITLE": "Título de la obra",
     "TITLE_REQUIRED": "El título de la obra es obligatorio",
@@ -200,7 +193,6 @@
     "ALTERNATIVE_TITLES_HINT": "Añade títulos alternativos o traducidos",
     "ADD_ALTERNATIVE_TITLE": "Añadir título alternativo",
     "STATUS": "Estado",
-
     "IDENTIFICATION_CODES": "Códigos de identificación",
     "ISRC": "ISRC",
     "ISWC": "ISWC",
@@ -208,20 +200,17 @@
     "ISWC_FORMAT": "Formato: T-123.456.789-0",
     "ISRC_INVALID": "Formato de ISRC no válido",
     "ISWC_INVALID": "Formato de ISWC no válido",
-
     "DURATION_AND_DATES": "Duración y fechas",
     "DURATION": "Duración",
     "MINUTES": "min",
     "SECONDS": "seg",
     "RECORDING_DATE": "Fecha de grabación",
     "RELEASE_DATE": "Fecha de lanzamiento",
-
     "GENRE_AND_LANGUAGES": "Género e idiomas",
     "GENRE": "Género",
     "SELECT_GENRE": "Selecciona un género",
     "LANGUAGES": "Idiomas",
     "LANGUAGES_HINT": "Selecciona todos los idiomas usados en esta obra",
-
     "COVER_VERSION_INFO": "Información de la versión cover",
     "IS_COVER_VERSION": "Esta es una versión cover",
     "ORIGINAL_WORK_TITLE": "Título de la obra original",
@@ -230,13 +219,10 @@
     "ORIGINAL_WORK_ISWC": "ISWC original",
     "ORIGINAL_WORK_INFO": "Información adicional",
     "ORIGINAL_WORK_INFO_HINT": "Añade detalles si ISRC/ISWC no está disponible",
-
     "ADDITIONAL_NOTES": "Notas adicionales",
     "NOTES": "Notas",
-
     "MANAGE_SPLITS": "Gestionar divisiones"
   },
-
   "RIGHTS_HOLDERS": {
     "TITLE": "Titulares de derechos",
     "ADD_RIGHTS_HOLDER": "Añadir titular de derechos",
@@ -246,13 +232,11 @@
     "NO_RIGHTS_HOLDERS_DESCRIPTION": "Añade artistas, compositores, productores y editoriales para gestionar divisiones",
     "CREATE_FIRST_RIGHTS_HOLDER": "Añade tu primer titular de derechos",
     "SEARCH_PLACEHOLDER": "Buscar por nombre, correo, IPI, CMO...",
-
     "TYPE": "Tipo",
     "TYPE_PERSON": "Persona",
     "TYPE_COMPANY": "Empresa",
     "TYPE_PERSON_DESC": "Artista individual, compositor o productor",
     "TYPE_COMPANY_DESC": "Empresa de edición, sello o organización",
-
     "BASIC_INFO": "Información básica",
     "FIRST_NAME": "Nombre",
     "LAST_NAME": "Apellido",
@@ -261,11 +245,9 @@
     "LAST_NAME_REQUIRED": "El apellido es obligatorio",
     "COMPANY_NAME_REQUIRED": "El nombre de la empresa es obligatorio",
     "NAME_MIN_LENGTH": "El nombre debe tener al menos 2 caracteres",
-
     "CONTACT_INFO": "Información de contacto",
     "EMAIL": "Correo electrónico",
     "PHONE": "Teléfono",
-
     "PROFESSIONAL_DETAILS": "Detalles profesionales",
     "CMO_PRO": "CMO/PRO",
     "CMO_HINT": "Organización de Gestión Colectiva u Organización de Derechos de Ejecución",
@@ -274,11 +256,9 @@
     "IPI_INVALID": "Formato de IPI no válido (debe ser 9-11 dígitos)",
     "TAX_ID": "NIF/CIF",
     "TAX_ID_HINT": "Número de identificación fiscal o número de IVA",
-
     "NOTES": "Notas",
     "ADDITIONAL_INFO": "Información adicional"
   },
-
   "COMMON": {
     "LOADING": "Cargando...",
     "SAVING": "Guardando...",
@@ -313,9 +293,9 @@
     "OK": "OK",
     "RETRY": "Reintentar",
     "ALL": "Todos",
-    "CREATING": "Creando..."
+    "CREATING": "Creando...",
+    "NOTES": "Notas"
   },
-
   "ERRORS": {
     "GENERIC": "Algo salió mal. Por favor, inténtalo de nuevo.",
     "NETWORK": "Error de red. Por favor, verifica tu conexión.",
@@ -324,7 +304,6 @@
     "VALIDATION": "Por favor, verifica tu entrada e inténtalo de nuevo.",
     "SERVER": "Error del servidor. Por favor, inténtalo más tarde."
   },
-
   "ROLES": {
     "ARTIST": "Artista",
     "PRODUCER": "Productor",
@@ -336,7 +315,6 @@
     "ENGINEER": "Ingeniero",
     "OTHER": "Otro"
   },
-
   "WORKSPACE_TYPES": {
     "BAND": "Banda/Artista",
     "LABEL": "Sello discográfico",
@@ -345,7 +323,6 @@
     "MANAGEMENT": "Management",
     "OTHER": "Otro"
   },
-
   "LANGUAGES": {
     "EN": "Inglés",
     "DE": "Alemán",
@@ -355,7 +332,6 @@
     "IT": "Italiano",
     "PT": "Portugués"
   },
-
   "SOCIAL_PLATFORMS": {
     "INSTAGRAM": "Instagram",
     "TWITTER": "Twitter/X",
@@ -365,7 +341,6 @@
     "WEBSITE": "Sitio web",
     "SPOTIFY": "Spotify"
   },
-
   "NOTIFICATIONS": {
     "PROFILE_CREATED": "¡Perfil creado exitosamente!",
     "PROFILE_UPDATED": "¡Perfil actualizado exitosamente!",
@@ -376,7 +351,6 @@
     "COPIED_TO_CLIPBOARD": "¡Copiado al portapapeles!",
     "QR_CODE_DOWNLOADED": "¡Código QR descargado exitosamente!"
   },
-
   "VALIDATION": {
     "REQUIRED": "Este campo es obligatorio",
     "EMAIL": "Por favor, introduce un correo electrónico válido",
@@ -387,7 +361,6 @@
     "MAX": "El valor máximo es {max}",
     "URL": "Por favor, introduce una URL válida"
   },
-
   "PLACEHOLDERS": {
     "ENTER_EMAIL": "Introduce tu correo electrónico",
     "ENTER_PASSWORD": "Introduce tu contraseña",
@@ -397,7 +370,6 @@
     "SELECT": "Seleccionar...",
     "OPTIONAL": "Opcional"
   },
-
   "TOOLTIPS": {
     "EDIT": "Editar",
     "DELETE": "Eliminar",
@@ -407,14 +379,12 @@
     "INFO": "Más información",
     "HELP": "Ayuda"
   },
-
   "FOOTER": {
     "COPYRIGHT": "© 2025 Plataforma de Derechos Musicales. Todos los derechos reservados.",
     "PRIVACY": "Política de Privacidad",
     "TERMS": "Términos de Servicio",
     "CONTACT": "Contáctanos"
   },
-
   "SPLITS": {
     "SPLIT_EDITOR": "Editor de divisiones",
     "IP_RIGHTS": "Derechos de PI",
@@ -456,9 +426,18 @@
     "NOTES": "Notas",
     "REMOVE": "Eliminar",
     "INTELLECTUAL_PROPERTY_SPLITS": "Divisiones de Propiedad Intelectual",
-    "NEIGHBORING_RIGHTS_SPLITS": "Divisiones de derechos afines"
+    "NEIGHBORING_RIGHTS_SPLITS": "Divisiones de derechos afines",
+    "AI_DISCLOSURE": "Divulgación de IA",
+    "AI_TOOL": "Herramienta de IA",
+    "AI_ASSISTED": "Asistido por IA",
+    "AI_GENERATED": "Generado por IA",
+    "CREATION_TYPE": "Tipo de creación",
+    "HUMAN": "Humano",
+    "KIND": "Tipo",
+    "POSITION_QR_CODE": "Posiciona el código QR dentro del marco",
+    "SELECT_SPLIT_TYPES": "Selecciona tipos de división",
+    "EDIT_RIGHTS_HOLDER": "Editar titular de derechos"
   },
-
   "GDPR": {
     "COOKIES_TITLE": "Usamos cookies",
     "COOKIES_DESCRIPTION": "Usamos cookies para mejorar tu experiencia en nuestro sitio web. Al usar nuestro sitio, aceptas nuestro uso de cookies.",
@@ -486,5 +465,9 @@
     "DELETE_BUTTON": "Eliminar cuenta",
     "PRIVACY_POLICY": "Política de Privacidad",
     "TERMS_OF_SERVICE": "Términos de Servicio"
+  },
+  "PROTOCOL": {
+    "LYRICS": "Letra",
+    "MUSIC": "Música"
   }
 }

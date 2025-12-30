@@ -3,6 +3,18 @@
 **Date**: December 30, 2025  
 **Status**: ✅ Complete & Verified
 
+> **2025-12-30 Update**: Adding a rights holder with the Lyrics or Music split checkboxes now auto-inserts/updates the corresponding `protocol_lyric_authors` and `protocol_music_authors` rows (including melody/harmony/arrangement flags) whenever a protocol exists for the work. No manual sync required.
+
+### Quick Test Protocol Seeder
+
+Need sample data fast? Run `supabase/seeds/create_test_protocol.sql` in the Supabase SQL editor to generate:
+- A throwaway work tied to your most recent workspace
+- A draft protocol for that work
+- One sample lyric author (50%)
+- One sample music author (50% with melody + arrangement)
+
+The script auto-selects the newest workspace and user; tweak the selectors if you need specific IDs.
+
 ---
 
 ## 🎯 What Was Implemented

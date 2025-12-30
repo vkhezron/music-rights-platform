@@ -4,7 +4,6 @@
   "WELCOME": "Willkommen bei der Musikindustrie-Plattform!",
   "DESCRIPTION": "Verwalten Sie Ihre Rechte, verbinden Sie sich mit Künstlern und erweitern Sie Ihr Netzwerk.",
   "LANGUAGE": "Sprache",
-
   "BUTTONS": {
     "SAVE": "Speichern",
     "CANCEL": "Abbrechen",
@@ -24,7 +23,6 @@
     "ADD": "Hinzufügen",
     "REMOVE": "Entfernen"
   },
-
   "AUTH": {
     "WELCOME_BACK": "Willkommen zurück",
     "LOGIN_SUBTITLE": "Melden Sie sich an, um fortzufahren",
@@ -71,7 +69,6 @@
     "REGISTER_FEATURE_2": "Professionelles Networking",
     "REGISTER_FEATURE_3": "Kollaborations-Tools"
   },
-
   "PROFILE": {
     "SETUP_TITLE": "Profil einrichten",
     "SETUP_SUBTITLE": "Lassen Sie uns Sie besser kennenlernen",
@@ -113,7 +110,6 @@
     "PROFILE_DETAILS": "Profil-Details",
     "QR_CODE": "QR-Code"
   },
-
   "WORKSPACE": {
     "CREATE_TITLE": "Workspace erstellen",
     "CREATE_SUBTITLE": "Richten Sie Ihren Workspace ein, um Rechte zu verwalten und zusammenzuarbeiten",
@@ -149,7 +145,6 @@
     "TYPE_ALBUM": "Album",
     "TYPE_COLLECTION": "Sammlung"
   },
-
   "DASHBOARD": {
     "WELCOME": "Willkommen bei der Musikrechte-Plattform",
     "DASHBOARD": "Dashboard",
@@ -176,7 +171,6 @@
     "MANAGE_RIGHTS_HOLDERS": "Rechteinhaber verwalten",
     "ARCHIVE_PROJECT": "Projekt archivieren"
   },
-
   "WORKS": {
     "WORKS": "Werke",
     "ADD_WORK": "Werk hinzufügen",
@@ -229,7 +223,6 @@
     "NOTES": "Notizen",
     "MANAGE_SPLITS": "Splits verwalten"
   },
-
   "RIGHTS_HOLDERS": {
     "TITLE": "Rechteinhaber",
     "ADD_RIGHTS_HOLDER": "Rechteinhaber hinzufügen",
@@ -266,7 +259,6 @@
     "NOTES": "Notizen",
     "ADDITIONAL_INFO": "Zusätzliche Informationen"
   },
-
   "COMMON": {
     "LOADING": "Laden...",
     "SAVING": "Speichern...",
@@ -301,9 +293,9 @@
     "OK": "OK",
     "RETRY": "Wiederholen",
     "ALL": "Alle",
-    "CREATING": "Erstellen..."
+    "CREATING": "Erstellen...",
+    "NOTES": "Notizen"
   },
-
   "ERRORS": {
     "GENERIC": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     "NETWORK": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.",
@@ -312,7 +304,6 @@
     "VALIDATION": "Bitte überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
     "SERVER": "Serverfehler. Bitte versuchen Sie es später erneut."
   },
-
   "ROLES": {
     "ARTIST": "Künstler",
     "PRODUCER": "Produzent",
@@ -324,7 +315,6 @@
     "ENGINEER": "Tontechniker",
     "OTHER": "Andere"
   },
-
   "WORKSPACE_TYPES": {
     "BAND": "Band/Künstler",
     "LABEL": "Plattenlabel",
@@ -333,7 +323,6 @@
     "MANAGEMENT": "Management",
     "OTHER": "Andere"
   },
-
   "LANGUAGES": {
     "EN": "Englisch",
     "DE": "Deutsch",
@@ -343,7 +332,6 @@
     "IT": "Italienisch",
     "PT": "Portugiesisch"
   },
-
   "SOCIAL_PLATFORMS": {
     "INSTAGRAM": "Instagram",
     "TWITTER": "Twitter/X",
@@ -353,7 +341,6 @@
     "WEBSITE": "Webseite",
     "SPOTIFY": "Spotify"
   },
-
   "NOTIFICATIONS": {
     "PROFILE_CREATED": "Profil erfolgreich erstellt!",
     "PROFILE_UPDATED": "Profil erfolgreich aktualisiert!",
@@ -364,7 +351,6 @@
     "COPIED_TO_CLIPBOARD": "In Zwischenablage kopiert!",
     "QR_CODE_DOWNLOADED": "QR-Code erfolgreich heruntergeladen!"
   },
-
   "VALIDATION": {
     "REQUIRED": "Dieses Feld ist erforderlich",
     "EMAIL": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
@@ -375,7 +361,6 @@
     "MAX": "Maximalwert ist {max}",
     "URL": "Bitte geben Sie eine gültige URL ein"
   },
-
   "PLACEHOLDERS": {
     "ENTER_EMAIL": "Geben Sie Ihre E-Mail ein",
     "ENTER_PASSWORD": "Geben Sie Ihr Passwort ein",
@@ -385,7 +370,6 @@
     "SELECT": "Auswählen...",
     "OPTIONAL": "Optional"
   },
-
   "TOOLTIPS": {
     "EDIT": "Bearbeiten",
     "DELETE": "Löschen",
@@ -395,14 +379,12 @@
     "INFO": "Weitere Informationen",
     "HELP": "Hilfe"
   },
-
   "FOOTER": {
     "COPYRIGHT": "© 2025 Musikrechte-Plattform. Alle Rechte vorbehalten.",
     "PRIVACY": "Datenschutzerklärung",
     "TERMS": "Nutzungsbedingungen",
     "CONTACT": "Kontaktieren Sie uns"
   },
-
   "SPLITS": {
     "SPLIT_EDITOR": "Split-Editor",
     "IP_RIGHTS": "Urheberrechte",
@@ -444,9 +426,18 @@
     "NOTES": "Notizen",
     "REMOVE": "Entfernen",
     "INTELLECTUAL_PROPERTY_SPLITS": "Splits für Immaterialgüterrechte",
-    "NEIGHBORING_RIGHTS_SPLITS": "Splits für verwandte Schutzrechte"
+    "NEIGHBORING_RIGHTS_SPLITS": "Splits für verwandte Schutzrechte",
+    "AI_DISCLOSURE": "KI-Offenlegung",
+    "AI_TOOL": "KI-Werkzeug",
+    "AI_ASSISTED": "KI-assistiert",
+    "AI_GENERATED": "KI-generiert",
+    "CREATION_TYPE": "Erstellungstyp",
+    "HUMAN": "Mensch",
+    "KIND": "Art",
+    "POSITION_QR_CODE": "Positionieren Sie den QR-Code im Bild",
+    "SELECT_SPLIT_TYPES": "Wählen Sie Aufteilungstypen",
+    "EDIT_RIGHTS_HOLDER": "Rechteinhaber bearbeiten"
   },
-
   "GDPR": {
     "COOKIES_TITLE": "Wir verwenden Cookies",
     "COOKIES_DESCRIPTION": "Wir verwenden Cookies, um Ihr Erlebnis auf unserer Website zu verbessern. Durch die Nutzung unserer Website stimmen Sie der Verwendung von Cookies zu.",
@@ -474,5 +465,9 @@
     "DELETE_BUTTON": "Konto löschen",
     "PRIVACY_POLICY": "Datenschutzerklärung",
     "TERMS_OF_SERVICE": "Nutzungsbedingungen"
+  },
+  "PROTOCOL": {
+    "LYRICS": "Liedtext",
+    "MUSIC": "Musik"
   }
 }

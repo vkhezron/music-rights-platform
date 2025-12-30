@@ -107,7 +107,7 @@ export class PdfGeneratorService {
           ctx.fillStyle = darkGray;
           const holderName = this.getRightsHolderName(split.rights_holder);
           const splitType = this.formatSplitType(split.split_type);
-          const percentage = split.percentage.toFixed(2) + '%';
+          const percentage = (split.ownership_percentage ?? split.percentage ?? 0).toFixed(2) + '%';
           const notes = split.notes || '';
 
           ctx.fillText(holderName, 50, y + 15);
@@ -124,7 +124,7 @@ export class PdfGeneratorService {
         ctx.fillStyle = 'white';
         ctx.font = 'bold 12px Arial';
         ctx.fillText('TOTAL IP RIGHTS:', 50, y + 15);
-        const ipTotal = ipSplits.reduce((sum, s) => sum + s.percentage, 0);
+        const ipTotal = ipSplits.reduce((sum, s) => sum + (s.ownership_percentage ?? s.percentage ?? 0), 0);
         ctx.fillText(ipTotal.toFixed(2) + '%', 500, y + 15);
 
         y += 45;
@@ -159,7 +159,7 @@ export class PdfGeneratorService {
           ctx.fillStyle = darkGray;
           const holderName = this.getRightsHolderName(split.rights_holder);
           const splitType = this.formatSplitType(split.split_type);
-          const percentage = split.percentage.toFixed(2) + '%';
+          const percentage = (split.ownership_percentage ?? split.percentage ?? 0).toFixed(2) + '%';
           const notes = split.notes || '';
 
           ctx.fillText(holderName, 50, y + 15);
@@ -176,7 +176,7 @@ export class PdfGeneratorService {
         ctx.fillStyle = 'white';
         ctx.font = 'bold 12px Arial';
         ctx.fillText('TOTAL NEIGHBORING RIGHTS:', 50, y + 15);
-        const neighboringTotal = neighboringSplits.reduce((sum, s) => sum + s.percentage, 0);
+        const neighboringTotal = neighboringSplits.reduce((sum, s) => sum + (s.ownership_percentage ?? s.percentage ?? 0), 0);
         ctx.fillText(neighboringTotal.toFixed(2) + '%', 500, y + 15);
 
         y += 50;

@@ -9,6 +9,8 @@ import {
   computed,
   inject,
   signal,
+  runInInjectionContext,
+  Injector,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -23,6 +25,7 @@ import { WorkspaceService } from '../services/workspace.service';
 import { PdfGeneratorService } from '../services/pdf-generator.service';
 import { SupabaseService } from '../services/supabase.service';
 import { ProtocolService } from '../services/protocol.service';
+import { ProfileService } from '../services/profile.service';
 import { Work } from '../models/work.model';
 import { RightsHolder, RightsHolderKind, RightsHolderType, RIGHTS_HOLDER_KINDS } from '../../models/rights-holder.model';
 import { LyricAuthor, MusicAuthor, NeighbouringRightsholder, PROTOCOL_ROLES, ProtocolRoleKind } from '../models/protocol.model';
@@ -60,22 +63,25 @@ type QRCodeData = {
  * DB split types based on your current Postgres check constraint.
  */
 export type DbSplitType =
-  | 'lyric'
+  | 'lyrics'
   | 'music'
   | 'publishing'
   | 'performance'
-  | 'master'
-  | 'neighboring';
+  | 'master_recording'
+  | 'neighboring_rights';
+
+export type RightsLayer = 'ip' | 'neighboring';
 
 /**
- * Row shape aligned to your DB table (important: percentage, not ownership_percentage).
+ * Row shape aligned to your DB table (uses ownership_percentage per schema).
  */
 export interface WorkSplitRow {
   id?: string;
   work_id: string;
   rights_holder_id: string;
   split_type: DbSplitType;
-  percentage: number;
+  ownership_percentage: number;
+  percentage?: number; // Alias for UI compatibility
   notes?: string | null;
 
   version?: number | null;
@@ -83,6 +89,7 @@ export interface WorkSplitRow {
   created_by?: string;
   created_at?: string;
   updated_at?: string;
+  rights_layer?: RightsLayer;
 
   rights_holder?: RightsHolder;
 }
@@ -93,7 +100,8 @@ export interface WorkSplitRow {
 export interface WorkSplitUpsert {
   rights_holder_id: string;
   split_type: DbSplitType;
-  percentage: number;
+  ownership_percentage: number;
+  rights_layer: RightsLayer;
   notes?: string;
 }
 
@@ -103,11 +111,19 @@ export interface WorkSplitUpsert {
 export type SplitTab = 'ip' | 'neighboring';
 
 // Which DB split types belong to which UI sheet
-const IP_SPLIT_TYPES: DbSplitType[] = ['lyric', 'music', 'publishing'];
-const NEIGHBORING_SPLIT_TYPES: DbSplitType[] = ['performance', 'master', 'neighboring'];
+const IP_SPLIT_TYPES: DbSplitType[] = ['lyrics', 'music', 'publishing'];
+const NEIGHBORING_SPLIT_TYPES: DbSplitType[] = ['performance', 'master_recording', 'neighboring_rights'];
+const SPLIT_TYPE_LABELS: Record<DbSplitType, string> = {
+  lyrics: 'Lyrics',
+  music: 'Music',
+  publishing: 'Publishing',
+  performance: 'Performance',
+  master_recording: 'Master Recording',
+  neighboring_rights: 'Neighboring Rights',
+};
 
 const DEFAULT_IP_TYPE: DbSplitType = 'music';
-const DEFAULT_NEIGHBORING_TYPE: DbSplitType = 'master';
+const DEFAULT_NEIGHBORING_TYPE: DbSplitType = 'master_recording';
 
 @Component({
   selector: 'app-split-editor',
@@ -126,6 +142,8 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   private pdfGenerator = inject(PdfGeneratorService);
   private supabase = inject(SupabaseService);
   private protocolService = inject(ProtocolService);
+  private profileService = inject(ProfileService);
+  private injector = inject(Injector);
 
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
 
@@ -143,6 +161,9 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   readonly FileText = FileText;
   readonly Music = Music;
   readonly Edit = Edit;
+  
+  // Expose Math for template
+  readonly Math = Math;
 
   // State
   work = signal<Work | null>(null);
@@ -170,7 +191,44 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   scanError = signal('');
   scanningFor = signal<SplitTab>('ip');
 
-  // Add rights holder
+  // ==========================================
+  // NEW: 3-Button Toggle Workflow State
+  // ==========================================
+  addRightsHolderMode = signal<'buttons' | 'add-me' | 'scan-qr' | 'add-manually' | null>(null);
+  
+  // Add Me: Store current user profile data
+  currentUserData = signal<Partial<RightsHolder> | null>(null);
+  
+  // Split type selection (checkboxes)
+  selectedSplitTypes = signal<Set<string>>(new Set()); // lyrics, music, melody, harmony, arrangement, etc.
+  showMusicSubOptions = signal(false); // Show melody/harmony/arrangement when music is checked
+  
+  // Split type percentages - track percentage for each selected split type
+  splitTypePercentages = signal<Map<string, number>>(new Map()); // { 'lyrics': 50, 'music': 50 }
+  
+  // Scan QR: Store scanned user data
+  scannedUserData = signal<Partial<RightsHolder> | null>(null);
+  
+  // Add Manually: Form for creating new inline
+  manualHolderForm = signal({
+    type: 'person' as RightsHolderType,
+    kind: 'other' as RightsHolderKind,
+    nickname: '',
+    first_name: '',
+    last_name: '',
+    company_name: '',
+    email: '',
+    phone: '',
+  });
+  
+  // AI Disclosure for current holder being added
+  currentAiDisclosure = signal({
+    creation_type: 'human' as 'human' | 'ai_assisted' | 'ai_generated',
+    ai_tool: '',
+    notes: '',
+  });
+
+  // Add rights holder (legacy - keep for compatibility)
   selectedRightsHolderId = '';
   addingManually = signal(false);
   creatingNewHolder = signal(false);
@@ -202,12 +260,22 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   // Options for DB split types within each tab
   ipTypeOptions = IP_SPLIT_TYPES.map((v) => ({
     value: v,
-    label: v === 'lyric' ? 'Lyrics' : v === 'music' ? 'Music' : 'Publishing',
+    label:
+      v === 'lyrics'
+        ? 'Lyrics'
+        : v === 'music'
+        ? 'Music'
+        : 'Publishing',
   }));
 
   neighboringTypeOptions = NEIGHBORING_SPLIT_TYPES.map((v) => ({
     value: v,
-    label: v === 'performance' ? 'Performance' : v === 'master' ? 'Master' : 'Neighboring',
+    label:
+      v === 'performance'
+        ? 'Performance'
+        : v === 'master_recording'
+        ? 'Master'
+        : 'Neighboring',
   }));
 
   currentSplits = computed(() =>
@@ -245,6 +313,14 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
     }
 
     this.hasCameraSupport.set(await this.qrScannerService.hasCameraSupport());
+    
+    // Set up subscription to rights holders with proper injection context
+    runInInjectionContext(this.injector, () => {
+      this.rightsHoldersService.rightsHolders$
+        .pipe(takeUntilDestroyed())
+        .subscribe((rhs) => this.rightsHolders.set(rhs));
+    });
+    
     await this.loadData(workId);
   }
 
@@ -256,22 +332,69 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   // Helpers
   // =========================
   private validateTab(splits: WorkSplitRow[], label: string) {
-    const total = splits.reduce((sum, s) => sum + (Number(s.percentage) || 0), 0);
-
     if (splits.length === 0) {
       return { isValid: false, class: 'invalid', message: `At least one ${label} rights holder is required` };
     }
-    if (total === 100) {
-      return { isValid: true, class: 'valid', message: 'Perfect! Total is 100%' };
+
+    const totalsByType = new Map<DbSplitType, number>();
+    for (const split of splits) {
+      const value = Number(split.percentage ?? split.ownership_percentage ?? 0);
+      if (!Number.isFinite(value)) continue;
+      const current = totalsByType.get(split.split_type) ?? 0;
+      totalsByType.set(split.split_type, current + value);
     }
-    if (total < 100) {
-      return { isValid: false, class: 'under', message: `${(100 - total).toFixed(2)}% short of 100%` };
+
+    if (totalsByType.size === 0) {
+      return { isValid: false, class: 'invalid', message: `Select at least one split type for ${label}` };
     }
-    return { isValid: false, class: 'over', message: `Exceeds 100% by ${(total - 100).toFixed(2)}%` };
+
+    const tolerance = 0.01;
+    for (const [type, total] of totalsByType.entries()) {
+      if (total > 100 + tolerance) {
+        return {
+          isValid: false,
+          class: 'over',
+          message: `${this.getSplitTypeLabel(type)} exceeds 100% by ${this.formatPercentage(total - 100)}%`,
+        };
+      }
+      if (total < 100 - tolerance) {
+        return {
+          isValid: false,
+          class: 'under',
+          message: `${this.getSplitTypeLabel(type)} is short of 100% by ${this.formatPercentage(100 - total)}%`,
+        };
+      }
+    }
+
+    const summary = Array.from(totalsByType.entries())
+      .map(([type, total]) => `${this.getSplitTypeLabel(type)} ${this.formatPercentage(total)}%`)
+      .join(' · ');
+
+    return {
+      isValid: true,
+      class: 'valid',
+      message: totalsByType.size > 1 ? `All split types balanced (${summary})` : summary,
+    };
+  }
+
+  private getSplitTypeLabel(type: DbSplitType): string {
+    return SPLIT_TYPE_LABELS[type] ?? type;
+  }
+
+  private formatPercentage(value: number): string {
+    const rounded = Math.round(value * 100) / 100;
+    if (!Number.isFinite(rounded)) {
+      return '0';
+    }
+    return Number.isInteger(rounded) ? `${Math.trunc(rounded)}` : rounded.toFixed(2);
   }
 
   private isIpType(t: DbSplitType) {
     return IP_SPLIT_TYPES.includes(t);
+  }
+
+  private getRightsLayerForSplitType(t: DbSplitType): RightsLayer {
+    return this.isIpType(t) ? 'ip' : 'neighboring';
   }
 
   /**
@@ -279,8 +402,16 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
    * Fixes: 'lyrics' -> 'lyric'
    */
   private normalizeDbSplitType(t: any): DbSplitType {
-    if (t === 'lyrics') return 'lyric';
-    return t as DbSplitType;
+    switch (t) {
+      case 'lyric':
+        return 'lyrics';
+      case 'master':
+        return 'master_recording';
+      case 'neighboring':
+        return 'neighboring_rights';
+      default:
+        return t as DbSplitType;
+    }
   }
 
   getRightsHolderName(rh: RightsHolder): string {
@@ -316,11 +447,6 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
 
       await this.rightsHoldersService.loadRightsHolders(workspace.id);
 
-      // keep in sync; auto-unsub on destroy
-      this.rightsHoldersService.rightsHolders$
-        .pipe(takeUntilDestroyed())
-        .subscribe((rhs) => this.rightsHolders.set(rhs));
-
       // Load existing splits (type in your service may still be WorkSplit[])
       const allSplits: any[] = (await this.worksService.getWorkSplits(workId)) as any[];
 
@@ -330,8 +456,13 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
       const enriched: WorkSplitRow[] = (allSplits || []).map((s: any) => ({
         ...s,
         split_type: this.normalizeDbSplitType(s.split_type),
-        percentage: Number(s.percentage) || 0,
+        // Handle both old 'percentage' and new 'ownership_percentage' columns
+        ownership_percentage: Number(s.ownership_percentage ?? s.percentage ?? 0),
+        percentage: Number(s.ownership_percentage ?? s.percentage ?? 0), // Alias for compatibility
         rights_holder: s.rights_holder ?? rhsById.get(s.rights_holder_id),
+        rights_layer:
+          (s.rights_layer as RightsLayer | undefined) ??
+          this.getRightsLayerForSplitType(this.normalizeDbSplitType(s.split_type)),
       }));
 
       this.ipSplits.set(enriched.filter((s) => this.isIpType(s.split_type)));
@@ -458,6 +589,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
       rights_holder_id: rhId,
       rights_holder: rightsHolder,
       split_type: defaultType,
+      ownership_percentage: 0,
       percentage: 0,
       notes: '',
       is_active: true,
@@ -718,14 +850,16 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
       const ipPayload: WorkSplitUpsert[] = this.ipSplits().map((s) => ({
         rights_holder_id: s.rights_holder_id,
         split_type: s.split_type,
-        percentage: Number(s.percentage) || 0,
+        ownership_percentage: Number(s.percentage) || 0,
+        rights_layer: s.rights_layer ?? this.getRightsLayerForSplitType(s.split_type),
         notes: s.notes ?? '',
       }));
 
       const neighboringPayload: WorkSplitUpsert[] = this.neighboringSplits().map((s) => ({
         rights_holder_id: s.rights_holder_id,
         split_type: s.split_type,
-        percentage: Number(s.percentage) || 0,
+        ownership_percentage: Number(s.percentage) || 0,
+        rights_layer: s.rights_layer ?? this.getRightsLayerForSplitType(s.split_type),
         notes: s.notes ?? '',
       }));
 
@@ -835,9 +969,9 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
         cmo_name: '',
         pro_name: '',
         participation_percentage: 0,
-        melody: false,
-        harmony: false,
-        arrangement: false,
+        melody: 0,
+        harmony: 0,
+        arrangement: 0,
       }
     ]);
   }
@@ -1072,4 +1206,551 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
       this.isSaving.set(false);
     }
   }
+
+  // =====================================================
+  // NEW: 3-BUTTON WORKFLOW (Add Me / Scan QR / Add Manually)
+  // =====================================================
+
+  openAddRightsHolderModal() {
+    this.addRightsHolderMode.set('buttons');
+    this.selectedSplitTypes.set(new Set());
+    this.showMusicSubOptions.set(false);
+    this.currentUserData.set(null);
+    this.scannedUserData.set(null);
+    this.manualHolderForm.set({
+      type: 'person',
+      kind: 'other',
+      nickname: '',
+      first_name: '',
+      last_name: '',
+      company_name: '',
+      email: '',
+      phone: '',
+    });
+  }
+
+  closeAddRightsHolderModal() {
+    this.addRightsHolderMode.set(null);
+    this.selectedSplitTypes.set(new Set());
+    this.showMusicSubOptions.set(false);
+    this.currentUserData.set(null);
+    this.scannedUserData.set(null);
+    this.currentAiDisclosure.set({
+      creation_type: 'human',
+      ai_tool: '',
+      notes: '',
+    });
+    this.manualHolderForm.set({
+      type: 'person',
+      kind: 'other',
+      nickname: '',
+      first_name: '',
+      last_name: '',
+      company_name: '',
+      email: '',
+      phone: '',
+    });
+  }
+
+  // ADD ME: Load current user profile
+  async selectAddMe() {
+    try {
+      const profile = await this.profileService.loadProfile(this.supabase.currentUser?.id || '');
+      if (profile) {
+        this.currentUserData.set({
+          nickname: profile.nickname,
+          email: this.supabase.currentUser?.email,
+          avatar_url: profile.avatar_url,
+          bio: profile.bio,
+          profile_id: profile.id,
+          linked_user_id: this.supabase.currentUser?.id,
+        });
+        this.addRightsHolderMode.set('add-me');
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+      this.errorMessage.set('Failed to load your profile');
+    }
+  }
+
+  // SCAN QR: Toggle scanning mode
+  selectScanQR() {
+    this.addRightsHolderMode.set('scan-qr');
+    this.startScanning();
+  }
+
+  // ADD MANUALLY: Show form
+  selectAddManually() {
+    this.addRightsHolderMode.set('add-manually');
+    this.manualHolderForm.set({
+      type: 'person',
+      kind: 'other',
+      nickname: '',
+      first_name: '',
+      last_name: '',
+      company_name: '',
+      email: '',
+      phone: '',
+    });
+  }
+
+  // SPLIT TYPE SELECTION: Lyrics/Music checkboxes
+  toggleSplitType(splitType: string) {
+    const selected = new Set(this.selectedSplitTypes());
+    if (selected.has(splitType)) {
+      selected.delete(splitType);
+    } else {
+      selected.add(splitType);
+    }
+    
+    // Show music sub-options if music is selected
+    if (splitType === 'music' && selected.has('music')) {
+      this.showMusicSubOptions.set(true);
+    } else if (splitType === 'music' && !selected.has('music')) {
+      this.showMusicSubOptions.set(false);
+      // Remove melody/harmony/arrangement if music is deselected
+      selected.delete('melody');
+      selected.delete('harmony');
+      selected.delete('arrangement');
+    }
+    
+    this.selectedSplitTypes.set(selected);
+  }
+
+  isSplitTypeSelected(splitType: string): boolean {
+    return this.selectedSplitTypes().has(splitType);
+  }
+
+  // UPDATE SPLIT TYPE PERCENTAGE
+  updateSplitTypePercentage(splitType: string, percentage: number) {
+    const percentages = new Map(this.splitTypePercentages());
+    percentages.set(splitType, Math.max(0, percentage)); // Ensure non-negative
+    this.splitTypePercentages.set(percentages);
+  }
+
+  // GET SPLIT TYPE PERCENTAGE
+  getSplitTypePercentage(splitType: string): number {
+    return this.splitTypePercentages().get(splitType) || 0;
+  }
+
+  // CONFIRM & ADD: Process the selected data
+  async confirmAndAddRightsHolder() {
+    const selectedTypes = Array.from(this.selectedSplitTypes());
+    if (selectedTypes.length === 0) {
+      this.errorMessage.set('Please select at least one split type');
+      return;
+    }
+
+    try {
+      this.isSaving.set(true);
+
+      // Determine which user data to use (Add Me / Scan QR / Add Manually)
+      let holderData: Partial<RightsHolder> | null = null;
+
+      if (this.addRightsHolderMode() === 'add-me') {
+        holderData = this.currentUserData();
+      } else if (this.addRightsHolderMode() === 'scan-qr') {
+        holderData = this.scannedUserData();
+      } else if (this.addRightsHolderMode() === 'add-manually') {
+        const form = this.manualHolderForm();
+        const nickname = (form.nickname || '').trim();
+        if (!nickname) {
+          this.errorMessage.set('Please provide a nickname for this rights holder');
+          return;
+        }
+        holderData = {
+          type: form.type as RightsHolderType,
+          kind: form.kind,
+          nickname,
+          first_name: form.type === 'person' ? form.first_name : undefined,
+          last_name: form.type === 'person' ? form.last_name : undefined,
+          company_name: form.type === 'company' ? form.company_name : undefined,
+          email: form.email,
+          phone: form.phone,
+        };
+      }
+
+      if (!holderData) {
+        this.errorMessage.set('No holder data provided');
+        return;
+      }
+
+      // Create/fetch the rights holder
+      let holderId: string;
+      if (holderData.linked_user_id) {
+        // Check if this user already exists as a rights holder
+        const existing = this.rightsHolders().find(
+          rh => rh.linked_user_id === holderData?.linked_user_id
+        );
+        if (existing) {
+          holderId = existing.id;
+        } else {
+          // Create new rights holder linked to user
+          holderId = await this.createRightsHolder(holderData);
+        }
+      } else {
+        // Create new unlinked rights holder
+        holderId = await this.createRightsHolder(holderData);
+      }
+
+      // Add splits for each selected type
+      await this.addSplitsForTypes(holderId, selectedTypes);
+
+      this.successMessage.set('Rights holder added successfully!');
+      this.closeAddRightsHolderModal();
+      setTimeout(() => this.successMessage.set(''), 3000);
+    } catch (error: any) {
+      console.error('Error adding rights holder:', error);
+      this.errorMessage.set(`Failed to add rights holder: ${error.message}`);
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
+
+  private async createRightsHolder(holderData: Partial<RightsHolder>): Promise<string> {
+    const workspace = this.workspaceService.currentWorkspace;
+    if (!workspace) throw new Error('No workspace selected');
+
+    // Build insert object with only non-undefined, non-empty values (matching the service pattern)
+    const insertData: any = {
+      workspace_id: workspace.id,
+      type: holderData.type || 'person',
+      kind: holderData.kind || 'other',
+      created_by: this.supabase.currentUser?.id || '',
+    };
+
+    // Only include fields that have values
+    if (holderData.first_name) insertData.first_name = holderData.first_name;
+    if (holderData.last_name) insertData.last_name = holderData.last_name;
+    if (holderData.company_name) insertData.company_name = holderData.company_name;
+    if (holderData.email) insertData.email = holderData.email;
+    if (holderData.phone) insertData.phone = holderData.phone;
+    if (holderData.linked_user_id) insertData.linked_user_id = holderData.linked_user_id;
+    if (holderData.profile_id) insertData.profile_id = holderData.profile_id;
+
+    const resolvedNickname = this.resolveNickname(holderData);
+    if (resolvedNickname) {
+      insertData.nickname = resolvedNickname;
+    }
+
+    if (!insertData.nickname && !insertData.profile_id) {
+      insertData.nickname = this.generateFallbackNickname();
+    }
+
+    // Add AI disclosure
+    const aiDisclosure = this.currentAiDisclosure();
+    if (aiDisclosure) insertData.ai_disclosure = aiDisclosure;
+
+    const { data, error } = await this.supabase.client
+      .from('rights_holders')
+      .insert(insertData)
+      .select('id')
+      .single();
+
+    if (error) throw error;
+    if (!data?.id) throw new Error('Failed to create rights holder');
+
+    return data.id;
+  }
+
+  private async addSplitsForTypes(holderId: string, selectedTypes: string[]) {
+    const work = this.work();
+    if (!work) throw new Error('No work selected');
+
+    // Determine if this is IP or Neighboring rights based on active tab
+    const isIpRights = this.activeTab() === 'ip';
+    const allowedDbTypes = isIpRights ? IP_SPLIT_TYPES : NEIGHBORING_SPLIT_TYPES;
+
+    const existingSplits = [...this.ipSplits(), ...this.neighboringSplits()];
+    const splitTypePercentages = this.splitTypePercentages();
+
+    const candidates = selectedTypes
+      .map((uiType) => ({
+        uiType,
+        dbType: this.mapUiTypeToDbType(uiType),
+      }))
+      .filter((entry): entry is { uiType: string; dbType: DbSplitType } => !!entry.dbType);
+
+    const uniqueByDbType = new Map<DbSplitType, { uiType: string; dbType: DbSplitType }>();
+    for (const entry of candidates) {
+      if (!uniqueByDbType.has(entry.dbType)) {
+        uniqueByDbType.set(entry.dbType, entry);
+      }
+    }
+
+    const rowsToInsert = Array.from(uniqueByDbType.values())
+      .filter((entry) => allowedDbTypes.includes(entry.dbType))
+      .filter((entry) =>
+        !existingSplits.some(
+          (split) =>
+            split.work_id === work.id &&
+            split.rights_holder_id === holderId &&
+            split.split_type === entry.dbType
+        )
+      )
+      .map((entry) => ({
+        work_id: work.id,
+        rights_holder_id: holderId,
+        split_type: entry.dbType,
+        ownership_percentage: Number(splitTypePercentages.get(entry.uiType) ?? 0),
+        is_active: true,
+        created_by: this.supabase.currentUser?.id || '',
+        rights_layer: this.getRightsLayerForSplitType(entry.dbType),
+      }));
+
+    if (rowsToInsert.length > 0) {
+      const { error } = await this.supabase.client.from('work_splits').insert(rowsToInsert);
+      if (error) throw error;
+    }
+
+    await this.syncProtocolAuthors(holderId, selectedTypes, splitTypePercentages);
+
+    // Reload splits
+    await this.loadData(work.id);
+  }
+
+  private mapUiTypeToDbType(uiType: string): DbSplitType | null {
+    const mapping: { [key: string]: DbSplitType } = {
+      'lyrics': 'lyrics',
+      'music': 'music',
+      'publishing': 'publishing',
+      'performance': 'performance',
+      'master': 'master_recording',
+      'neighboring': 'neighboring_rights',
+      'melody': 'music',
+      'harmony': 'music',
+      'arrangement': 'music',
+    };
+    return mapping[uiType] || null;
+  }
+
+  // QR SCAN: Handle scanned data
+  handleQRScanned(scannedData: QRCodeData) {
+    // Load the scanned user's profile
+    if (scannedData.user_id) {
+      this.supabase.client
+        .from('profiles')
+        .select('*')
+        .eq('id', scannedData.user_id)
+        .single()
+        .then(({ data, error }) => {
+          if (error) {
+            this.scanError.set('Could not load user profile');
+            return;
+          }
+          this.scannedUserData.set({
+            nickname: data?.nickname,
+            email: data?.email,
+            avatar_url: data?.avatar_url,
+            bio: data?.bio,
+            profile_id: data?.id,
+            linked_user_id: data?.id,
+          });
+          this.stopScanning();
+          this.addRightsHolderMode.set('add-me'); // Show split type selection
+        });
+    }
+  }
+
+  // HELPER: Update AI disclosure creation type
+  updateAiDisclosureType(type: 'human' | 'ai_assisted' | 'ai_generated') {
+    const current = this.currentAiDisclosure();
+    this.currentAiDisclosure.set({
+      ...current,
+      creation_type: type,
+    });
+  }
+
+  // HELPER: Update AI disclosure tool
+  updateAiDisclosureTool(tool: string) {
+    const current = this.currentAiDisclosure();
+    this.currentAiDisclosure.set({
+      ...current,
+      ai_tool: tool,
+    });
+  }
+
+  // HELPER: Update AI disclosure notes
+  updateAiDisclosureNotes(notes: string) {
+    const current = this.currentAiDisclosure();
+    this.currentAiDisclosure.set({
+      ...current,
+      notes: notes,
+    });
+  }
+
+  // HELPER: Update manual holder form field
+  updateManualHolderField(field: string, value: any) {
+    const current = this.manualHolderForm();
+    this.manualHolderForm.set({
+      ...current,
+      [field]: value,
+    });
+  }
+
+  private resolveNickname(data: Partial<RightsHolder>): string | null {
+    const candidates = [
+      data.nickname,
+      `${data.first_name || ''} ${data.last_name || ''}`,
+      data.company_name,
+      data.email ? data.email.split('@')[0] : undefined,
+    ];
+
+    for (const candidate of candidates) {
+      const normalized = this.normalizeNickname(candidate);
+      if (normalized) return normalized;
+    }
+
+    return null;
+  }
+
+  private normalizeNickname(value?: string | null): string | null {
+    if (!value) return null;
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    const sanitized = trimmed
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    return sanitized || null;
+  }
+
+  private generateFallbackNickname(): string {
+    const globalCrypto = globalThis?.crypto as Crypto | undefined;
+    if (globalCrypto?.randomUUID) {
+      return `holder-${globalCrypto.randomUUID().split('-')[0]}`;
+    }
+    return `holder-${Math.random().toString(36).slice(2, 8)}`;
+  }
+
+  private async syncProtocolAuthors(
+    holderId: string,
+    selectedTypes: string[],
+    percentageMap: Map<string, number>
+  ) {
+    const work = this.work();
+    if (!work) return;
+
+    const wantsLyrics = selectedTypes.includes('lyrics');
+    const wantsMusic = selectedTypes.includes('music');
+    if (!wantsLyrics && !wantsMusic) return;
+
+    try {
+      const protocol = await this.protocolService.getProtocolByWorkId(work.id);
+      if (!protocol) return;
+
+      const { data: rightsHolder, error } = await this.supabase.client
+        .from('rights_holders')
+        .select('*')
+        .eq('id', holderId)
+        .single();
+
+      if (error || !rightsHolder) {
+        console.warn('Unable to load rights holder for protocol sync', error);
+        return;
+      }
+
+      const rightsHolderRecord = rightsHolder as RightsHolder;
+      const identity = this.deriveAuthorIdentity(rightsHolderRecord);
+      const cmoName = rightsHolderRecord.cmo_pro?.trim() || undefined;
+      const proName = undefined; // PRO not captured in current rights holder schema
+
+      if (wantsLyrics) {
+        const lyricPercentage = this.sanitizePercentage(percentageMap.get('lyrics'));
+        await this.protocolService.upsertLyricAuthor(protocol.id, {
+          name: identity.name,
+          surname: identity.surname,
+          aka: identity.aka ?? undefined,
+          cmo_name: cmoName,
+          pro_name: proName,
+          participation_percentage: lyricPercentage,
+        });
+      }
+
+      if (wantsMusic) {
+        const musicPercentage = this.sanitizePercentage(percentageMap.get('music'));
+        const flags = this.buildMusicContributionFlags(selectedTypes);
+        await this.protocolService.upsertMusicAuthor(protocol.id, {
+          name: identity.name,
+          surname: identity.surname,
+          aka: identity.aka ?? undefined,
+          cmo_name: cmoName,
+          pro_name: proName,
+          participation_percentage: musicPercentage,
+          melody: flags.melody,
+          harmony: flags.harmony,
+          arrangement: flags.arrangement,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to sync protocol authors:', error);
+    }
+  }
+
+  private deriveAuthorIdentity(holder: RightsHolder): { name: string; surname: string; aka: string | null } {
+    const isRegistered = Boolean(holder.profile_id || holder.linked_user_id);
+    const rawNickname = holder.nickname?.trim() || '';
+    const nickname = isRegistered ? rawNickname : '';
+    const company = holder.company_name?.trim() || holder.organization_name?.trim() || '';
+
+    let name = holder.first_name?.trim() || '';
+    let surname = holder.last_name?.trim() || '';
+
+    if (!name && nickname) {
+      const parts = nickname.split(/\s+/).filter(Boolean);
+      if (parts.length > 0) {
+        name = parts[0];
+        if (!surname && parts.length > 1) {
+          surname = parts.slice(1).join(' ');
+        }
+      }
+    }
+
+    if (!surname && nickname) {
+      const parts = nickname.split(/\s+/).filter(Boolean);
+      if (parts.length > 1) {
+        surname = parts.slice(1).join(' ');
+      }
+    }
+
+    if (!name && company) {
+      name = company;
+    }
+
+    if (!surname) {
+      if (holder.last_name?.trim()) {
+        surname = holder.last_name.trim();
+      } else if (company) {
+        surname = company;
+      } else if (nickname) {
+        surname = nickname;
+      }
+    }
+
+    if (!name) name = 'Unknown';
+    if (!surname) surname = name !== 'Unknown' ? name : 'Unknown';
+
+    const aka = isRegistered && rawNickname ? rawNickname : null;
+
+    return { name, surname, aka };
+  }
+
+  private buildMusicContributionFlags(selectedTypes: string[]): { melody: number; harmony: number; arrangement: number } {
+    const selected = new Set(selectedTypes);
+    return {
+      melody: selected.has('melody') ? 1 : 0,
+      harmony: selected.has('harmony') ? 1 : 0,
+      arrangement: selected.has('arrangement') ? 1 : 0,
+    };
+  }
+
+  private sanitizePercentage(value: number | undefined): number {
+    const numeric = Number(value ?? 0);
+    if (!Number.isFinite(numeric) || numeric < 0) return 0;
+    return Math.round(numeric * 100) / 100;
+  }
 }
+

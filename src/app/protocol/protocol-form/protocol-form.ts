@@ -373,9 +373,9 @@ export class ProtocolFormComponent implements OnInit {
           cmo_name: a.cmo_name || undefined,
           pro_name: a.pro_name || undefined,
           participation_percentage: parseFloat(a.participation_percentage) || 0,
-          melody: a.melody || false,
-          harmony: a.harmony || false,
-          arrangement: a.arrangement || false
+          melody: a.melody ? 1 : 0,
+          harmony: a.harmony ? 1 : 0,
+          arrangement: a.arrangement ? 1 : 0
         }));
 
       const neighbouring: NeighbouringRightsholder[] = this.neighbouring_rightsholders()

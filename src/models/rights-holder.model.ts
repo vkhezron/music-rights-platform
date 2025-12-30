@@ -78,8 +78,16 @@ export interface RightsHolder {
     show_email?: boolean;         // default: false (never public)
   };
   
+  // AI Disclosure (per rights holder)
+  ai_disclosure?: {
+    creation_type: 'human' | 'ai_assisted' | 'ai_generated';
+    ai_tool?: string;
+    notes?: string;
+  };
+  
   // Platform
   linked_user_id?: string;
+  profile_id?: string;  // UUID linking to auth.users(id) for registered users
   
   // Notes (internal use only)
   notes?: string;
@@ -155,6 +163,13 @@ export interface RightsHolderFormData {
   
   // Visibility
   visibility_settings?: RightsHolder['visibility_settings'];
+  
+  // AI Disclosure (per rights holder)
+  ai_disclosure?: {
+    creation_type: 'human' | 'ai_assisted' | 'ai_generated';
+    ai_tool?: string;
+    notes?: string;
+  };
   
   notes?: string;
 }

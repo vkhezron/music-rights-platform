@@ -65,6 +65,14 @@ export class RightsHoldersService {
       if (data.ipi_number !== undefined && data.ipi_number !== '') insertData.ipi_number = data.ipi_number;
       if (data.tax_id !== undefined && data.tax_id !== '') insertData.tax_id = data.tax_id;
       if (data.notes !== undefined && data.notes !== '') insertData.notes = data.notes;
+      if ((data as any).profile_id) insertData.profile_id = (data as any).profile_id;
+
+      const resolvedNickname = this.resolveNickname(data);
+      if (resolvedNickname) {
+        insertData.nickname = resolvedNickname;
+      } else {
+        insertData.nickname = this.generateFallbackNickname();
+      }
 
       const { data: rightsHolder, error } = await this.supabase.client
         .from('rights_holders')
@@ -166,5 +174,43 @@ export class RightsHoldersService {
              ipi.includes(lowerQuery) ||
              cmo.includes(lowerQuery);
     });
+  }
+
+  private resolveNickname(data: RightsHolderFormData): string | null {
+    const candidates = [
+      (data.nickname || ''),
+      `${data.first_name || ''} ${data.last_name || ''}`,
+      data.company_name,
+      data.email ? data.email.split('@')[0] : undefined,
+    ];
+
+    for (const candidate of candidates) {
+      const normalized = this.normalizeNickname(candidate);
+      if (normalized) return normalized;
+    }
+
+    return null;
+  }
+
+  private normalizeNickname(value?: string | null): string | null {
+    if (!value) return null;
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    const sanitized = trimmed
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    return sanitized || null;
+  }
+
+  private generateFallbackNickname(): string {
+    const globalCrypto = globalThis?.crypto as Crypto | undefined;
+    if (globalCrypto?.randomUUID) {
+      return `holder-${globalCrypto.randomUUID().split('-')[0]}`;
+    }
+    return `holder-${Math.random().toString(36).slice(2, 8)}`;
   }
 }

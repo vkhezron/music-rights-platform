@@ -106,6 +106,8 @@ export interface WorkSplit {
   rights_holder_id: string;
   split_type: SplitType;
   percentage: number;
+  ownership_percentage?: number;
+  rights_layer?: 'ip' | 'neighboring';
   is_active: boolean;
   created_by: string;
   created_at: string;

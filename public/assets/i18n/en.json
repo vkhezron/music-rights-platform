@@ -4,7 +4,6 @@
   "WELCOME": "Welcome to the Music Industry Platform!",
   "DESCRIPTION": "Manage your rights, connect with artists, and grow your network.",
   "LANGUAGE": "Language",
-  
   "BUTTONS": {
     "SAVE": "Save",
     "CANCEL": "Cancel",
@@ -24,7 +23,6 @@
     "ADD": "Add",
     "REMOVE": "Remove"
   },
-  
   "AUTH": {
     "WELCOME_BACK": "Welcome Back",
     "LOGIN_SUBTITLE": "Sign in to continue to Music Rights Platform",
@@ -71,7 +69,6 @@
     "REGISTER_FEATURE_2": "Professional networking",
     "REGISTER_FEATURE_3": "Collaboration tools"
   },
-  
   "PROFILE": {
     "SETUP_TITLE": "Set Up Your Profile",
     "SETUP_SUBTITLE": "Let's get to know you better",
@@ -113,7 +110,6 @@
     "PROFILE_DETAILS": "Profile Details",
     "QR_CODE": "QR Code"
   },
-
   "WORKSPACE": {
     "CREATE_TITLE": "Create Workspace",
     "CREATE_SUBTITLE": "Set up your workspace to manage rights and collaborate",
@@ -149,7 +145,6 @@
     "TYPE_ALBUM": "Album",
     "TYPE_COLLECTION": "Collection"
   },
-
   "DASHBOARD": {
     "WELCOME": "Welcome to Music Rights Platform",
     "DASHBOARD": "Dashboard",
@@ -176,7 +171,6 @@
     "MANAGE_RIGHTS_HOLDERS": "Manage Rights Holders",
     "ARCHIVE_PROJECT": "Archive Project"
   },
-
   "WORKS": {
     "WORKS": "Works",
     "ADD_WORK": "Add Work",
@@ -192,7 +186,6 @@
     "NO_RESULTS": "No Results Found",
     "NO_RESULTS_FOR": "No results for",
     "SEARCH_PLACEHOLDER": "Search by title, ISRC, ISWC...",
-    
     "BASIC_INFO": "Basic Information",
     "WORK_TITLE": "Work Title",
     "TITLE_REQUIRED": "Work title is required",
@@ -200,7 +193,6 @@
     "ALTERNATIVE_TITLES_HINT": "Add any alternative or translated titles",
     "ADD_ALTERNATIVE_TITLE": "Add Alternative Title",
     "STATUS": "Status",
-    
     "IDENTIFICATION_CODES": "Identification Codes",
     "ISRC": "ISRC",
     "ISWC": "ISWC",
@@ -208,20 +200,17 @@
     "ISWC_FORMAT": "Format: T-123.456.789-0",
     "ISRC_INVALID": "Invalid ISRC format",
     "ISWC_INVALID": "Invalid ISWC format",
-    
     "DURATION_AND_DATES": "Duration & Dates",
     "DURATION": "Duration",
     "MINUTES": "min",
     "SECONDS": "sec",
     "RECORDING_DATE": "Recording Date",
     "RELEASE_DATE": "Release Date",
-    
     "GENRE_AND_LANGUAGES": "Genre & Languages",
     "GENRE": "Genre",
     "SELECT_GENRE": "Select a genre",
     "LANGUAGES": "Languages",
     "LANGUAGES_HINT": "Select all languages used in this work",
-    
     "COVER_VERSION_INFO": "Cover Version Information",
     "IS_COVER_VERSION": "This is a cover version",
     "ORIGINAL_WORK_TITLE": "Original Work Title",
@@ -230,14 +219,10 @@
     "ORIGINAL_WORK_ISWC": "Original ISWC",
     "ORIGINAL_WORK_INFO": "Additional Information",
     "ORIGINAL_WORK_INFO_HINT": "Provide any additional details if ISRC/ISWC not available",
-    
     "ADDITIONAL_NOTES": "Additional Notes",
     "NOTES": "Notes",
-
     "MANAGE_SPLITS": "Manage Splits"
   },
-
-  
   "COMMON": {
     "LOADING": "Loading...",
     "SAVING": "Saving...",
@@ -272,9 +257,9 @@
     "OK": "OK",
     "RETRY": "Retry",
     "ALL": "All",
-    "CREATING": "Creating..."
+    "CREATING": "Creating...",
+    "NOTES": "Notes"
   },
-
   "ERRORS": {
     "GENERIC": "Something went wrong. Please try again.",
     "NETWORK": "Network error. Please check your connection.",
@@ -283,7 +268,6 @@
     "VALIDATION": "Please check your input and try again.",
     "SERVER": "Server error. Please try again later."
   },
-
   "ROLES": {
     "ARTIST": "Artist",
     "PRODUCER": "Producer",
@@ -295,7 +279,6 @@
     "ENGINEER": "Engineer",
     "OTHER": "Other"
   },
-
   "WORKSPACE_TYPES": {
     "BAND": "Band/Artist",
     "LABEL": "Record Label",
@@ -304,7 +287,6 @@
     "MANAGEMENT": "Management",
     "OTHER": "Other"
   },
-
   "LANGUAGES": {
     "EN": "English",
     "DE": "Deutsch",
@@ -314,7 +296,6 @@
     "IT": "Italiano",
     "PT": "Português"
   },
-
   "SOCIAL_PLATFORMS": {
     "INSTAGRAM": "Instagram",
     "TWITTER": "Twitter/X",
@@ -324,51 +305,42 @@
     "WEBSITE": "Website",
     "SPOTIFY": "Spotify"
   },
-
   "RIGHTS_HOLDERS": {
-  "TITLE": "Rights Holders",
-  "ADD_RIGHTS_HOLDER": "Add Rights Holder",
-  "CREATE_RIGHTS_HOLDER": "Create Rights Holder",
-  "EDIT_RIGHTS_HOLDER": "Edit Rights Holder",
-  "NO_RIGHTS_HOLDERS": "No Rights Holders Yet",
-  "NO_RIGHTS_HOLDERS_DESCRIPTION": "Add artists, composers, producers, and publishers to manage splits",
-  "CREATE_FIRST_RIGHTS_HOLDER": "Add Your First Rights Holder",
-  "SEARCH_PLACEHOLDER": "Search by name, email, IPI, CMO...",
-  
-  "TYPE": "Type",
-  "TYPE_PERSON": "Person",
-  "TYPE_COMPANY": "Company",
-  "TYPE_PERSON_DESC": "Individual artist, composer, or producer",
-  "TYPE_COMPANY_DESC": "Publishing company, label, or organization",
-  
-  "BASIC_INFO": "Basic Information",
-  "FIRST_NAME": "First Name",
-  "LAST_NAME": "Last Name",
-  "COMPANY_NAME": "Company Name",
-  "FIRST_NAME_REQUIRED": "First name is required",
-  "LAST_NAME_REQUIRED": "Last name is required",
-  "COMPANY_NAME_REQUIRED": "Company name is required",
-  "NAME_MIN_LENGTH": "Name must be at least 2 characters",
-  
-  "CONTACT_INFO": "Contact Information",
-  "EMAIL": "Email",
-  "PHONE": "Phone",
-  
-  "PROFESSIONAL_DETAILS": "Professional Details",
-  "CMO_PRO": "CMO/PRO",
-  "CMO_HINT": "Collective Management Organization or Performing Rights Organization",
-  "IPI_NUMBER": "IPI Number",
-  "IPI_FORMAT": "Format: 9-11 digits (e.g., 123456789)",
-  "IPI_INVALID": "Invalid IPI format (must be 9-11 digits)",
-  "TAX_ID": "Tax ID / VAT",
-  "TAX_ID_HINT": "Tax identification number or VAT number",
-  
-  "NOTES": "Notes",
-  "ADDITIONAL_INFO": "Additional Information"
-},
-
-  
-
+    "TITLE": "Rights Holders",
+    "ADD_RIGHTS_HOLDER": "Add Rights Holder",
+    "CREATE_RIGHTS_HOLDER": "Create Rights Holder",
+    "EDIT_RIGHTS_HOLDER": "Edit Rights Holder",
+    "NO_RIGHTS_HOLDERS": "No Rights Holders Yet",
+    "NO_RIGHTS_HOLDERS_DESCRIPTION": "Add artists, composers, producers, and publishers to manage splits",
+    "CREATE_FIRST_RIGHTS_HOLDER": "Add Your First Rights Holder",
+    "SEARCH_PLACEHOLDER": "Search by name, email, IPI, CMO...",
+    "TYPE": "Type",
+    "TYPE_PERSON": "Person",
+    "TYPE_COMPANY": "Company",
+    "TYPE_PERSON_DESC": "Individual artist, composer, or producer",
+    "TYPE_COMPANY_DESC": "Publishing company, label, or organization",
+    "BASIC_INFO": "Basic Information",
+    "FIRST_NAME": "First Name",
+    "LAST_NAME": "Last Name",
+    "COMPANY_NAME": "Company Name",
+    "FIRST_NAME_REQUIRED": "First name is required",
+    "LAST_NAME_REQUIRED": "Last name is required",
+    "COMPANY_NAME_REQUIRED": "Company name is required",
+    "NAME_MIN_LENGTH": "Name must be at least 2 characters",
+    "CONTACT_INFO": "Contact Information",
+    "EMAIL": "Email",
+    "PHONE": "Phone",
+    "PROFESSIONAL_DETAILS": "Professional Details",
+    "CMO_PRO": "CMO/PRO",
+    "CMO_HINT": "Collective Management Organization or Performing Rights Organization",
+    "IPI_NUMBER": "IPI Number",
+    "IPI_FORMAT": "Format: 9-11 digits (e.g., 123456789)",
+    "IPI_INVALID": "Invalid IPI format (must be 9-11 digits)",
+    "TAX_ID": "Tax ID / VAT",
+    "TAX_ID_HINT": "Tax identification number or VAT number",
+    "NOTES": "Notes",
+    "ADDITIONAL_INFO": "Additional Information"
+  },
   "NOTIFICATIONS": {
     "PROFILE_CREATED": "Profile created successfully!",
     "PROFILE_UPDATED": "Profile updated successfully!",
@@ -379,7 +351,6 @@
     "COPIED_TO_CLIPBOARD": "Copied to clipboard!",
     "QR_CODE_DOWNLOADED": "QR code downloaded successfully!"
   },
-
   "VALIDATION": {
     "REQUIRED": "This field is required",
     "EMAIL": "Please enter a valid email address",
@@ -390,7 +361,6 @@
     "MAX": "Maximum value is {max}",
     "URL": "Please enter a valid URL"
   },
-
   "PLACEHOLDERS": {
     "ENTER_EMAIL": "Enter your email",
     "ENTER_PASSWORD": "Enter your password",
@@ -400,7 +370,6 @@
     "SELECT": "Select...",
     "OPTIONAL": "Optional"
   },
-
   "TOOLTIPS": {
     "EDIT": "Edit",
     "DELETE": "Delete",
@@ -410,14 +379,12 @@
     "INFO": "More information",
     "HELP": "Help"
   },
-
   "FOOTER": {
     "COPYRIGHT": "© 2025 Music Rights Platform. All rights reserved.",
     "PRIVACY": "Privacy Policy",
     "TERMS": "Terms of Service",
     "CONTACT": "Contact Us"
   },
-
   "SPLITS": {
     "SPLIT_EDITOR": "Split Editor",
     "IP_RIGHTS": "IP Rights",
@@ -459,9 +426,18 @@
     "NOTES": "Notes",
     "REMOVE": "Remove",
     "INTELLECTUAL_PROPERTY_SPLITS": "Intellectual Property splits",
-    "NEIGHBORING_RIGHTS_SPLITS": "Neighboring rights splits"
+    "NEIGHBORING_RIGHTS_SPLITS": "Neighboring rights splits",
+    "AI_DISCLOSURE": "AI Disclosure",
+    "AI_TOOL": "AI Tool",
+    "AI_ASSISTED": "AI Assisted",
+    "AI_GENERATED": "AI Generated",
+    "CREATION_TYPE": "Creation Type",
+    "HUMAN": "Human",
+    "KIND": "Kind",
+    "POSITION_QR_CODE": "Position the QR code within the frame",
+    "SELECT_SPLIT_TYPES": "Select Split Types",
+    "EDIT_RIGHTS_HOLDER": "Edit Rights Holder"
   },
-
   "GDPR": {
     "COOKIES_TITLE": "We use cookies",
     "COOKIES_DESCRIPTION": "We use cookies to improve your experience on our website. By using our site, you consent to our use of cookies.",
@@ -490,7 +466,6 @@
     "PRIVACY_POLICY": "Privacy Policy",
     "TERMS_OF_SERVICE": "Terms of Service"
   },
-
   "PROTOCOL": {
     "PROTOCOL_FORM": "Music Work Protocol Form",
     "MUSIC_WORK_REGISTRATION": "Register your musical work with complete rights holder information",
@@ -503,22 +478,18 @@
     "IS_COVER_VERSION": "This is a cover version",
     "ORIGINAL_WORK_TITLE": "Original Work Title",
     "ADVANCED_OPTIONS": "Advanced Options",
-    
     "LYRIC_AUTHORS": "Lyric Authors",
     "LYRIC_AUTHOR": "Lyric Author",
     "ADD_LYRIC_AUTHOR": "Add Lyric Author",
-    
     "MUSIC_AUTHORS": "Music Authors",
     "MUSIC_AUTHOR": "Music Author",
     "ADD_MUSIC_AUTHOR": "Add Music Author",
     "MELODY": "Melody",
     "HARMONY": "Harmony",
     "ARRANGEMENT": "Arrangement",
-    
     "NEIGHBOURING_RIGHTSHOLDERS": "Neighbouring Rightsholders",
     "NEIGHBOURING_RIGHTSHOLDER": "Neighbouring Rightsholder",
     "ADD_NEIGHBOURING_RIGHTSHOLDER": "Add Neighbouring Rightsholder",
-    
     "NAME": "Name",
     "MIDDLE_NAME": "Middle Name",
     "SURNAME": "Surname",
@@ -527,15 +498,14 @@
     "SELECT_ROLE": "Select a role",
     "ADD_ROLE": "Add Role",
     "TOTAL": "Total",
-    
     "SUBMIT": "Submit Protocol",
-    "SUBMISSION_SUCCESS": "Protocol submitted successfully! Redirecting to dashboard..."
+    "SUBMISSION_SUCCESS": "Protocol submitted successfully! Redirecting to dashboard...",
+    "LYRICS": "Lyrics",
+    "MUSIC": "Music"
   },
-
   "CLEAR": "Clear",
   "DELETE": "Delete",
   "ERROR": "Error",
   "SUBMITTING": "Submitting",
   "CANCEL": "Cancel"
 }
-

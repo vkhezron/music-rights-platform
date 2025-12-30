@@ -57,9 +57,9 @@ export interface MusicAuthor {
   cmo_name?: string;
   pro_name?: string;
   participation_percentage: number;
-  melody: boolean;
-  harmony: boolean;
-  arrangement: boolean;
+  melody?: number;        // 0 = no, 1 = yes, null = unknown
+  harmony?: number;       // 0 = no, 1 = yes, null = unknown
+  arrangement?: number;   // 0 = no, 1 = yes, null = unknown
   created_at?: string;
 }
 

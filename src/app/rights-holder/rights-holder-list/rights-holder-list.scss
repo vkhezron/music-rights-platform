@@ -375,6 +375,40 @@
   margin-bottom: 1rem;
 }
 
+.registration-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px dashed #f6ad55;
+  border-radius: 8px;
+  background: #fffaf0;
+
+  .status-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #c05621;
+  }
+
+  .invite-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.35);
+    }
+  }
+}
+
 .rh-detail {
   display: flex;
   align-items: center;

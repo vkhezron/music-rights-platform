@@ -10,6 +10,9 @@ import {
   NeighbouringRightsholder
 } from '../models/protocol.model';
 
+type LyricAuthorUpsert = Omit<LyricAuthor, 'id' | 'protocol_id' | 'created_at'>;
+type MusicAuthorUpsert = Omit<MusicAuthor, 'id' | 'protocol_id' | 'created_at'>;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -139,6 +142,23 @@ export class ProtocolService {
     }
   }
 
+  async getProtocolByWorkId(workId: string): Promise<Protocol | null> {
+    const { data, error } = await this.supabase.client
+      .from('protocols')
+      .select('*')
+      .eq('work_id', workId)
+      .maybeSingle();
+
+    if (error) {
+      if ((error as any).code === 'PGRST116') {
+        return null;
+      }
+      throw error;
+    }
+
+    return data ?? null;
+  }
+
   /**
    * Add lyric authors to a protocol
    */
@@ -208,6 +228,100 @@ export class ProtocolService {
       .insert(insertData);
 
     if (error) throw error;
+  }
+
+  async upsertLyricAuthor(protocolId: string, author: LyricAuthorUpsert): Promise<void> {
+    const { data: existing, error: selectError } = await this.supabase.client
+      .from('protocol_lyric_authors')
+      .select('id')
+      .eq('protocol_id', protocolId)
+      .eq('name', author.name)
+      .eq('surname', author.surname)
+      .maybeSingle();
+
+    if (selectError && (selectError as any).code !== 'PGRST116') {
+      throw selectError;
+    }
+
+    if (existing?.id) {
+      const { error } = await this.supabase.client
+        .from('protocol_lyric_authors')
+        .update({
+          middle_name: author.middle_name ?? null,
+          aka: author.aka ?? null,
+          cmo_name: author.cmo_name ?? null,
+          pro_name: author.pro_name ?? null,
+          participation_percentage: author.participation_percentage,
+        })
+        .eq('id', existing.id);
+
+      if (error) throw error;
+    } else {
+      const { error } = await this.supabase.client
+        .from('protocol_lyric_authors')
+        .insert({
+          protocol_id: protocolId,
+          name: author.name,
+          middle_name: author.middle_name ?? null,
+          surname: author.surname,
+          aka: author.aka ?? null,
+          cmo_name: author.cmo_name ?? null,
+          pro_name: author.pro_name ?? null,
+          participation_percentage: author.participation_percentage,
+        });
+
+      if (error) throw error;
+    }
+  }
+
+  async upsertMusicAuthor(protocolId: string, author: MusicAuthorUpsert): Promise<void> {
+    const { data: existing, error: selectError } = await this.supabase.client
+      .from('protocol_music_authors')
+      .select('id')
+      .eq('protocol_id', protocolId)
+      .eq('name', author.name)
+      .eq('surname', author.surname)
+      .maybeSingle();
+
+    if (selectError && (selectError as any).code !== 'PGRST116') {
+      throw selectError;
+    }
+
+    if (existing?.id) {
+      const { error } = await this.supabase.client
+        .from('protocol_music_authors')
+        .update({
+          middle_name: author.middle_name ?? null,
+          aka: author.aka ?? null,
+          cmo_name: author.cmo_name ?? null,
+          pro_name: author.pro_name ?? null,
+          participation_percentage: author.participation_percentage,
+          melody: author.melody ?? 0,
+          harmony: author.harmony ?? 0,
+          arrangement: author.arrangement ?? 0,
+        })
+        .eq('id', existing.id);
+
+      if (error) throw error;
+    } else {
+      const { error } = await this.supabase.client
+        .from('protocol_music_authors')
+        .insert({
+          protocol_id: protocolId,
+          name: author.name,
+          middle_name: author.middle_name ?? null,
+          surname: author.surname,
+          aka: author.aka ?? null,
+          cmo_name: author.cmo_name ?? null,
+          pro_name: author.pro_name ?? null,
+          participation_percentage: author.participation_percentage,
+          melody: author.melody ?? 0,
+          harmony: author.harmony ?? 0,
+          arrangement: author.arrangement ?? 0,
+        });
+
+      if (error) throw error;
+    }
   }
 
   /**

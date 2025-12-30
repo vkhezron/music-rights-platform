@@ -25,6 +25,17 @@ export class WorksService {
     });
   }
 
+  private resolveRightsLayer(splitType: SplitType): 'ip' | 'neighboring' {
+    switch (splitType) {
+      case 'lyrics':
+      case 'music':
+      case 'publishing':
+        return 'ip';
+      default:
+        return 'neighboring';
+    }
+  }
+
   get works(): Work[] {
     return this.worksSubject.value;
   }
@@ -183,14 +194,17 @@ export class WorksService {
     }
 
     try {
+      const rightsLayer = this.resolveRightsLayer(splitType);
       const { data, error } = await this.supabase.client
         .from('work_splits')
         .insert({
           work_id: workId,
           rights_holder_id: rightsHolderId,
           split_type: splitType,
-          percentage: percentage,
-          created_by: currentUser.id
+          ownership_percentage: percentage,
+          created_by: currentUser.id,
+          is_active: true,
+          rights_layer: rightsLayer
         })
         .select()
         .single();
@@ -207,7 +221,7 @@ export class WorksService {
     try {
       const { data, error } = await this.supabase.client
         .from('work_splits')
-        .update({ percentage })
+        .update({ ownership_percentage: percentage })
         .eq('id', splitId)
         .select()
         .single();
@@ -267,19 +281,21 @@ export class WorksService {
           work_id: workId,
           rights_holder_id: s.rights_holder_id,
           split_type: s.split_type,
-          percentage: Number(s.percentage) || 0,
+          ownership_percentage: Number(s.ownership_percentage ?? s.percentage) || 0,
           notes: s.notes || null,
           created_by: currentUser.id,
-          is_active: true
+          is_active: true,
+          rights_layer: s.rights_layer ?? this.resolveRightsLayer(s.split_type)
         })),
         ...neighboringSplits.map(s => ({
           work_id: workId,
           rights_holder_id: s.rights_holder_id,
           split_type: s.split_type,
-          percentage: Number(s.percentage) || 0,
+          ownership_percentage: Number(s.ownership_percentage ?? s.percentage) || 0,
           notes: s.notes || null,
           created_by: currentUser.id,
-          is_active: true
+          is_active: true,
+          rights_layer: s.rights_layer ?? this.resolveRightsLayer(s.split_type)
         }))
       ];
 

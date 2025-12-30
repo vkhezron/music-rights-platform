@@ -144,6 +144,27 @@ export class RightsHolderListComponent implements OnInit {
     }
   }
 
+  isRegistered(rh: RightsHolder): boolean {
+    return Boolean(rh.profile_id || rh.linked_user_id);
+  }
+
+  inviteRightsHolder(rh: RightsHolder, event: Event) {
+    event.stopPropagation();
+
+    if (!rh.email) {
+      alert('No email available for this rights holder.');
+      return;
+    }
+
+    const subject = encodeURIComponent('Invitation to join the workspace');
+    const body = encodeURIComponent(
+      'Hi,\n\nWe would love for you to join the workspace to manage music rights collaboratively. ' +
+      'Please sign up using the link provided in this invitation.\n\nThank you!'
+    );
+
+    window.location.href = `mailto:${rh.email}?subject=${subject}&body=${body}`;
+  }
+
   goBack() {
     this.router.navigate(['/dashboard']);
   }

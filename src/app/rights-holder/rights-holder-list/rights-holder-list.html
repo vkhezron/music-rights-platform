@@ -125,6 +125,12 @@
 
           <!-- Card Body -->
           <div class="card-body">
+            @if (!isRegistered(rh)) {
+              <div class="registration-status">
+                <span class="status-label">Not registered user</span>
+                <button class="invite-btn" (click)="inviteRightsHolder(rh, $event)">Invite</button>
+              </div>
+            }
             
             <!-- Contact Info -->
             @if (rh.email) {

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SplitEditor } from './split-editor';
+import { SplitEditorComponent } from './split-editor';
 
-describe('SplitEditor', () => {
-  let component: SplitEditor;
-  let fixture: ComponentFixture<SplitEditor>;
+describe('SplitEditorComponent', () => {
+  let component: SplitEditorComponent;
+  let fixture: ComponentFixture<SplitEditorComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SplitEditor]
+      imports: [SplitEditorComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(SplitEditor);
+    fixture = TestBed.createComponent(SplitEditorComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

@@ -1,0 +1,36 @@
+.role-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 220px;
+}
+
+.role-selector__search {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--surface-border, #e3e5e8);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.role-selector__list {
+  overflow-y: auto;
+  max-height: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.role-selector__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-base, #0f172a);
+}
+
+.role-selector__empty {
+  font-size: 13px;
+  color: var(--text-muted, #94a3b8);
+}

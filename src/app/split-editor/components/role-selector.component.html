@@ -1,0 +1,25 @@
+<div class="role-selector">
+  <input
+    type="text"
+    class="role-selector__search"
+    placeholder="Search roles"
+    (input)="onQueryChange($any($event.target).value)"
+  />
+
+  <div class="role-selector__list">
+    @if (filteredRoles().length === 0) {
+      <p class="role-selector__empty">No roles found</p>
+    } @else {
+      @for (role of filteredRoles(); track role) {
+        <label class="role-selector__item">
+          <input
+            type="checkbox"
+            [checked]="selectedRoles().includes(role)"
+            (change)="toggleRole(role, $any($event.target).checked)"
+          />
+          <span>{{ role }}</span>
+        </label>
+      }
+    }
+  </div>
+</div>

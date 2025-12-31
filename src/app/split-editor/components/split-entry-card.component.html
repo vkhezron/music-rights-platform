@@ -1,0 +1,170 @@
+<div class="entry-card" [class.entry-card--readonly]="entry().isReadonly">
+  <div class="entry-card__header">
+    <div class="entry-card__method">{{ methodLabel }}</div>
+    <button
+      type="button"
+      class="entry-card__remove"
+      (click)="remove()"
+      title="Remove rights holder"
+    >
+      Remove
+    </button>
+  </div>
+
+  @if (entry().isReadonly) {
+    <p class="entry-card__hint">Identity fields come from the rights holder profile.</p>
+  }
+
+  <div class="entry-card__grid">
+    <label class="entry-card__field">
+      <span>First name</span>
+      <input
+        type="text"
+        [(ngModel)]="localEntry.firstName"
+        (ngModelChange)="emitUpdate()"
+        [readonly]="entry().isReadonly"
+        placeholder="First name"
+      />
+    </label>
+
+    <label class="entry-card__field">
+      <span>Last name</span>
+      <input
+        type="text"
+        [(ngModel)]="localEntry.lastName"
+        (ngModelChange)="emitUpdate()"
+        [readonly]="entry().isReadonly"
+        placeholder="Last name"
+      />
+    </label>
+
+    <label class="entry-card__field">
+      <span>Email</span>
+      <input
+        type="email"
+        [(ngModel)]="localEntry.email"
+        (ngModelChange)="emitUpdate()"
+        [readonly]="entry().isReadonly"
+        placeholder="Email address"
+      />
+    </label>
+
+    <label class="entry-card__field">
+      <span>CMO / PRO</span>
+      <input
+        type="text"
+        [(ngModel)]="localEntry.cmoPro"
+        (ngModelChange)="emitUpdate()"
+        [readonly]="entry().isReadonly"
+        placeholder="Select organisation"
+      />
+    </label>
+  </div>
+
+  <div class="entry-card__grid entry-card__grid--equal">
+    <label class="entry-card__field">
+      <span>Share</span>
+      <div class="entry-card__percentage">
+        <input
+          type="number"
+          min="0"
+          max="100"
+          step="1"
+          [(ngModel)]="localEntry.ownershipPercentage"
+          (ngModelChange)="emitUpdate()"
+        />
+        <span class="entry-card__percentage-suffix">%</span>
+      </div>
+    </label>
+
+    <div class="entry-card__field">
+      <span>Creation type</span>
+      <div class="entry-card__radio-group">
+        <label>
+          <input
+            type="radio"
+            value="human"
+            name="ai-disclosure-{{ entry().tempId || entry().id }}"
+            [(ngModel)]="localEntry.aiDisclosure.creationType"
+            (ngModelChange)="emitUpdate()"
+          />
+          Human
+        </label>
+        <label>
+          <input
+            type="radio"
+            value="ai_assisted"
+            name="ai-disclosure-{{ entry().tempId || entry().id }}"
+            [(ngModel)]="localEntry.aiDisclosure.creationType"
+            (ngModelChange)="emitUpdate()"
+          />
+          AI assisted
+        </label>
+        <label>
+          <input
+            type="radio"
+            value="ai_generated"
+            name="ai-disclosure-{{ entry().tempId || entry().id }}"
+            [(ngModel)]="localEntry.aiDisclosure.creationType"
+            (ngModelChange)="emitUpdate()"
+          />
+          AI generated
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="entry-card__grid" *ngIf="localEntry.aiDisclosure.creationType !== 'human'">
+    <label class="entry-card__field">
+      <span>AI tool</span>
+      <input
+        type="text"
+        [(ngModel)]="localEntry.aiDisclosure.aiTool"
+        (ngModelChange)="emitUpdate()"
+        placeholder="Name of tool"
+      />
+    </label>
+  </div>
+
+  <div class="entry-card__grid" *ngIf="showContributionFlags()">
+    <div class="entry-card__field">
+      <span>Contribution</span>
+      <div class="entry-card__checkbox-group">
+        <label>
+          <input
+            type="checkbox"
+            [checked]="localEntry.contributionTypes?.melody === true"
+            (change)="onFlagChange('melody', $any($event.target).checked)"
+          />
+          Melody
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            [checked]="localEntry.contributionTypes?.harmony === true"
+            (change)="onFlagChange('harmony', $any($event.target).checked)"
+          />
+          Harmony
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            [checked]="localEntry.contributionTypes?.arrangement === true"
+            (change)="onFlagChange('arrangement', $any($event.target).checked)"
+          />
+          Arrangement
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="entry-card__grid" *ngIf="showRoleSelector()">
+    <label class="entry-card__field">
+      <span>Roles</span>
+      <app-role-selector
+        [selectedRoles]="localEntry.roles || []"
+        (rolesChange)="onRoleChange($event)"
+      ></app-role-selector>
+    </label>
+  </div>
+</div>

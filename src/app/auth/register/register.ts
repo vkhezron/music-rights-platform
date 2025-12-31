@@ -130,7 +130,7 @@ export class Register {
 
       setTimeout(() => {
         sessionStorage.setItem('displayName', this.registerForm.value.displayName);
-        this.router.navigate(['/profile/setup']);
+        this.router.navigate(['/profile-hub']);
       }, 2000);
 
     } catch (error: any) {

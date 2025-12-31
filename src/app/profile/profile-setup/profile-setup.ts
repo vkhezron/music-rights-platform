@@ -168,7 +168,7 @@ export class ProfileSetup implements OnInit {
     );
     
     if (profile) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/profile-hub']);
     }
   }
 
@@ -249,7 +249,7 @@ export class ProfileSetup implements OnInit {
 
       await this.profileService.createProfile(profileData);
 
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/profile-hub']);
 
     } catch (error: any) {
       console.error('Profile creation error:', error);

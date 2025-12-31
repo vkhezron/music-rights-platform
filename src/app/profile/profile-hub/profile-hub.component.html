@@ -1,0 +1,96 @@
+<div class="hub-page">
+  @if (isLoading()) {
+    <div class="hub-card loading">
+      <lucide-icon [img]="LoaderIcon" [size]="28" class="spinner"></lucide-icon>
+      <p>Loading your profile…</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="hub-card error">
+      <lucide-icon [img]="WarningIcon" [size]="32"></lucide-icon>
+      <h2>{{ errorMessage() }}</h2>
+      <button class="primary" type="button" (click)="goToEditProfile()">
+        Complete My Profile
+      </button>
+      <button class="ghost" type="button" (click)="skipToDashboard()">
+        Skip to Dashboard
+      </button>
+    </div>
+  } @else if (profile(); as currentProfile) {
+    <section class="hub-layout">
+      <header class="hub-header">
+        <div class="avatar" [class.placeholder]="!currentProfile.avatar_url">
+          @if (currentProfile.avatar_url) {
+            <img [src]="currentProfile.avatar_url" [alt]="currentProfile.nickname" />
+          } @else {
+            <lucide-icon [img]="AvatarIcon" [size]="48"></lucide-icon>
+          }
+        </div>
+        <div class="headline">
+          <p class="eyebrow">Welcome back</p>
+          <h1>{{ displayName() }}</h1>
+          <p class="nickname">@{{ currentProfile.nickname }}</p>
+
+          <div class="completeness" [class.low]="hasIncompleteProfile()">
+            <div class="bar">
+              <div class="fill" [style.width.%]="profileCompleteness()"></div>
+            </div>
+            <div class="label">
+              <lucide-icon [img]="GaugeIcon" [size]="16"></lucide-icon>
+              <span>Profile {{ profileCompleteness() }}% complete</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="cards">
+        <article class="card" (click)="goToEditProfile()">
+          <div class="icon">
+            <lucide-icon [img]="EditIcon" [size]="36"></lucide-icon>
+          </div>
+          <h2>Edit My Profile</h2>
+          <p>Update your roles, bio, and visibility preferences.</p>
+          @if (hasIncompleteProfile()) {
+            <span class="badge warn">Action needed</span>
+          }
+        </article>
+
+        <article class="card" (click)="goToPublicProfile()">
+          <div class="icon">
+            <lucide-icon [img]="PublicIcon" [size]="36"></lucide-icon>
+          </div>
+          <h2>View Public Profile</h2>
+          <p>Preview what collaborators see when they scan your QR code.</p>
+          <span class="badge info">Preview</span>
+        </article>
+
+        <article class="card" (click)="goToDashboard()">
+          <div class="icon">
+            <lucide-icon [img]="DashboardIcon" [size]="36"></lucide-icon>
+          </div>
+          <h2>Go to Dashboard</h2>
+          <p>Manage works, splits, protocols, and collaborators.</p>
+          <span class="badge primary">Main app</span>
+        </article>
+      </div>
+
+      <section class="stats">
+        <div class="stat">
+          <span class="value">{{ quickStats().works }}</span>
+          <span class="label">Works</span>
+        </div>
+        <div class="stat">
+          <span class="value">{{ quickStats().collaborators }}</span>
+          <span class="label">Collaborators</span>
+        </div>
+        <div class="stat">
+          <span class="value">{{ quickStats().protocols }}</span>
+          <span class="label">Protocols</span>
+        </div>
+      </section>
+
+      <footer class="hub-footer">
+        <a routerLink="/dashboard">Skip to Dashboard</a>
+      </footer>
+    </section>
+  }
+</div>

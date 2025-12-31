@@ -41,6 +41,23 @@ export class ProfileService {
     return this.currentProfile$.value;
   }
 
+  async getCurrentProfile(options: { refresh?: boolean } = {}): Promise<UserProfile | null> {
+    const { refresh = false } = options;
+    if (!refresh) {
+      const existing = this.currentProfile;
+      if (existing) {
+        return existing;
+      }
+    }
+
+    const userId = this.supabase.currentUser?.id;
+    if (!userId) {
+      return null;
+    }
+
+    return this.loadProfile(userId);
+  }
+
   /**
    * Load user profile
    */
@@ -288,20 +305,41 @@ export class ProfileService {
     }
   }
 
-  async getProfileByNickname(nickname: string): Promise<UserProfile | null> {
-    try {
-      const { data, error } = await this.supabase.client
-        .from('profiles')
-        .select('*')
-        .eq('nickname', nickname)
-        .maybeSingle();
+  async getProfileByNickname(rawNickname: string): Promise<UserProfile | null> {
+    const sanitized = rawNickname.replace(/^@/, '').trim();
 
-      if (error) throw error;
-      return data ?? null;
-    } catch (error: any) {
-      console.error('Error fetching profile by nickname:', error);
+    if (!sanitized) {
       return null;
     }
+
+    const attempts = [sanitized];
+    const lowered = sanitized.toLowerCase();
+    if (lowered !== sanitized) {
+      attempts.push(lowered);
+    }
+
+    for (const candidate of attempts) {
+      try {
+        const { data, error } = await this.supabase.client
+          .from('profiles')
+          .select('*')
+          .eq('nickname', candidate)
+          .maybeSingle();
+
+        if (error && error.code !== 'PGRST116') {
+          throw error;
+        }
+
+        if (data) {
+          return data;
+        }
+      } catch (error: any) {
+        console.error('Error fetching profile by nickname:', error);
+        break;
+      }
+    }
+
+    return null;
   }
 
   

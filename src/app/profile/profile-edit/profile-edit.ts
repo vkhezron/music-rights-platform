@@ -234,7 +234,7 @@ export class ProfileEdit implements OnInit {
       this.successMessage.set('Profile updated successfully!');
       
       setTimeout(() => {
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/profile-hub']);
       }, 2000);
 
     } catch (error: any) {
@@ -246,6 +246,6 @@ export class ProfileEdit implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/profile-hub']);
   }
 }

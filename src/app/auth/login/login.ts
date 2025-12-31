@@ -57,7 +57,7 @@ export class Login {
       await this.supabase.signIn(email, password);
 
       // Successful login
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/profile-hub']);
     } catch (error: any) {
       this.errorMessage.set(error.message || 'An error occurred during login.');
     } finally {

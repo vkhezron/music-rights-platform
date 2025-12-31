@@ -11,6 +11,11 @@ export const routes: Routes = [
         canActivate: [AuthGuard]
     },
     {
+        path: 'profile-hub'
+        , loadComponent: () => import('./profile/profile-hub/profile-hub.component').then(m => m.ProfileHubComponent)
+        , canActivate: [AuthGuard]
+    },
+    {
         path: 'auth/register'
         , loadComponent: () => import('./auth/register/register').then(m => m.Register),
         canActivate: [AuthGuard]

@@ -197,7 +197,7 @@ export class PublicProfileComponent implements OnInit {
     this.successMessage.set(null);
 
     try {
-      const normalized = nickname.replace(/^@/, '').toLowerCase();
+      const normalized = nickname.replace(/^@/, '');
       const profile = await this.profileService.getProfileByNickname(normalized);
       if (!profile) {
         this.profile.set(null);

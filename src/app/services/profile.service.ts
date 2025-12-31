@@ -288,5 +288,21 @@ export class ProfileService {
     }
   }
 
+  async getProfileByNickname(nickname: string): Promise<UserProfile | null> {
+    try {
+      const { data, error } = await this.supabase.client
+        .from('profiles')
+        .select('*')
+        .eq('nickname', nickname)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data ?? null;
+    } catch (error: any) {
+      console.error('Error fetching profile by nickname:', error);
+      return null;
+    }
+  }
+
   
 }

@@ -5,7 +5,14 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { WorksService } from '../../services/works';
 import { WorkspaceService } from '../../services/workspace.service';
-import { WorkFormData } from '../../../models/work.model';
+import { WorkFormData } from '../../models/work.model';
+import {
+  WorkCreationDeclaration,
+  WorkCreationDeclarationDraft,
+  WorkCreationDeclarationMap,
+  createDefaultWorkCreationDeclarationMap,
+} from '../../models/work-creation-declaration.model';
+import { AIDisclosureFormComponent } from '../../components/ai-disclosure-form/ai-disclosure-form.component';
 
 // Lucide Icons
 import { LucideAngularModule, ArrowLeft, Save, Plus, X, Music, Clock, Calendar, Globe, Tag, CheckCircle, AlertCircle, Edit } from 'lucide-angular';
@@ -17,7 +24,8 @@ import { LucideAngularModule, ArrowLeft, Save, Plus, X, Music, Clock, Calendar, 
     CommonModule,
     ReactiveFormsModule,
     TranslateModule,
-    LucideAngularModule
+    LucideAngularModule,
+    AIDisclosureFormComponent
   ],
   templateUrl: './work-form.html',
   styleUrl: './work-form.scss'
@@ -49,6 +57,8 @@ export class WorkFormComponent implements OnInit {
   workId = signal<string | null>(null);
   errorMessage = signal('');
   successMessage = signal('');
+  aiDisclosures = signal<WorkCreationDeclarationMap>(createDefaultWorkCreationDeclarationMap());
+  aiDisclosuresValid = signal(true);
 
   // Options
   statusOptions = ['draft', 'registered', 'published', 'archived'];
@@ -123,6 +133,15 @@ export class WorkFormComponent implements OnInit {
     this.alternativeTitles.removeAt(index);
   }
 
+  onAIDisclosuresChanged(map: WorkCreationDeclarationMap): void {
+    this.aiDisclosures.set(structuredClone(map));
+    this.aiDisclosuresValid.set(this.isDisclosureMapValid(this.aiDisclosures()));
+  }
+
+  onAIDisclosuresValidityChange(valid: boolean): void {
+    this.aiDisclosuresValid.set(valid);
+  }
+
   async loadWork(id: string) {
     this.isLoading.set(true);
     try {
@@ -151,6 +170,9 @@ export class WorkFormComponent implements OnInit {
         status: work.status,
         notes: work.notes
       });
+
+      this.aiDisclosures.set(this.toDisclosureMap(work.ai_disclosures));
+      this.aiDisclosuresValid.set(this.isDisclosureMapValid(this.aiDisclosures()));
 
       // Add alternative titles
       if (work.alternative_titles) {
@@ -210,6 +232,11 @@ export class WorkFormComponent implements OnInit {
       return;
     }
 
+    if (!this.aiDisclosuresValid()) {
+      this.errorMessage.set('Complete the AI disclosure section before saving.');
+      return;
+    }
+
     this.isLoading.set(true);
     this.errorMessage.set('');
     this.successMessage.set('');
@@ -233,7 +260,8 @@ export class WorkFormComponent implements OnInit {
         original_work_iswc: formValue.original_work_iswc || undefined,
         original_work_info: formValue.original_work_info || undefined,
         status: formValue.status,
-        notes: formValue.notes || undefined
+        notes: formValue.notes || undefined,
+        ai_disclosures: this.toDisclosureArray(),
       };
 
       if (this.isEditMode() && this.workId()) {
@@ -281,5 +309,46 @@ export class WorkFormComponent implements OnInit {
   hasError(fieldName: string, errorType: string): boolean {
     const field = this.workForm.get(fieldName);
     return field ? field.hasError(errorType) && (field.dirty || field.touched) : false;
+  }
+
+  private toDisclosureArray(): WorkCreationDeclarationDraft[] {
+    const map = this.aiDisclosures();
+    const entries = Object.values(map) as WorkCreationDeclarationDraft[];
+    return entries.map(entry => ({
+      section: entry.section,
+      creation_type: entry.creation_type,
+      ai_tool: entry.ai_tool ?? null,
+      notes: entry.notes ?? null,
+    }));
+  }
+
+  private toDisclosureMap(
+    declarations?: WorkCreationDeclaration[] | null
+  ): WorkCreationDeclarationMap {
+    const map = createDefaultWorkCreationDeclarationMap();
+    if (!declarations?.length) {
+      return map;
+    }
+
+    for (const declaration of declarations) {
+      map[declaration.section] = {
+        section: declaration.section,
+        creation_type: declaration.creation_type,
+        ai_tool: declaration.ai_tool ?? null,
+        notes: declaration.notes ?? null,
+      };
+    }
+
+    return map;
+  }
+
+  private isDisclosureMapValid(map: WorkCreationDeclarationMap): boolean {
+    const entries = Object.values(map) as WorkCreationDeclarationDraft[];
+    return entries.every(entry => {
+      if (entry.creation_type === 'human') {
+        return true;
+      }
+      return Boolean(entry.ai_tool && entry.ai_tool.trim());
+    });
   }
 }

@@ -2,7 +2,7 @@
 // WORK MODELS & CONSTANTS
 // ============================================
 
-import { WorkCreationDeclaration } from './work-creation-declaration.model';
+import { WorkCreationDeclaration, WorkCreationDeclarationDraft } from './work-creation-declaration.model';
 
 export interface Work {
   id: string;
@@ -62,7 +62,7 @@ export interface WorkFormData {
   original_work_info?: string;
   status: 'draft' | 'registered' | 'published' | 'archived';
   notes?: string;
-  ai_disclosures?: WorkCreationDeclaration[];
+  ai_disclosures?: WorkCreationDeclarationDraft[];
 }
 
 // Split types

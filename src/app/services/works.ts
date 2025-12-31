@@ -3,6 +3,11 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { WorkspaceService } from './workspace.service';
 import { Work, WorkFormData, WorkSplit, SplitType } from '../../models/work.model';
+import {
+  WorkCreationDeclaration,
+  WorkCreationDeclarationDraft,
+} from '../models/work-creation-declaration.model';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -48,13 +53,24 @@ export class WorksService {
     try {
       const { data, error } = await this.supabase.client
         .from('works')
-        .select('*')
+        .select('*, work_creation_declarations(section, creation_type, ai_tool, notes, updated_at)')
         .eq('workspace_id', workspaceId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      this.worksSubject.next(data || []);
+      const works = (data ?? []).map(record => {
+        const { work_creation_declarations, ...rest } = record as (Work & {
+          work_creation_declarations?: WorkCreationDeclaration[];
+        }) & Record<string, unknown>;
+
+        return {
+          ...rest,
+          ai_disclosures: work_creation_declarations ?? [],
+        } satisfies Work;
+      });
+
+      this.worksSubject.next(works);
     } catch (error) {
       console.error('Error loading works:', error);
       throw error;
@@ -88,11 +104,16 @@ export class WorksService {
 
       if (error) throw error;
 
+      const aiDrafts = ai_disclosures ?? [];
+      await this.replaceWorkAIDeclarations(data.id, aiDrafts);
+      const aiDeclarations = await this.getWorkAIDeclarations(data.id);
+      const workWithAi: Work = { ...data, ai_disclosures: aiDeclarations };
+
       // Update local state
       const currentWorks = this.worksSubject.value;
-      this.worksSubject.next([data, ...currentWorks]);
+      this.worksSubject.next([workWithAi, ...currentWorks]);
 
-      return data;
+      return workWithAi;
     } catch (error) {
       console.error('Error creating work:', error);
       throw error;
@@ -112,17 +133,24 @@ export class WorksService {
 
       if (error) throw error;
 
+      if (ai_disclosures) {
+        await this.replaceWorkAIDeclarations(id, ai_disclosures);
+      }
+
+      const aiDeclarations = await this.getWorkAIDeclarations(id);
+      const workWithAi: Work = { ...data, ai_disclosures: aiDeclarations };
+
       // Update local state
       const currentWorks = this.worksSubject.value;
-      const updatedWorks = currentWorks.map(w => w.id === id ? data : w);
+      const updatedWorks = currentWorks.map(w => (w.id === id ? workWithAi : w));
       this.worksSubject.next(updatedWorks);
 
       // Update current work if it's the one being edited
       if (this.currentWork?.id === id) {
-        this.currentWorkSubject.next(data);
+        this.currentWorkSubject.next(workWithAi);
       }
 
-      return data;
+      return workWithAi;
     } catch (error) {
       console.error('Error updating work:', error);
       throw error;
@@ -162,11 +190,65 @@ export class WorksService {
 
       if (error) throw error;
 
-      this.currentWorkSubject.next(data);
-      return data;
+      const aiDeclarations = await this.getWorkAIDeclarations(id);
+      const workWithAi: Work = { ...data, ai_disclosures: aiDeclarations };
+
+      this.currentWorkSubject.next(workWithAi);
+      return workWithAi;
     } catch (error) {
       console.error('Error getting work:', error);
       return null;
+    }
+  }
+
+  async getWorkAIDeclarations(workId: string): Promise<WorkCreationDeclaration[]> {
+    try {
+      const { data, error } = await this.supabase.client
+        .from('work_creation_declarations')
+        .select('*')
+        .eq('work_id', workId)
+        .order('section', { ascending: true });
+
+      if (error) throw error;
+      return (data ?? []) as WorkCreationDeclaration[];
+    } catch (error) {
+      console.error('Error loading AI disclosures:', error);
+      throw error;
+    }
+  }
+
+  private async replaceWorkAIDeclarations(
+    workId: string,
+    declarations: WorkCreationDeclarationDraft[]
+  ): Promise<void> {
+    try {
+      const { error: deleteError } = await this.supabase.client
+        .from('work_creation_declarations')
+        .delete()
+        .eq('work_id', workId);
+
+      if (deleteError) throw deleteError;
+
+      if (!declarations.length) {
+        return;
+      }
+
+      const payload = declarations.map(declaration => ({
+        work_id: workId,
+        section: declaration.section,
+        creation_type: declaration.creation_type,
+        ai_tool: declaration.ai_tool ?? null,
+        notes: declaration.notes ?? null,
+      }));
+
+      const { error: insertError } = await this.supabase.client
+        .from('work_creation_declarations')
+        .insert(payload);
+
+      if (insertError) throw insertError;
+    } catch (error) {
+      console.error('Error saving AI disclosures:', error);
+      throw error;
     }
   }
 

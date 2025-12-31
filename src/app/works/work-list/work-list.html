@@ -118,6 +118,18 @@
               }
             </div>
 
+            @if (hasAIDisclosures(work)) {
+              <div class="ai-disclosure" [class.contains-ai]="hasAIInvolvement(work)">
+                <div class="ai-avatar" [attr.aria-hidden]="true">
+                  {{ hasAIInvolvement(work) ? '🤖' : '✍️' }}
+                </div>
+                <div class="ai-copy">
+                  <span class="ai-label">AI Disclosure</span>
+                  <span class="ai-summary">{{ getAIDisclosureSummary(work) }}</span>
+                </div>
+              </div>
+            }
+
             <!-- Status Badge -->
             @if (work.status) {
               <div class="status-badge" [class]="'status-' + work.status">

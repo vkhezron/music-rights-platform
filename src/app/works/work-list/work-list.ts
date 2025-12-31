@@ -128,4 +128,44 @@ export class WorksListComponent implements OnInit {
   goBack() {
     this.router.navigate(['/dashboard']);
   }
+
+  hasAIDisclosures(work: Work): boolean {
+    return Array.isArray(work.ai_disclosures) && work.ai_disclosures.length > 0;
+  }
+
+  hasAIInvolvement(work: Work): boolean {
+    return Boolean(work.ai_disclosures?.some(disclosure => disclosure.creation_type !== 'human'));
+  }
+
+  getAIDisclosureSummary(work: Work): string {
+    const disclosures = work.ai_disclosures ?? [];
+    if (!disclosures.length) {
+      return 'No disclosure on file';
+    }
+
+    const aiSections = disclosures.filter(item => item.creation_type !== 'human');
+    if (!aiSections.length) {
+      return 'Declared 100% human made';
+    }
+
+    const tokens = aiSections.map(item => {
+      const label = this.getDisclosureSectionLabel(item.section);
+      const typeLabel = item.creation_type === 'ai_assisted' ? 'assisted' : 'generated';
+      return `${label} (${typeLabel}${item.ai_tool ? ` · ${item.ai_tool}` : ''})`;
+    });
+
+    return tokens.join(' • ');
+  }
+
+  private getDisclosureSectionLabel(section: string | undefined): string {
+    if (!section) return 'Unknown';
+    const labels: Record<string, string> = {
+      ip: 'Composition/Lyrics',
+      mixing: 'Mixing',
+      mastering: 'Mastering',
+      session_musicians: 'Session Musicians',
+      visuals: 'Artwork/Visuals',
+    };
+    return labels[section] ?? section;
+  }
 }

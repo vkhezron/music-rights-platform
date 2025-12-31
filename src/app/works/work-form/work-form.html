@@ -352,6 +352,16 @@
       }
     </div>
 
+    <!-- AI Disclosure Section -->
+    <div class="form-section">
+      <h2 class="section-title">AI Disclosure</h2>
+      <app-ai-disclosure-form
+        [initialDisclosures]="aiDisclosures()"
+        (disclosuresChange)="onAIDisclosuresChanged($event)"
+        (validChange)="onAIDisclosuresValidityChange($event)"
+      ></app-ai-disclosure-form>
+    </div>
+
     <!-- Notes Section -->
     <div class="form-section">
       <h2 class="section-title">{{ 'WORKS.ADDITIONAL_NOTES' | translate }}</h2>
@@ -392,7 +402,7 @@
       <button
         type="submit"
         class="submit-button"
-        [disabled]="isLoading() || workForm.invalid">
+        [disabled]="isLoading() || workForm.invalid || !aiDisclosuresValid()">
         @if (!isLoading()) {
           <lucide-icon [img]="Save" [size]="20"></lucide-icon>
           <span>{{ (isEditMode() ? 'COMMON.SAVE' : 'WORKS.SAVE_AND_ADD_HOLDER') | translate }}</span>

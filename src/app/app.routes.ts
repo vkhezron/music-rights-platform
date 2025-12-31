@@ -82,6 +82,10 @@ export const routes: Routes = [
         loadComponent: () => import('./protocol/protocol-form/protocol-form').then(m => m.ProtocolFormComponent)
     },
     {
+        path: 'u/:nickname',
+        loadComponent: () => import('./public-profile/public-profile.component').then(m => m.PublicProfileComponent)
+    },
+    {
         path: 'privacy-policy',
         loadComponent: () => import('./legal/privacy-policy/privacy-policy').then(m => m.PrivacyPolicyComponent)
     },

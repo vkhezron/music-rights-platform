@@ -1,0 +1,111 @@
+<div class="profile-page">
+  <header class="page-header">
+    <button class="ghost-btn" routerLink="/auth/login" [disabled]="isLoading()">
+      <lucide-icon [img]="BackIcon" [size]="18"></lucide-icon>
+      <span>Back to app</span>
+    </button>
+    <button class="ghost-btn" type="button" (click)="shareProfile()" [disabled]="isLoading()">
+      <lucide-icon [img]="ShareIcon" [size]="18"></lucide-icon>
+      <span>Share</span>
+    </button>
+  </header>
+
+  @if (isLoading()) {
+    <div class="loading-card">
+      <div class="skeleton avatar"></div>
+      <div class="skeleton line large"></div>
+      <div class="skeleton line"></div>
+      <div class="skeleton line"></div>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="status-card error">
+      <p>{{ errorMessage() }}</p>
+    </div>
+  } @else if (profile(); as profile) {
+    <section class="profile-hero">
+      <div class="avatar" [class.with-image]="profile.avatar_url">
+        @if (profile.avatar_url) {
+          <img [src]="profile.avatar_url" [alt]="'Avatar of ' + profile.nickname" />
+        } @else {
+          <span>{{ profile.nickname ? profile.nickname.slice(0, 1).toUpperCase() : '?' }}</span>
+        }
+      </div>
+
+      <div class="hero-copy">
+        <div class="handle">
+          <span>@{{ profile.nickname }}</span>
+        </div>
+        <h1>{{ profile.custom_role_text || (profile.primary_role | titlecase) }}</h1>
+
+        <div class="meta-row">
+          <div class="meta-pill">
+            <lucide-icon [img]="GlobeIcon" [size]="16"></lucide-icon>
+            <span>{{ formatLanguage(profile.primary_language) }}</span>
+          </div>
+          @if (profile.user_number) {
+            <div class="meta-pill">
+              <span>ID #{{ profile.user_number }}</span>
+            </div>
+          }
+        </div>
+
+        @if (profile.bio) {
+          <p class="bio">{{ profile.bio }}</p>
+        }
+      </div>
+
+      <aside class="callout">
+        @if (showAddButton()) {
+          <button class="primary-btn" type="button" (click)="addAsRightsHolder()" [disabled]="isAdding()">
+            <lucide-icon [img]="UserPlusIcon" [size]="18"></lucide-icon>
+            <span>{{ isAdding() ? 'Adding…' : 'Add to workspace' }}</span>
+          </button>
+          <small>Import this collaborator into your current workspace.</small>
+        } @else if (!canAddToWorkspace()) {
+          <small>Sign in and choose a workspace to add this collaborator.</small>
+        } @else if (existingRightsHolder()) {
+          <small>This collaborator is already part of your workspace.</small>
+        }
+      </aside>
+    </section>
+
+    @if (successMessage()) {
+      <div class="status-card success"><p>{{ successMessage() }}</p></div>
+    }
+
+    <section class="profile-content">
+      @if (secondaryRoles().length) {
+        <div class="card">
+          <h2>Additional Roles</h2>
+          <ul class="chip-list">
+            @for (role of secondaryRoles(); track role) {
+              <li class="chip">{{ role }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      @if (socialLinks().length) {
+        <div class="card">
+          <h2>Social & Music</h2>
+          <ul class="link-list">
+            @for (link of socialLinks(); track link.key) {
+              <li>
+                <a [href]="link.url" target="_blank" rel="noopener noreferrer">{{ link.label }}</a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      <div class="card">
+        <h2>Collaboration Tips</h2>
+        <ul class="info-list">
+          <li>Use the QR code in the app to pull this profile directly into split sheets.</li>
+          <li>All shared information respects the artist’s privacy preferences.</li>
+          <li>Once added, customise roles, percentages, and identifiers for each work.</li>
+        </ul>
+      </div>
+    </section>
+  }
+</div>

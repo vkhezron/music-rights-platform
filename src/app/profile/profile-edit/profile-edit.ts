@@ -1,9 +1,10 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ProfileService } from '../../services/profile.service';
+import { GdprService } from '../../services/gdpr.service';
 import { ProfileFormData, PRIMARY_ROLES, SECONDARY_ROLES, LANGUAGES, SOCIAL_PLATFORMS } from '../../../models/profile.model';
 
 // Import Lucide Icons
@@ -17,7 +18,8 @@ import { LucideAngularModule, CheckCircle, AlertCircle, ChevronDown, ChevronRigh
     CommonModule,
     ReactiveFormsModule,
     TranslateModule,
-    LucideAngularModule
+    LucideAngularModule,
+    RouterModule
   ],
   templateUrl: './profile-edit.html',
   styleUrl: './profile-edit.scss'
@@ -25,6 +27,7 @@ import { LucideAngularModule, CheckCircle, AlertCircle, ChevronDown, ChevronRigh
 export class ProfileEdit implements OnInit {
   private fb = inject(FormBuilder);
   private profileService = inject(ProfileService);
+  private gdprService = inject(GdprService);
   private router = inject(Router);
 
   // Lucide Icons
@@ -247,5 +250,20 @@ export class ProfileEdit implements OnInit {
 
   cancel() {
     this.router.navigate(['/profile-hub']);
+  }
+
+  /**
+   * Export personal data
+   */
+  async exportData() {
+    try {
+      await this.gdprService.exportPersonalData();
+      this.successMessage.set('Data exported successfully');
+      setTimeout(() => this.successMessage.set(''), 3000);
+    } catch (error) {
+      console.error('Export error:', error);
+      this.errorMessage.set('PROFILE.EXPORT_ERROR');
+      setTimeout(() => this.errorMessage.set(''), 5000);
+    }
   }
 }

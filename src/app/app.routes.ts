@@ -40,8 +40,14 @@ export const routes: Routes = [
         ,  loadComponent: () => import('./profile/profile-edit/profile-edit').then(m => m.ProfileEdit)
         , canActivate: [AuthGuard]  
     },
-    {path: 'profile/qr-code'
+    {
+        path: 'profile/qr-code'
         ,loadComponent: () => import('./profile/qr-code-display/qr-code-display').then(m => m.QrCodeDisplayComponent)
+        , canActivate: [AuthGuard]  
+    },
+    {
+        path: 'profile/delete-account'
+        , loadComponent: () => import('./profile/account-deletion/account-deletion').then(m => m.AccountDeletionComponent)
         , canActivate: [AuthGuard]  
     },
     {

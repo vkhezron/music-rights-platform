@@ -1,0 +1,145 @@
+<div class="account-deletion-container">
+  <div class="deletion-page">
+    <!-- Header -->
+    <div class="header">
+      <button class="back-btn" (click)="goBack()" type="button">
+        <lucide-icon [img]="X" [size]="20"></lucide-icon>
+      </button>
+      <h1>{{ 'GDPR.DELETE_ACCOUNT_TITLE' | translate }}</h1>
+    </div>
+
+    <!-- Warning Card -->
+    <div class="warning-card">
+      <div class="warning-icon">
+        <lucide-icon [img]="AlertTriangle" [size]="48" [strokeWidth]="2"></lucide-icon>
+      </div>
+      <h2>{{ 'GDPR.DELETE_ACCOUNT_WARNING_TITLE' | translate }}</h2>
+      <p>{{ 'GDPR.DELETE_ACCOUNT_WARNING_TEXT' | translate }}</p>
+    </div>
+
+    <!-- What Will Be Deleted -->
+    <div class="info-section">
+      <h3>{{ 'GDPR.DELETE_ACCOUNT_WHAT_DELETED' | translate }}</h3>
+      <ul class="deletion-list">
+        <li>{{ 'GDPR.DELETE_ACCOUNT_ITEM_PROFILE' | translate }}</li>
+        <li>{{ 'GDPR.DELETE_ACCOUNT_ITEM_WORKSPACES' | translate }}</li>
+        <li>{{ 'GDPR.DELETE_ACCOUNT_ITEM_WORKS' | translate }}</li>
+        <li>{{ 'GDPR.DELETE_ACCOUNT_ITEM_RIGHTS' | translate }}</li>
+        <li>{{ 'GDPR.DELETE_ACCOUNT_ITEM_SPLITS' | translate }}</li>
+        <li>{{ 'GDPR.DELETE_ACCOUNT_ITEM_PROTOCOLS' | translate }}</li>
+        <li>{{ 'GDPR.DELETE_ACCOUNT_ITEM_CONSENTS' | translate }}</li>
+      </ul>
+    </div>
+
+    <!-- Important Notes -->
+    <div class="info-section">
+      <h3>{{ 'GDPR.DELETE_ACCOUNT_IMPORTANT' | translate }}</h3>
+      <ul class="notes-list">
+        <li>{{ 'GDPR.DELETE_ACCOUNT_NOTE_IRREVERSIBLE' | translate }}</li>
+        <li>{{ 'GDPR.DELETE_ACCOUNT_NOTE_COLLABORATORS' | translate }}</li>
+        <li>{{ 'GDPR.DELETE_ACCOUNT_NOTE_EXPORT' | translate }}</li>
+      </ul>
+    </div>
+
+    <!-- Export Data Link -->
+    <div class="export-section">
+      <p>{{ 'GDPR.DELETE_ACCOUNT_EXPORT_PROMPT' | translate }}</p>
+      <a routerLink="/profile/export-data" class="export-link">
+        {{ 'GDPR.DATA_EXPORT' | translate }}
+      </a>
+    </div>
+
+    <!-- Delete Button -->
+    <div class="action-section">
+      <button 
+        class="delete-btn" 
+        (click)="openConfirmDialog()"
+        type="button">
+        <lucide-icon [img]="Trash2" [size]="20"></lucide-icon>
+        {{ 'GDPR.DELETE_ACCOUNT_BUTTON' | translate }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Dialog -->
+@if (showConfirmDialog()) {
+  <div class="dialog-overlay" (click)="closeDialog()">
+    <div class="dialog-content" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h2>{{ 'GDPR.DELETE_ACCOUNT_CONFIRM_TITLE' | translate }}</h2>
+        <button class="close-btn" (click)="closeDialog()" type="button">
+          <lucide-icon [img]="X" [size]="24"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="dialog-body">
+        <p class="confirmation-text">
+          {{ 'GDPR.DELETE_ACCOUNT_CONFIRM_TEXT' | translate }}
+        </p>
+
+        <!-- Password Input -->
+        <div class="form-group">
+          <label for="password">{{ 'GDPR.DELETE_ACCOUNT_CONFIRM_PASSWORD_LABEL' | translate }}</label>
+          <input
+            id="password"
+            type="password"
+            class="form-input"
+            [(ngModel)]="password"
+            [placeholder]="'GDPR.DELETE_ACCOUNT_CONFIRM_PASSWORD_PLACEHOLDER' | translate"
+            [disabled]="isDeleting()"
+            (keyup.enter)="deleteAccount()"
+          />
+        </div>
+
+        <!-- Confirmation Text Input -->
+        <div class="form-group">
+          <label for="confirmText">
+            {{ 'GDPR.DELETE_ACCOUNT_CONFIRM_TYPE_LABEL' | translate }}
+          </label>
+          <input
+            id="confirmText"
+            type="text"
+            class="form-input"
+            [(ngModel)]="confirmText"
+            placeholder="DELETE"
+            [disabled]="isDeleting()"
+            (keyup.enter)="deleteAccount()"
+          />
+          <p class="helper-text">
+            {{ 'GDPR.DELETE_ACCOUNT_CONFIRM_TYPE_HINT' | translate }}
+          </p>
+        </div>
+
+        <!-- Error Message -->
+        @if (errorMessage()) {
+          <div class="error-message">
+            <lucide-icon [img]="AlertTriangle" [size]="16"></lucide-icon>
+            {{ errorMessage() | translate }}
+          </div>
+        }
+      </div>
+
+      <div class="dialog-footer">
+        <button 
+          class="cancel-btn" 
+          (click)="closeDialog()"
+          [disabled]="isDeleting()"
+          type="button">
+          {{ 'COMMON.CANCEL' | translate }}
+        </button>
+        <button 
+          class="confirm-delete-btn" 
+          (click)="deleteAccount()"
+          [disabled]="!canDelete()"
+          type="button">
+          @if (isDeleting()) {
+            {{ 'GDPR.DELETE_ACCOUNT_DELETING' | translate }}...
+          } @else {
+            {{ 'GDPR.DELETE_ACCOUNT_CONFIRM_BUTTON' | translate }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

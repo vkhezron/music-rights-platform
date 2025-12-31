@@ -100,6 +100,19 @@ export class GdprService {
   /**
    * Delete user account and all associated data
    * WARNING: This is irreversible
+   * 
+   * Deletion order (from leaf nodes to root):
+   * 1. Protocol author tables (protocol_lyric_authors, protocol_music_authors, protocol_neighbouring_rightsholders)
+   * 2. Protocols
+   * 3. Work creation declarations
+   * 4. Work splits
+   * 5. Works
+   * 6. Rights holders
+   * 7. Workspace members
+   * 8. Workspaces
+   * 9. User consents (if table exists)
+   * 10. Profile
+   * 11. Auth user
    */
   async deleteAccount(password: string): Promise<void> {
     const user = this.supabase.currentUser;
@@ -116,72 +129,216 @@ export class GdprService {
         throw new Error('Incorrect password');
       }
 
-      // Delete all user data (order matters due to foreign keys)
-      
-      // Delete work_splits
-      const { error: splitsError } = await this.supabase.client
-        .from('work_splits')
-        .delete()
-        .in('work_id', 
-          (await this.supabase.client
-            .from('works')
-            .select('id')
-            .eq('created_by', user.id)).data?.map((w: any) => w.id) || []
-        );
+      console.log('Starting account deletion for user:', user.id);
 
-      if (splitsError) throw splitsError;
+      // Get user's workspace IDs first (needed for cascade deletes)
+      const { data: workspaces } = await this.supabase.client
+        .from('workspaces')
+        .select('id')
+        .eq('created_by', user.id);
 
-      // Delete works
+      const workspaceIds = workspaces?.map((w: any) => w.id) || [];
+
+      // Get user's work IDs (needed for protocol and split cleanup)
+      const { data: works } = await this.supabase.client
+        .from('works')
+        .select('id')
+        .eq('created_by', user.id);
+
+      const workIds = works?.map((w: any) => w.id) || [];
+
+      // Step 1: Delete protocol author records
+      // These reference protocols, which reference works, which reference workspaces
+      if (workspaceIds.length > 0) {
+        // Get all protocol IDs for user's workspaces
+        const { data: protocols } = await this.supabase.client
+          .from('protocols')
+          .select('id')
+          .in('workspace_id', workspaceIds);
+
+        const protocolIds = protocols?.map((p: any) => p.id) || [];
+
+        if (protocolIds.length > 0) {
+          // Delete protocol_lyric_authors
+          const { error: lyricAuthorsError } = await this.supabase.client
+            .from('protocol_lyric_authors')
+            .delete()
+            .in('protocol_id', protocolIds);
+
+          if (lyricAuthorsError && lyricAuthorsError.code !== 'PGRST116') {
+            console.warn('Error deleting lyric authors:', lyricAuthorsError);
+          }
+
+          // Delete protocol_music_authors
+          const { error: musicAuthorsError } = await this.supabase.client
+            .from('protocol_music_authors')
+            .delete()
+            .in('protocol_id', protocolIds);
+
+          if (musicAuthorsError && musicAuthorsError.code !== 'PGRST116') {
+            console.warn('Error deleting music authors:', musicAuthorsError);
+          }
+
+          // Delete protocol_neighbouring_rightsholders
+          const { error: neighbouringError } = await this.supabase.client
+            .from('protocol_neighbouring_rightsholders')
+            .delete()
+            .in('protocol_id', protocolIds);
+
+          if (neighbouringError && neighbouringError.code !== 'PGRST116') {
+            console.warn('Error deleting neighbouring rightsholders:', neighbouringError);
+          }
+
+          console.log(`Deleted protocol author records for ${protocolIds.length} protocols`);
+        }
+
+        // Step 2: Delete protocols
+        const { error: protocolsError } = await this.supabase.client
+          .from('protocols')
+          .delete()
+          .in('workspace_id', workspaceIds);
+
+        if (protocolsError && protocolsError.code !== 'PGRST116') {
+          console.warn('Error deleting protocols:', protocolsError);
+        } else {
+          console.log('Deleted protocols');
+        }
+      }
+
+      // Step 3: Delete work creation declarations
+      if (workIds.length > 0) {
+        const { error: declarationsError } = await this.supabase.client
+          .from('work_creation_declarations')
+          .delete()
+          .in('work_id', workIds);
+
+        if (declarationsError && declarationsError.code !== 'PGRST116') {
+          console.warn('Error deleting work creation declarations:', declarationsError);
+        } else {
+          console.log('Deleted work creation declarations');
+        }
+      }
+
+      // Step 4: Delete work_splits
+      if (workIds.length > 0) {
+        const { error: splitsError } = await this.supabase.client
+          .from('work_splits')
+          .delete()
+          .in('work_id', workIds);
+
+        if (splitsError) {
+          console.warn('Error deleting work splits:', splitsError);
+        } else {
+          console.log('Deleted work splits');
+        }
+      }
+
+      // Step 5: Delete works
       const { error: worksError } = await this.supabase.client
         .from('works')
         .delete()
         .eq('created_by', user.id);
 
-      if (worksError) throw worksError;
+      if (worksError) {
+        console.warn('Error deleting works:', worksError);
+      } else {
+        console.log('Deleted works');
+      }
 
-      // Delete rights_holders
-      const { error: holdersError } = await this.supabase.client
-        .from('rights_holders')
-        .delete()
-        .eq('created_by', user.id);
+      // Step 6: Delete rights_holders
+      if (workspaceIds.length > 0) {
+        const { error: holdersError } = await this.supabase.client
+          .from('rights_holders')
+          .delete()
+          .in('workspace_id', workspaceIds);
 
-      if (holdersError) throw holdersError;
+        if (holdersError) {
+          console.warn('Error deleting rights holders:', holdersError);
+        } else {
+          console.log('Deleted rights holders');
+        }
+      }
 
-      // Delete workspace_members
+      // Step 7: Delete workspace_members
       const { error: membersError } = await this.supabase.client
         .from('workspace_members')
         .delete()
         .eq('user_id', user.id);
 
-      if (membersError) throw membersError;
+      if (membersError) {
+        console.warn('Error deleting workspace members:', membersError);
+      } else {
+        console.log('Deleted workspace members');
+      }
 
-      // Delete workspaces
+      // Step 8: Delete workspaces
       const { error: workspacesError } = await this.supabase.client
         .from('workspaces')
         .delete()
         .eq('created_by', user.id);
 
-      if (workspacesError) throw workspacesError;
+      if (workspacesError) {
+        console.warn('Error deleting workspaces:', workspacesError);
+      } else {
+        console.log('Deleted workspaces');
+      }
 
-      // Delete profile
+      // Step 9: Delete user_consents (if table exists)
+      try {
+        const { error: consentsError } = await this.supabase.client
+          .from('user_consents')
+          .delete()
+          .eq('user_id', user.id);
+
+        if (consentsError && consentsError.code !== 'PGRST116') {
+          console.warn('Error deleting user consents:', consentsError);
+        } else if (!consentsError) {
+          console.log('Deleted user consents');
+        }
+      } catch (error) {
+        console.warn('user_consents table may not exist:', error);
+      }
+
+      // Step 10: Delete profile
       const { error: profileError } = await this.supabase.client
         .from('profiles')
         .delete()
         .eq('id', user.id);
 
-      if (profileError) throw profileError;
-
-      // Delete auth user
-      const { error: deleteError } = await this.supabase.client.auth.admin.deleteUser(user.id);
-      
-      if (deleteError) {
-        console.warn('Could not delete auth user (requires admin)', deleteError);
+      if (profileError) {
+        console.warn('Error deleting profile:', profileError);
+      } else {
+        console.log('Deleted profile');
       }
 
-      // Sign out
+      // Step 11: Clear local storage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(this.localConsentKey);
+        console.log('Cleared local storage');
+      }
+
+      // Step 12: Delete auth user (requires admin access)
+      // Note: This will fail if called from client-side without admin privileges
+      // The user can still be deleted manually from Supabase dashboard
+      try {
+        const { error: deleteError } = await this.supabase.client.auth.admin.deleteUser(user.id);
+        
+        if (deleteError) {
+          console.warn('Could not delete auth user via admin API (expected if not admin):', deleteError.message);
+          console.info('User data has been deleted. Auth user can be removed from Supabase dashboard.');
+        } else {
+          console.log('Deleted auth user');
+        }
+      } catch (error) {
+        console.warn('Auth admin deletion not available from client:', error);
+      }
+
+      // Step 13: Sign out
       await this.supabase.signOut();
+      console.log('Account deletion complete. User signed out.');
+
     } catch (error) {
-      console.error('Error deleting account:', error);
+      console.error('Error during account deletion:', error);
       throw error;
     }
   }

@@ -222,6 +222,26 @@
           }
         </button>
       </div>
+
+      <!-- GDPR Section -->
+      <div class="gdpr-section">
+        <h3>{{ 'GDPR.DATA_EXPORT_TITLE' | translate }}</h3>
+        <p class="gdpr-description">{{ 'GDPR.DATA_EXPORT_DESC' | translate }}</p>
+        <div class="gdpr-actions">
+          <button type="button" class="export-button" (click)="exportData()">
+            <span>{{ 'GDPR.DATA_EXPORT' | translate }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="danger-zone">
+        <h3>{{ 'PROFILE.DANGER_ZONE' | translate }}</h3>
+        <p class="danger-description">{{ 'PROFILE.DANGER_ZONE_DESC' | translate }}</p>
+        <a routerLink="/profile/delete-account" class="danger-button">
+          {{ 'GDPR.DELETE_ACCOUNT_TITLE' | translate }}
+        </a>
+      </div>
     </form>
   </div>
 </div>

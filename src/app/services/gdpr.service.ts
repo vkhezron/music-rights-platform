@@ -12,6 +12,7 @@ import { ProfileService } from './profile.service';
 export class GdprService {
   private supabase = inject(SupabaseService);
   private profileService = inject(ProfileService);
+  private readonly localConsentKey = 'gdpr_consent_preferences';
 
   /**
    * Export user's personal data as JSON
@@ -190,7 +191,7 @@ export class GdprService {
    */
   async getConsentPreferences(): Promise<any> {
     const user = this.supabase.currentUser;
-    if (!user) return null;
+    if (!user) return this.getLocalConsentPreferences();
 
     try {
       const { data } = await this.supabase.client
@@ -199,10 +200,19 @@ export class GdprService {
         .eq('user_id', user.id)
         .single();
 
-      return data;
+      if (data) {
+        this.saveLocalConsentPreferences(data);
+      }
+
+      return data ?? this.getLocalConsentPreferences();
     } catch (error) {
-      // Table might not exist yet
-      return null;
+      if (this.isMissingConsentTableError(error)) {
+        console.warn('Consent table missing; falling back to local storage.');
+        return this.getLocalConsentPreferences();
+      }
+
+      console.error('Failed to load consent preferences:', error);
+      throw error;
     }
   }
 
@@ -218,6 +228,8 @@ export class GdprService {
     const user = this.supabase.currentUser;
     if (!user) throw new Error('No user logged in');
 
+    this.saveLocalConsentPreferences({ ...preferences, user_id: user.id });
+
     try {
       const { error } = await this.supabase.client
         .from('user_consents')
@@ -232,6 +244,11 @@ export class GdprService {
 
       if (error) throw error;
     } catch (error) {
+      if (this.isMissingConsentTableError(error)) {
+        console.warn('Consent table missing; stored preferences locally only.');
+        return;
+      }
+
       console.error('Error saving consent preferences:', error);
       throw error;
     }
@@ -251,5 +268,33 @@ export class GdprService {
   setCookieConsent(accepted: boolean): void {
     localStorage.setItem('gdpr_consent', accepted ? 'accepted' : 'rejected');
     localStorage.setItem('gdpr_consent_date', new Date().toISOString());
+  }
+
+  private saveLocalConsentPreferences(preferences: any): void {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(this.localConsentKey, JSON.stringify(preferences));
+    } catch (error) {
+      console.warn('Unable to cache consent preferences locally.', error);
+    }
+  }
+
+  private getLocalConsentPreferences(): any {
+    if (typeof window === 'undefined') return null;
+    const raw = localStorage.getItem(this.localConsentKey);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch (error) {
+      console.warn('Unable to parse cached consent preferences.', error);
+      return null;
+    }
+  }
+
+  private isMissingConsentTableError(error: unknown): boolean {
+    if (!error || typeof error !== 'object') return false;
+    const err = error as { code?: string; message?: string };
+    if (err.code === 'PGRST205') return true;
+    return Boolean(err.message && err.message.includes("user_consents"));
   }
 }

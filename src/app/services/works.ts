@@ -73,10 +73,12 @@ export class WorksService {
     }
 
     try {
+      const { ai_disclosures, ...insertPayload } = formData;
+
       const { data, error } = await this.supabase.client
         .from('works')
         .insert({
-          ...formData,
+          ...insertPayload,
           workspace_id: currentWorkspace.id,
           created_by: currentUser.id,
           status: 'draft'
@@ -99,9 +101,11 @@ export class WorksService {
 
   async updateWork(id: string, formData: Partial<WorkFormData>): Promise<Work> {
     try {
+      const { ai_disclosures, ...updatePayload } = formData;
+
       const { data, error } = await this.supabase.client
         .from('works')
-        .update(formData)
+        .update(updatePayload)
         .eq('id', id)
         .select()
         .single();
@@ -187,7 +191,14 @@ export class WorksService {
     }
   }
 
-  async createSplit(workId: string, rightsHolderId: string, splitType: SplitType, percentage: number): Promise<WorkSplit> {
+  async createSplit(
+    workId: string,
+    rightsHolderId: string,
+    splitType: SplitType,
+    percentage: number,
+    contributionTypes?: WorkSplit['contribution_types'],
+    roles?: WorkSplit['roles']
+  ): Promise<WorkSplit> {
     const currentUser = this.supabase.currentUser;
     if (!currentUser) {
       throw new Error('User not authenticated');
@@ -202,6 +213,8 @@ export class WorksService {
           rights_holder_id: rightsHolderId,
           split_type: splitType,
           ownership_percentage: percentage,
+          contribution_types: contributionTypes ?? null,
+          roles: roles ?? null,
           created_by: currentUser.id,
           is_active: true,
           rights_layer: rightsLayer
@@ -217,11 +230,22 @@ export class WorksService {
     }
   }
 
-  async updateSplit(splitId: string, percentage: number): Promise<WorkSplit> {
+  async updateSplit(
+    splitId: string,
+    update: {
+      ownership_percentage?: number;
+      contribution_types?: WorkSplit['contribution_types'];
+      roles?: WorkSplit['roles'];
+    }
+  ): Promise<WorkSplit> {
     try {
       const { data, error } = await this.supabase.client
         .from('work_splits')
-        .update({ ownership_percentage: percentage })
+        .update({
+          ...(update.ownership_percentage !== undefined ? { ownership_percentage: update.ownership_percentage } : {}),
+          ...(update.contribution_types !== undefined ? { contribution_types: update.contribution_types ?? null } : {}),
+          ...(update.roles !== undefined ? { roles: update.roles ?? null } : {})
+        })
         .eq('id', splitId)
         .select()
         .single();
@@ -285,7 +309,9 @@ export class WorksService {
           notes: s.notes || null,
           created_by: currentUser.id,
           is_active: true,
-          rights_layer: s.rights_layer ?? this.resolveRightsLayer(s.split_type)
+          rights_layer: s.rights_layer ?? this.resolveRightsLayer(s.split_type),
+          contribution_types: s.contribution_types ?? null,
+          roles: s.roles ?? null
         })),
         ...neighboringSplits.map(s => ({
           work_id: workId,
@@ -295,7 +321,9 @@ export class WorksService {
           notes: s.notes || null,
           created_by: currentUser.id,
           is_active: true,
-          rights_layer: s.rights_layer ?? this.resolveRightsLayer(s.split_type)
+          rights_layer: s.rights_layer ?? this.resolveRightsLayer(s.split_type),
+          contribution_types: s.contribution_types ?? null,
+          roles: s.roles ?? null
         }))
       ];
 
@@ -320,7 +348,7 @@ export class WorksService {
   async validateSplits(workId: string, splitType: SplitType): Promise<{ valid: boolean; total: number }> {
     const splits = await this.getWorkSplits(workId);
     const typeSplits = splits.filter(s => s.split_type === splitType);
-    const total = typeSplits.reduce((sum, split) => sum + split.percentage, 0);
+    const total = typeSplits.reduce((sum, split) => sum + split.ownership_percentage, 0);
     
     return {
       valid: Math.abs(total - 100) < 0.01, // Allow tiny floating point differences

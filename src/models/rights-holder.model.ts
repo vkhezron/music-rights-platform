@@ -38,6 +38,7 @@ export interface RightsHolder {
   
   // NEW: Nickname & Social
   nickname?: string;    // @username format, unique
+  display_name?: string; // Stage/public name for surfaces
   avatar_url?: string;
   bio?: string;
   social_links?: {
@@ -130,6 +131,7 @@ export interface RightsHolderFormData {
   
   // Privacy-first person fields
   nickname?: string;
+  display_name?: string;
   avatar_url?: string;
   bio?: string;
   social_links?: {

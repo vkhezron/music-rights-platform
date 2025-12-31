@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, Validators, ReactiveFormsModule, ValidatorFn } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { RightsHoldersService, RightsHolder } from '../../services/rights-holder';
@@ -81,6 +81,10 @@ export class RightsHolderFormComponent implements OnInit {
       
       // Company field
       company_name: [''],
+
+      // Public identity
+      nickname: ['', [Validators.required, Validators.pattern(/^@?[a-z0-9._-]{3,20}$/i)]],
+      display_name: [''],
       
       // Common fields
       email: ['', [Validators.email]],
@@ -122,9 +126,9 @@ export class RightsHolderFormComponent implements OnInit {
     const companyNameControl = this.rhForm.get('company_name');
 
     if (type === 'person') {
-      // Person: first_name and last_name required
-      firstNameControl?.setValidators([Validators.required, Validators.minLength(2)]);
-      lastNameControl?.setValidators([Validators.required, Validators.minLength(2)]);
+      // Person: legal names optional but enforce minimum length when provided
+      firstNameControl?.setValidators([this.optionalMinLength(2)]);
+      lastNameControl?.setValidators([this.optionalMinLength(2)]);
       companyNameControl?.clearValidators();
     } else {
       // Company: company_name required
@@ -156,6 +160,8 @@ export class RightsHolderFormComponent implements OnInit {
         first_name: rh.first_name || '',
         last_name: rh.last_name || '',
         company_name: rh.company_name || '',
+        nickname: rh.nickname ? this.ensureNicknamePrefix(rh.nickname) : '',
+        display_name: rh.display_name || '',
         email: rh.email || '',
         phone: rh.phone || '',
         cmo_pro: rh.cmo_pro || '',
@@ -180,11 +186,22 @@ export class RightsHolderFormComponent implements OnInit {
   }
 
   getDisplayName(): string {
+    const nickname = this.rhForm.get('nickname')?.value;
+    if (nickname) {
+      return this.ensureNicknamePrefix(nickname);
+    }
+
+    const displayName = this.rhForm.get('display_name')?.value;
+    if (displayName) {
+      return displayName;
+    }
+
     if (this.rhForm.get('type')?.value === 'person') {
       const firstName = this.rhForm.get('first_name')?.value || '';
       const lastName = this.rhForm.get('last_name')?.value || '';
       return `${firstName} ${lastName}`.trim() || 'New Person';
     }
+
     return this.rhForm.get('company_name')?.value || 'New Company';
   }
 
@@ -200,7 +217,12 @@ export class RightsHolderFormComponent implements OnInit {
     this.successMessage.set('');
 
     try {
-      const formData = this.rhForm.value;
+      const formValue = this.rhForm.value;
+      const formData = {
+        ...formValue,
+        nickname: this.normalizeNickname(formValue.nickname),
+        display_name: formValue.display_name?.trim() || undefined,
+      };
 
       if (this.isEditMode()) {
         // Update existing rights holder
@@ -238,5 +260,30 @@ export class RightsHolderFormComponent implements OnInit {
 
   cancel() {
     this.router.navigate(['/rights-holders']);
+  }
+
+  private optionalMinLength(min: number): ValidatorFn {
+    return (control: AbstractControl) => {
+      const value = control.value;
+      if (value === null || value === undefined) return null;
+      const trimmed = `${value}`.trim();
+      if (!trimmed) return null;
+      return trimmed.length >= min
+        ? null
+        : { minlength: { requiredLength: min, actualLength: trimmed.length } };
+    };
+  }
+
+  private ensureNicknamePrefix(value: string): string {
+    if (!value) return value;
+    return value.startsWith('@') ? value : `@${value}`;
+  }
+
+  private normalizeNickname(value?: string | null): string | undefined {
+    if (!value) return undefined;
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+    const withoutAt = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
+    return withoutAt || undefined;
   }
 }

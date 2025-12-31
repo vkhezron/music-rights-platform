@@ -18,6 +18,7 @@ export interface SplitEntry {
   splitType: IPSplitType | 'neighbouring';
   ownershipPercentage: number;
   nickname?: string;
+  displayName?: string;
   firstName?: string;
   lastName?: string;
   email?: string;

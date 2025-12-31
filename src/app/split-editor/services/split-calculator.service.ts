@@ -75,20 +75,8 @@ export class SplitCalculatorService {
       errors.push('Ownership percentage must be between 0 and 100');
     }
 
-    if (entry.entryMethod === 'add_manually') {
-      if (!entry.firstName?.trim()) {
-        errors.push('First name is required');
-      }
-      if (!entry.lastName?.trim()) {
-        errors.push('Last name is required');
-      }
-    }
-
-    if (entry.splitType === 'music') {
-      const flags = entry.contributionTypes;
-      if (!flags || (!flags.melody && !flags.harmony && !flags.arrangement)) {
-        errors.push('At least one contribution type must be selected');
-      }
+    if (!entry.nickname?.trim()) {
+      errors.push('Public handle is required');
     }
 
     if (entry.splitType === 'neighbouring' && (!entry.roles || entry.roles.length === 0)) {

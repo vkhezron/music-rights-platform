@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Work } from '../../models/work.model';
-import { RightsHolder } from './rights-holder';
-import { WorkSplitRow } from '../split-editor/split-editor';
+import type { Work } from '../../models/work.model';
+import type { RightsHolder } from './rights-holder';
+import type { WorkSplitRow } from '../split-editor/split-editor';
 
 /**
  * PDF Generation Service
@@ -20,236 +20,178 @@ export class PdfGeneratorService {
     ipSplits: WorkSplitRow[],
     neighboringSplits: WorkSplitRow[]
   ): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-      try {
-        // Create canvas for PDF rendering
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        if (!ctx) {
-          throw new Error('Could not get canvas context');
-        }
+    const { jsPDF } = await import('jspdf');
 
-        // Set canvas size (A4 at 96 DPI: 794 x 1123)
-        const pageWidth = 794;
-        const pageHeight = 1123;
-        canvas.width = pageWidth;
-        canvas.height = pageHeight * 2; // Two pages
+    try {
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 40;
+        const lineHeight = 18;
 
-        // Colors
-        const darkGray = '#1a1a1a';
-        const lightGray = '#f5f5f5';
-        const accentColor = '#667eea';
-        const borderColor = '#e0e0e0';
+        let y = margin;
 
-        // Fonts
-        ctx.font = 'bold 24px Arial';
-        ctx.fillStyle = darkGray;
-
-        let y = 40;
-
-        // ===== HEADER =====
-        ctx.fillText('MUSIC RIGHTS SPLIT SHEET', 40, y);
-        y += 40;
-
-        // Work info box
-        ctx.fillStyle = lightGray;
-        ctx.fillRect(40, y, pageWidth - 80, 100);
-        
-        ctx.fillStyle = darkGray;
-        ctx.font = 'bold 14px Arial';
-        ctx.fillText('Work Title:', 50, y + 25);
-        
-        ctx.font = '14px Arial';
-        ctx.fillText(work.work_title, 150, y + 25);
-        
-        ctx.font = 'bold 14px Arial';
-        ctx.fillText('ISRC:', 50, y + 50);
-        
-        ctx.font = '14px Arial';
-        ctx.fillText(work.isrc || 'N/A', 150, y + 50);
-        
-        ctx.font = 'bold 14px Arial';
-        ctx.fillText('ISWC:', 50, y + 75);
-        
-        ctx.font = '14px Arial';
-        ctx.fillText(work.iswc || 'N/A', 150, y + 75);
-
-        y += 120;
-
-        // ===== IP RIGHTS SECTION =====
-        ctx.fillStyle = accentColor;
-        ctx.font = 'bold 16px Arial';
-        ctx.fillText('INTELLECTUAL PROPERTY RIGHTS', 40, y);
-        y += 30;
-
-        // IP table header
-        ctx.fillStyle = lightGray;
-        ctx.fillRect(40, y, pageWidth - 80, 30);
-        
-        ctx.fillStyle = darkGray;
-        ctx.font = 'bold 12px Arial';
-        ctx.fillText('Rights Holder Name', 50, y + 20);
-        ctx.fillText('Split Type', 350, y + 20);
-        ctx.fillText('Percentage', 500, y + 20);
-        ctx.fillText('Notes', 600, y + 20);
-
-        y += 40;
-
-        // IP table rows
-        ctx.font = '12px Arial';
-        ipSplits.forEach((split, index) => {
-          if (index % 2 === 0) {
-            ctx.fillStyle = '#fafafa';
-            ctx.fillRect(40, y - 5, pageWidth - 80, 25);
+        const ensureSpace = (height: number) => {
+          if (y + height > pageHeight - margin) {
+            doc.addPage();
+            y = margin;
           }
-          
-          ctx.fillStyle = darkGray;
-          const holderName = this.getRightsHolderName(split.rights_holder);
-          const splitType = this.formatSplitType(split.split_type);
-          const percentage = (split.ownership_percentage ?? split.percentage ?? 0).toFixed(2) + '%';
-          const notes = split.notes || '';
+        };
 
-          ctx.fillText(holderName, 50, y + 15);
-          ctx.fillText(splitType, 350, y + 15);
-          ctx.fillText(percentage, 500, y + 15);
-          ctx.fillText(notes.substring(0, 30), 600, y + 15);
+        const drawHeader = () => {
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(22);
+          doc.text('Music Rights Split Sheet', margin, y);
+          y += lineHeight * 2;
 
-          y += 25;
-        });
+          doc.setDrawColor('#e0e0e0');
+          doc.setFillColor('#f5f5f5');
+          doc.rect(margin, y, pageWidth - margin * 2, 90, 'F');
 
-        // IP total
-        ctx.fillStyle = accentColor;
-        ctx.fillRect(40, y, pageWidth - 80, 25);
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 12px Arial';
-        ctx.fillText('TOTAL IP RIGHTS:', 50, y + 15);
-        const ipTotal = ipSplits.reduce((sum, s) => sum + (s.ownership_percentage ?? s.percentage ?? 0), 0);
-        ctx.fillText(ipTotal.toFixed(2) + '%', 500, y + 15);
+          doc.setFontSize(12);
+          doc.setTextColor('#1a1a1a');
 
-        y += 45;
+          const infoLines: Array<[string, string]> = [
+            ['Work Title', work.work_title || 'Untitled'],
+            ['ISRC', work.isrc || 'N/A'],
+            ['ISWC', work.iswc || 'N/A'],
+          ];
 
-        // ===== NEIGHBORING RIGHTS SECTION =====
-        ctx.fillStyle = accentColor;
-        ctx.font = 'bold 16px Arial';
-        ctx.fillText('NEIGHBORING RIGHTS', 40, y);
-        y += 30;
+          infoLines.forEach((line, index) => {
+            const [label, value] = line;
+            const offsetY = y + 25 + index * 22;
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${label}:`, margin + 12, offsetY);
+            doc.setFont('helvetica', 'normal');
+            doc.text(String(value), margin + 120, offsetY, { maxWidth: pageWidth - margin * 2 - 140 });
+          });
 
-        // Neighboring table header
-        ctx.fillStyle = lightGray;
-        ctx.fillRect(40, y, pageWidth - 80, 30);
-        
-        ctx.fillStyle = darkGray;
-        ctx.font = 'bold 12px Arial';
-        ctx.fillText('Rights Holder Name', 50, y + 20);
-        ctx.fillText('Split Type', 350, y + 20);
-        ctx.fillText('Percentage', 500, y + 20);
-        ctx.fillText('Notes', 600, y + 20);
+          y += 110;
+        };
 
-        y += 40;
+        const drawTable = (
+          title: string,
+          rows: WorkSplitRow[],
+          totalLabel: string
+        ) => {
+          ensureSpace(120);
 
-        // Neighboring table rows
-        ctx.font = '12px Arial';
-        neighboringSplits.forEach((split, index) => {
-          if (index % 2 === 0) {
-            ctx.fillStyle = '#fafafa';
-            ctx.fillRect(40, y - 5, pageWidth - 80, 25);
-          }
-          
-          ctx.fillStyle = darkGray;
-          const holderName = this.getRightsHolderName(split.rights_holder);
-          const splitType = this.formatSplitType(split.split_type);
-          const percentage = (split.ownership_percentage ?? split.percentage ?? 0).toFixed(2) + '%';
-          const notes = split.notes || '';
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(14);
+          doc.setTextColor('#667eea');
+          doc.text(title, margin, y);
+          y += lineHeight * 1.3;
 
-          ctx.fillText(holderName, 50, y + 15);
-          ctx.fillText(splitType, 350, y + 15);
-          ctx.fillText(percentage, 500, y + 15);
-          ctx.fillText(notes.substring(0, 30), 600, y + 15);
+          const columnWidths = [220, 120, 80, pageWidth - margin * 2 - 420];
+          const headers = ['Rights Holder', 'Split Type', 'Percentage', 'Notes'];
 
-          y += 25;
-        });
+          doc.setFillColor('#f5f5f5');
+          doc.setTextColor('#1a1a1a');
+          doc.rect(margin, y - lineHeight + 6, pageWidth - margin * 2, lineHeight + 4, 'F');
+          doc.setFontSize(11);
+          headers.reduce((x, header, index) => {
+            doc.text(header, x + 10, y + 2);
+            return x + columnWidths[index];
+          }, margin);
 
-        // Neighboring total
-        ctx.fillStyle = accentColor;
-        ctx.fillRect(40, y, pageWidth - 80, 25);
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 12px Arial';
-        ctx.fillText('TOTAL NEIGHBORING RIGHTS:', 50, y + 15);
-        const neighboringTotal = neighboringSplits.reduce((sum, s) => sum + (s.ownership_percentage ?? s.percentage ?? 0), 0);
-        ctx.fillText(neighboringTotal.toFixed(2) + '%', 500, y + 15);
+          y += lineHeight + 6;
 
-        y += 50;
+          doc.setFont('helvetica', 'normal');
+          rows.forEach((split, index) => {
+            ensureSpace(lineHeight * 1.4);
+            if (index % 2 === 0) {
+              doc.setFillColor('#fafafa');
+              doc.rect(margin, y - lineHeight + 4, pageWidth - margin * 2, lineHeight + 4, 'F');
+            }
 
-        // ===== SIGNATURE LINES (Page 2) =====
-        y = pageHeight + 40;
-        
-        ctx.fillStyle = darkGray;
-        ctx.font = 'bold 16px Arial';
-        ctx.fillText('SIGNATURES', 40, y);
-        y += 40;
+            const holderName = this.getRightsHolderName(split.rights_holder);
+            const splitType = this.formatSplitType(split.split_type);
+            const percentage = (split.ownership_percentage ?? split.percentage ?? 0).toFixed(2) + '%';
+            const notes = (split.notes || '').slice(0, 60);
 
-        ctx.font = 'bold 12px Arial';
-        ctx.fillText('This split sheet confirms the ownership percentages listed above.', 40, y);
-        y += 30;
+            const rowValues = [holderName, splitType, percentage, notes];
 
-        // Signature lines for each rights holder
-        const allHolders = [
-          ...ipSplits.map(s => s.rights_holder).filter(Boolean),
-          ...neighboringSplits.map(s => s.rights_holder).filter(Boolean)
-        ];
+            rowValues.reduce((x, value, colIndex) => {
+              doc.text(String(value), x + 10, y + 2, {
+                maxWidth: columnWidths[colIndex] - 20,
+              });
+              return x + columnWidths[colIndex];
+            }, margin);
 
-        const uniqueHolders = Array.from(
-          new Map(allHolders.map(h => [h!.id, h])).values()
+            y += lineHeight + 4;
+          });
+
+          const total = rows.reduce((sum, split) => sum + (split.ownership_percentage ?? split.percentage ?? 0), 0);
+          ensureSpace(lineHeight * 1.5);
+
+          doc.setFillColor('#667eea');
+          doc.setTextColor('#ffffff');
+          doc.rect(margin, y - lineHeight + 6, pageWidth - margin * 2, lineHeight + 4, 'F');
+          doc.text(totalLabel, margin + 10, y + 2);
+          doc.text(total.toFixed(2) + '%', margin + columnWidths[0] + columnWidths[1] + 10, y + 2);
+
+          doc.setTextColor('#1a1a1a');
+          y += lineHeight * 1.8;
+        };
+
+        const drawSignatures = () => {
+          doc.addPage();
+          y = margin;
+
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(16);
+          doc.setTextColor('#1a1a1a');
+          doc.text('Signatures', margin, y);
+          y += lineHeight * 1.8;
+
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(11);
+          doc.text('This split sheet confirms the ownership percentages listed above.', margin, y);
+          y += lineHeight * 1.5;
+
+          const allHolders = [
+            ...ipSplits.map(s => s.rights_holder).filter(Boolean),
+            ...neighboringSplits.map(s => s.rights_holder).filter(Boolean),
+          ] as RightsHolder[];
+
+          const unique = Array.from(new Map(allHolders.map(holder => [holder.id, holder])).values());
+
+          doc.setDrawColor('#d0d0d0');
+          unique.slice(0, 6).forEach(holder => {
+            ensureSpace(lineHeight * 4);
+
+            const holderName = this.getRightsHolderName(holder);
+            doc.line(margin, y, margin + 250, y);
+            doc.line(margin + 300, y, margin + 520, y);
+
+            doc.setFont('helvetica', 'bold');
+            doc.text('Signature', margin, y + lineHeight);
+            doc.text('Date', margin + 300, y + lineHeight);
+
+            doc.setFont('helvetica', 'normal');
+            doc.text(holderName, margin, y + lineHeight * 2);
+
+            y += lineHeight * 3;
+          });
+        };
+
+        drawHeader();
+        drawTable('Intellectual Property Rights', ipSplits, 'Total IP Rights');
+        drawTable('Neighboring Rights', neighboringSplits, 'Total Neighboring Rights');
+        drawSignatures();
+
+        doc.setFontSize(9);
+        doc.setTextColor('#777777');
+        doc.text(
+          `Generated by Music Rights Platform · ${new Date().toLocaleDateString()}`,
+          margin,
+          pageHeight - margin / 2
         );
 
-        ctx.font = '12px Arial';
-        uniqueHolders.slice(0, 4).forEach((holder, index) => {
-          const lineY = y + index * 60;
-          const holderName = this.getRightsHolderName(holder);
-          
-          // Signature line
-          ctx.fillStyle = borderColor;
-          ctx.fillRect(40, lineY, 250, 1);
-          
-          // Name label
-          ctx.fillStyle = darkGray;
-          ctx.font = 'bold 11px Arial';
-          ctx.fillText('Signature', 40, lineY + 20);
-          
-          // Name
-          ctx.font = '11px Arial';
-          ctx.fillText(holderName, 40, lineY + 40);
-          
-          // Date line
-          ctx.fillStyle = borderColor;
-          ctx.fillRect(350, lineY, 250, 1);
-          
-          ctx.fillStyle = darkGray;
-          ctx.font = 'bold 11px Arial';
-          ctx.fillText('Date', 350, lineY + 20);
-        });
-
-        y += 280;
-
-        // ===== FOOTER =====
-        ctx.fillStyle = '#999';
-        ctx.font = '10px Arial';
-        ctx.fillText('Generated by Music Rights Platform - ' + new Date().toLocaleDateString(), 40, pageHeight - 20);
-
-        // Convert canvas to blob
-        canvas.toBlob((blob) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(new Error('Could not generate PDF blob'));
-          }
-        }, 'image/png');
-
-      } catch (error) {
-        reject(error);
-      }
-    });
+      return doc.output('blob');
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -262,12 +204,12 @@ export class PdfGeneratorService {
     neighboringSplits: WorkSplitRow[]
   ): Promise<void> {
     try {
-      const blob = await this.generateSplitSheetPDF(work, ipSplits, neighboringSplits);
-      
-      const url = URL.createObjectURL(blob);
+      const pdfBlob = await this.generateSplitSheetPDF(work, ipSplits, neighboringSplits);
+
+      const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = filename || `split-sheet-${work.work_title}.png`;
+      link.download = filename || `split-sheet-${work.work_title}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -283,10 +225,19 @@ export class PdfGeneratorService {
    */
   private getRightsHolderName(holder: any): string {
     if (!holder) return 'Unknown';
-    if (holder.type === 'person') {
-      return `${holder.first_name || ''} ${holder.last_name || ''}`.trim();
+    const nickname = holder.nickname ? this.ensureNicknamePrefix(holder.nickname) : null;
+    if (nickname) return nickname;
+
+    if (holder.display_name) {
+      return holder.display_name;
     }
-    return holder.company_name || 'Unknown';
+
+    if (holder.type === 'person') {
+      const legacy = `${holder.first_name || ''} ${holder.last_name || ''}`.trim();
+      if (legacy) return legacy;
+    }
+
+    return holder.organization_name || holder.company_name || 'Unknown rights holder';
   }
 
   /**
@@ -294,13 +245,19 @@ export class PdfGeneratorService {
    */
   private formatSplitType(type: string): string {
     const typeMap: { [key: string]: string } = {
-      'lyric': 'Lyric',
-      'music': 'Music',
-      'publishing': 'Publishing',
-      'performance': 'Performance',
-      'master': 'Master Recording',
-      'neighboring': 'Neighboring Rights'
+      lyrics: 'Lyrics',
+      music: 'Music',
+      publishing: 'Publishing',
+      performance: 'Performance',
+      master_recording: 'Master Recording',
+      neighboring_rights: 'Neighboring Rights',
+      neighboring: 'Neighboring Rights',
     };
     return typeMap[type] || type;
+  }
+
+  private ensureNicknamePrefix(nickname: string): string {
+    if (!nickname) return nickname;
+    return nickname.startsWith('@') ? nickname : `@${nickname}`;
   }
 }

@@ -69,7 +69,13 @@ export class SplitEntryCardComponent implements OnChanges {
   }
 
   emitUpdate(): void {
-    this.entryUpdated.emit({ ...this.localEntry });
+    const normalizedNickname = this.normalizeNickname(this.localEntry.nickname);
+    const payload: SplitEntry = {
+      ...this.localEntry,
+      nickname: normalizedNickname,
+    };
+    this.localEntry = payload;
+    this.entryUpdated.emit({ ...payload });
   }
 
   remove(): void {
@@ -85,5 +91,38 @@ export class SplitEntryCardComponent implements OnChanges {
       default:
         return 'Added manually';
     }
+  }
+
+  get displayLabel(): string {
+    const entry = this.localEntry ?? this.entry();
+    if (!entry) return '';
+
+    if (entry.nickname) {
+      return this.ensureNicknamePrefix(entry.nickname);
+    }
+
+    if (entry.displayName) {
+      return entry.displayName;
+    }
+
+    const parts = [entry.firstName, entry.lastName].filter(Boolean).join(' ');
+    if (parts.trim()) {
+      return parts.trim();
+    }
+
+    return 'Unnamed rights holder';
+  }
+
+  private ensureNicknamePrefix(nickname: string): string {
+    if (!nickname) return nickname;
+    return nickname.startsWith('@') ? nickname : `@${nickname}`;
+  }
+
+  private normalizeNickname(value?: string): string | undefined {
+    if (!value) return undefined;
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+    const withoutPrefix = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
+    return withoutPrefix || undefined;
   }
 }

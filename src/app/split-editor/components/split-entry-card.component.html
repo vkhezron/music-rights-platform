@@ -1,6 +1,9 @@
 <div class="entry-card" [class.entry-card--readonly]="entry().isReadonly">
   <div class="entry-card__header">
-    <div class="entry-card__method">{{ methodLabel }}</div>
+    <div class="entry-card__header-left">
+      <div class="entry-card__method">{{ methodLabel }}</div>
+      <div class="entry-card__identity-label">{{ displayLabel }}</div>
+    </div>
     <button
       type="button"
       class="entry-card__remove"
@@ -12,32 +15,64 @@
   </div>
 
   @if (entry().isReadonly) {
-    <p class="entry-card__hint">Identity fields come from the rights holder profile.</p>
+    <p class="entry-card__hint">Identity fields sync from the rights holder profile.</p>
   }
 
+  <div class="entry-card__grid entry-card__grid--identity">
+    <label class="entry-card__field">
+      <span>Public handle</span>
+      <div class="entry-card__handle">
+        <span class="entry-card__handle-prefix">@</span>
+        <input
+          type="text"
+          [(ngModel)]="localEntry.nickname"
+          (ngModelChange)="emitUpdate()"
+          [readonly]="entry().isReadonly"
+          placeholder="nickname"
+        />
+      </div>
+    </label>
+
+    <label class="entry-card__field">
+      <span>Display name</span>
+      <input
+        type="text"
+        [(ngModel)]="localEntry.displayName"
+        (ngModelChange)="emitUpdate()"
+        [readonly]="entry().isReadonly"
+        placeholder="Stage or project name"
+      />
+    </label>
+  </div>
+
+  <details class="entry-card__legal" [open]="!!(localEntry.firstName || localEntry.lastName)">
+    <summary>Legal identity (private)</summary>
+    <div class="entry-card__grid">
+      <label class="entry-card__field">
+        <span>First name</span>
+        <input
+          type="text"
+          [(ngModel)]="localEntry.firstName"
+          (ngModelChange)="emitUpdate()"
+          [readonly]="entry().isReadonly"
+          placeholder="First name"
+        />
+      </label>
+
+      <label class="entry-card__field">
+        <span>Last name</span>
+        <input
+          type="text"
+          [(ngModel)]="localEntry.lastName"
+          (ngModelChange)="emitUpdate()"
+          [readonly]="entry().isReadonly"
+          placeholder="Last name"
+        />
+      </label>
+    </div>
+  </details>
+
   <div class="entry-card__grid">
-    <label class="entry-card__field">
-      <span>First name</span>
-      <input
-        type="text"
-        [(ngModel)]="localEntry.firstName"
-        (ngModelChange)="emitUpdate()"
-        [readonly]="entry().isReadonly"
-        placeholder="First name"
-      />
-    </label>
-
-    <label class="entry-card__field">
-      <span>Last name</span>
-      <input
-        type="text"
-        [(ngModel)]="localEntry.lastName"
-        (ngModelChange)="emitUpdate()"
-        [readonly]="entry().isReadonly"
-        placeholder="Last name"
-      />
-    </label>
-
     <label class="entry-card__field">
       <span>Email</span>
       <input

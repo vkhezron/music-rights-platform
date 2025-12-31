@@ -87,26 +87,55 @@
         {{ 'RIGHTS_HOLDERS.BASIC_INFO' | translate }}
       </h2>
 
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nickname" class="required">Public handle</label>
+          <input
+            id="nickname"
+            type="text"
+            formControlName="nickname"
+            class="form-input"
+            [class.error]="hasError('nickname', 'required') || hasError('nickname', 'pattern')"
+            placeholder="@nickname"
+          />
+          @if (hasError('nickname', 'required')) {
+            <div class="error-message">Provide a public handle.</div>
+          }
+          @if (hasError('nickname', 'pattern')) {
+            <div class="error-message">Use letters, numbers, dots or dashes (3-20 characters).</div>
+          }
+          <div class="field-hint">Visible on split sheets and shared with collaborators.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="display_name">Display name</label>
+          <input
+            id="display_name"
+            type="text"
+            formControlName="display_name"
+            class="form-input"
+            placeholder="Stage or project name"
+          />
+          <div class="field-hint">Optional fallback when no handle is available.</div>
+        </div>
+      </div>
+
       <!-- Person Fields -->
       @if (rhForm.get('type')?.value === 'person') {
         <div class="form-row">
           <div class="form-group">
-            <label for="first_name" class="required">
+            <label for="first_name">
               {{ 'RIGHTS_HOLDERS.FIRST_NAME' | translate }}
+              <span class="field-hint-inline">({{ 'COMMON.OPTIONAL' | translate }})</span>
             </label>
             <input
               id="first_name"
               type="text"
               formControlName="first_name"
               class="form-input"
-              [class.error]="hasError('first_name', 'required') || hasError('first_name', 'minlength')"
+              [class.error]="hasError('first_name', 'minlength')"
               placeholder="John"
             />
-            @if (hasError('first_name', 'required')) {
-              <div class="error-message">
-                {{ 'RIGHTS_HOLDERS.FIRST_NAME_REQUIRED' | translate }}
-              </div>
-            }
             @if (hasError('first_name', 'minlength')) {
               <div class="error-message">
                 {{ 'RIGHTS_HOLDERS.NAME_MIN_LENGTH' | translate }}
@@ -115,22 +144,18 @@
           </div>
 
           <div class="form-group">
-            <label for="last_name" class="required">
+            <label for="last_name">
               {{ 'RIGHTS_HOLDERS.LAST_NAME' | translate }}
+              <span class="field-hint-inline">({{ 'COMMON.OPTIONAL' | translate }})</span>
             </label>
             <input
               id="last_name"
               type="text"
               formControlName="last_name"
               class="form-input"
-              [class.error]="hasError('last_name', 'required') || hasError('last_name', 'minlength')"
+              [class.error]="hasError('last_name', 'minlength')"
               placeholder="Doe"
             />
-            @if (hasError('last_name', 'required')) {
-              <div class="error-message">
-                {{ 'RIGHTS_HOLDERS.LAST_NAME_REQUIRED' | translate }}
-              </div>
-            }
             @if (hasError('last_name', 'minlength')) {
               <div class="error-message">
                 {{ 'RIGHTS_HOLDERS.NAME_MIN_LENGTH' | translate }}

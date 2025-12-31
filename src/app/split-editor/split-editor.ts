@@ -149,6 +149,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
             splitType,
             ownershipPercentage: 0,
             nickname: profile.nickname,
+            displayName: profile.nickname,
             firstName: profile.nickname,
             lastName: '',
             email: currentUser?.email ?? undefined,
@@ -229,6 +230,13 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
     try {
       const entriesWithHolders = await this.ensureRightsHolderIds(entries);
 
+      const normalizeContributionTypes = (entry: SplitEntry) => ({
+        melody: entry.contributionTypes?.melody ?? false,
+        harmony: entry.contributionTypes?.harmony ?? false,
+        arrangement: entry.contributionTypes?.arrangement ?? false,
+      });
+      const makeEmptyContributionTypes = () => ({ melody: false, harmony: false, arrangement: false });
+
       const ipPayload = entriesWithHolders
         .filter(entry => entry.splitType === 'lyrics' || entry.splitType === 'music')
         .map(entry => ({
@@ -236,8 +244,11 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
           split_type: entry.splitType,
           ownership_percentage: Number(entry.ownershipPercentage || 0),
           rights_layer: 'ip' as RightsLayer,
-          contribution_types: entry.splitType === 'music' ? entry.contributionTypes ?? null : null,
-          roles: null,
+          contribution_types:
+            entry.splitType === 'music'
+              ? normalizeContributionTypes(entry)
+              : makeEmptyContributionTypes(),
+          roles: [],
           notes: undefined,
         }));
 
@@ -248,8 +259,8 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
           split_type: 'neighboring_rights' as DbSplitType,
           ownership_percentage: Number(entry.ownershipPercentage || 0),
           rights_layer: 'neighboring' as RightsLayer,
-          contribution_types: null,
-          roles: entry.roles && entry.roles.length ? entry.roles : null,
+          contribution_types: makeEmptyContributionTypes(),
+          roles: entry.roles && entry.roles.length ? entry.roles : [],
           notes: undefined,
         }));
 
@@ -361,6 +372,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
       ...entry,
       tempId: entry.tempId ?? this.generateTempId(),
       nickname: holder.nickname ?? entry.nickname,
+      displayName: holder.display_name ?? entry.displayName ?? holder.nickname,
       firstName: holder.first_name ?? entry.firstName ?? holder.nickname ?? '',
       lastName: holder.last_name ?? entry.lastName,
       email: holder.email ?? entry.email,
@@ -424,6 +436,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
       cmo_pro: entry.cmoPro,
       ipi_number: entry.ipiNumber,
       nickname: entry.nickname,
+      display_name: entry.displayName,
       ai_disclosure: {
         creation_type: entry.aiDisclosure.creationType,
         ai_tool: entry.aiDisclosure.aiTool,
@@ -508,6 +521,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
             splitType,
             ownershipPercentage: 0,
             nickname: profile.nickname,
+              displayName: profile.nickname,
             firstName: profile.nickname,
             aiDisclosure: { creationType: 'human' },
             isReadonly: false,
@@ -534,6 +548,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
       splitType,
       ownershipPercentage: 0,
       nickname: holder.nickname,
+      displayName: holder.display_name ?? holder.nickname ?? `${holder.first_name ?? ''} ${holder.last_name ?? ''}`.trim(),
       firstName: holder.first_name ?? holder.nickname ?? '',
       lastName: holder.last_name ?? '',
       email: holder.email,

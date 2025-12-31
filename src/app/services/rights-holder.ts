@@ -59,6 +59,7 @@ export class RightsHoldersService {
       if (data.first_name !== undefined && data.first_name !== '') insertData.first_name = data.first_name;
       if (data.last_name !== undefined && data.last_name !== '') insertData.last_name = data.last_name;
       if (data.company_name !== undefined && data.company_name !== '') insertData.company_name = data.company_name;
+      if (data.display_name !== undefined && data.display_name.trim() !== '') insertData.display_name = data.display_name.trim();
       if (data.email !== undefined && data.email !== '') insertData.email = data.email;
       if (data.phone !== undefined && data.phone !== '') insertData.phone = data.phone;
       if (data.cmo_pro !== undefined && data.cmo_pro !== '') insertData.cmo_pro = data.cmo_pro;
@@ -152,10 +153,28 @@ export class RightsHoldersService {
 
   // Helper method to get display name
   getDisplayName(rh: RightsHolder): string {
-    if (rh.type === 'person') {
-      return `${rh.first_name || ''} ${rh.last_name || ''}`.trim();
+    if (rh.nickname) {
+      return this.ensureNicknamePrefix(rh.nickname);
     }
-    return rh.company_name || 'Unknown';
+
+    if (rh.display_name) {
+      return rh.display_name;
+    }
+
+    if (rh.type === 'person') {
+      const legacy = `${rh.first_name || ''} ${rh.last_name || ''}`.trim();
+      if (legacy) return legacy;
+    }
+
+    if (rh.organization_name) {
+      return rh.organization_name;
+    }
+
+    if (rh.company_name) {
+      return rh.company_name;
+    }
+
+    return 'Unknown rights holder';
   }
 
   // Search functionality
@@ -169,7 +188,10 @@ export class RightsHoldersService {
       const ipi = (rh.ipi_number || '').toLowerCase();
       const cmo = (rh.cmo_pro || '').toLowerCase();
 
+      const displayName = (rh.display_name || '').toLowerCase();
+
       return name.includes(lowerQuery) ||
+             displayName.includes(lowerQuery) ||
              email.includes(lowerQuery) ||
              ipi.includes(lowerQuery) ||
              cmo.includes(lowerQuery);
@@ -179,6 +201,7 @@ export class RightsHoldersService {
   private resolveNickname(data: RightsHolderFormData): string | null {
     const candidates = [
       (data.nickname || ''),
+      data.display_name?.trim(),
       `${data.first_name || ''} ${data.last_name || ''}`,
       data.company_name,
       data.email ? data.email.split('@')[0] : undefined,
@@ -212,5 +235,10 @@ export class RightsHoldersService {
       return `holder-${globalCrypto.randomUUID().split('-')[0]}`;
     }
     return `holder-${Math.random().toString(36).slice(2, 8)}`;
+  }
+
+  private ensureNicknamePrefix(nickname: string): string {
+    if (!nickname) return nickname;
+    return nickname.startsWith('@') ? nickname : `@${nickname}`;
   }
 }

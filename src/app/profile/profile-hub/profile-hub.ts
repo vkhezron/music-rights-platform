@@ -30,8 +30,8 @@ interface QuickStats {
   selector: 'app-profile-hub',
   standalone: true,
   imports: [CommonModule, RouterLink, LucideAngularModule],
-  templateUrl: './profile-hub.component.html',
-  styleUrls: ['./profile-hub.component.scss'],
+  templateUrl: './profile-hub.html',
+  styleUrls: ['./profile-hub.scss'],
 })
 export class ProfileHubComponent implements OnInit {
   private readonly profileService = inject(ProfileService);

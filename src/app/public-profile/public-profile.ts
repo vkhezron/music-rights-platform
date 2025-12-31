@@ -20,8 +20,8 @@ interface SocialLink {
   selector: 'app-public-profile',
   standalone: true,
   imports: [CommonModule, RouterModule, LucideAngularModule],
-  templateUrl: './public-profile.component.html',
-  styleUrls: ['./public-profile.component.scss'],
+  templateUrl: './public-profile.html',
+  styleUrls: ['./public-profile.scss'],
 })
 export class PublicProfileComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);

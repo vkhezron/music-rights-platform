@@ -12,7 +12,7 @@ export const routes: Routes = [
     },
     {
         path: 'profile-hub'
-        , loadComponent: () => import('./profile/profile-hub/profile-hub.component').then(m => m.ProfileHubComponent)
+        , loadComponent: () => import('./profile/profile-hub/profile-hub').then(m => m.ProfileHubComponent)
         , canActivate: [AuthGuard]
     },
     {
@@ -88,7 +88,7 @@ export const routes: Routes = [
     },
     {
         path: 'u/:nickname',
-        loadComponent: () => import('./public-profile/public-profile.component').then(m => m.PublicProfileComponent)
+        loadComponent: () => import('./public-profile/public-profile').then(m => m.PublicProfileComponent)
     },
     {
         path: 'privacy-policy',

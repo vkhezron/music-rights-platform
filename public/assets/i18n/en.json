@@ -777,5 +777,22 @@
     "SERIOUS_CONCERNS": "For Serious Privacy Concerns",
     "DPA_CONTACT": "Contact your local Data Protection Authority:",
     "FOOTER": "This is a passion project. Use at your own risk."
+  },
+  "PUBLIC_PROFILE": {
+    "BACK_TO_APP": "Back to app",
+    "SHARE": "Share",
+    "ADD_TO_WORKSPACE": "Add to workspace",
+    "ADDING": "Adding…",
+    "IMPORT_COLLABORATOR": "Import this collaborator into your current workspace.",
+    "SIGN_IN_TO_ADD": "Sign in and choose a workspace to add this collaborator.",
+    "ALREADY_IN_WORKSPACE": "This collaborator is already part of your workspace.",
+    "ADDITIONAL_ROLES": "Additional Roles",
+    "SOCIAL_AND_MUSIC": "Social & Music",
+    "COLLABORATION_TIPS": "Collaboration Tips",
+    "TIP_1": "Use the QR code in the app to pull this profile directly into split sheets.",
+    "TIP_2": "All shared information respects the artist's privacy preferences.",
+    "TIP_3": "Once added, customise roles, percentages, and identifiers for each work.",
+    "NO_PROFILE_FOUND": "No profile found for this handle.",
+    "UNABLE_TO_LOAD": "Unable to load this profile right now."
   }
 }

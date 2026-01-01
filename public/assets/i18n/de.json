@@ -739,5 +739,22 @@
     "SERIOUS_CONCERNS": "Für ernsthafte Datenschutzbedenken",
     "DPA_CONTACT": "Kontaktieren Sie Ihre lokale Datenschutzbehörde:",
     "FOOTER": "Dies ist ein Leidenschaftsprojekt. Nutzung auf eigenes Risiko."
+  },
+  "PUBLIC_PROFILE": {
+    "BACK_TO_APP": "Zurück zur App",
+    "SHARE": "Teilen",
+    "ADD_TO_WORKSPACE": "Zu Workspace hinzufügen",
+    "ADDING": "Wird hinzugefügt…",
+    "IMPORT_COLLABORATOR": "Diesen Mitarbeiter in Ihren aktuellen Workspace importieren.",
+    "SIGN_IN_TO_ADD": "Melden Sie sich an und wählen Sie einen Workspace, um diesen Mitarbeiter hinzuzufügen.",
+    "ALREADY_IN_WORKSPACE": "Dieser Mitarbeiter ist bereits Teil Ihres Workspaces.",
+    "ADDITIONAL_ROLES": "Zusätzliche Rollen",
+    "SOCIAL_AND_MUSIC": "Social & Musik",
+    "COLLABORATION_TIPS": "Kollaborations-Tipps",
+    "TIP_1": "Verwenden Sie den QR-Code in der App, um dieses Profil direkt in Split-Sheets zu übernehmen.",
+    "TIP_2": "Alle geteilten Informationen respektieren die Datenschutzeinstellungen des Künstlers.",
+    "TIP_3": "Nach dem Hinzufügen können Sie Rollen, Prozentsätze und Kennungen für jedes Werk anpassen.",
+    "NO_PROFILE_FOUND": "Kein Profil für diesen Handle gefunden.",
+    "UNABLE_TO_LOAD": "Dieses Profil kann derzeit nicht geladen werden."
   }
 }

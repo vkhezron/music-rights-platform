@@ -228,7 +228,8 @@
         <h3>{{ 'GDPR.DATA_EXPORT_TITLE' | translate }}</h3>
         <p class="gdpr-description">{{ 'GDPR.DATA_EXPORT_DESC' | translate }}</p>
         <div class="gdpr-actions">
-          <button type="button" class="export-button" (click)="exportData()">
+          <button type="button" class="export-button" (click)="exportData()" [disabled]="isLoading()">
+            <lucide-icon [img]="Download" [size]="20"></lucide-icon>
             <span>{{ 'GDPR.DATA_EXPORT' | translate }}</span>
           </button>
         </div>

@@ -2,11 +2,11 @@
   <header class="page-header">
     <button class="ghost-btn" routerLink="/auth/login" [disabled]="isLoading()">
       <lucide-icon [img]="BackIcon" [size]="18"></lucide-icon>
-      <span>Back to app</span>
+      <span>{{ 'PUBLIC_PROFILE.BACK_TO_APP' | translate }}</span>
     </button>
     <button class="ghost-btn" type="button" (click)="shareProfile()" [disabled]="isLoading()">
       <lucide-icon [img]="ShareIcon" [size]="18"></lucide-icon>
-      <span>Share</span>
+      <span>{{ 'PUBLIC_PROFILE.SHARE' | translate }}</span>
     </button>
   </header>
 
@@ -19,7 +19,7 @@
     </div>
   } @else if (errorMessage()) {
     <div class="status-card error">
-      <p>{{ errorMessage() }}</p>
+      <p>{{ errorMessage() === 'No profile found for this handle.' ? ('PUBLIC_PROFILE.NO_PROFILE_FOUND' | translate) : ('PUBLIC_PROFILE.UNABLE_TO_LOAD' | translate) }}</p>
     </div>
   } @else if (profile(); as profile) {
     <section class="profile-hero">
@@ -58,13 +58,13 @@
         @if (showAddButton()) {
           <button class="primary-btn" type="button" (click)="addAsRightsHolder()" [disabled]="isAdding()">
             <lucide-icon [img]="UserPlusIcon" [size]="18"></lucide-icon>
-            <span>{{ isAdding() ? 'Adding…' : 'Add to workspace' }}</span>
+            <span>{{ isAdding() ? ('PUBLIC_PROFILE.ADDING' | translate) : ('PUBLIC_PROFILE.ADD_TO_WORKSPACE' | translate) }}</span>
           </button>
-          <small>Import this collaborator into your current workspace.</small>
+          <small>{{ 'PUBLIC_PROFILE.IMPORT_COLLABORATOR' | translate }}</small>
         } @else if (!canAddToWorkspace()) {
-          <small>Sign in and choose a workspace to add this collaborator.</small>
+          <small>{{ 'PUBLIC_PROFILE.SIGN_IN_TO_ADD' | translate }}</small>
         } @else if (existingRightsHolder()) {
-          <small>This collaborator is already part of your workspace.</small>
+          <small>{{ 'PUBLIC_PROFILE.ALREADY_IN_WORKSPACE' | translate }}</small>
         }
       </aside>
     </section>
@@ -76,7 +76,7 @@
     <section class="profile-content">
       @if (secondaryRoles().length) {
         <div class="card">
-          <h2>Additional Roles</h2>
+          <h2>{{ 'PUBLIC_PROFILE.ADDITIONAL_ROLES' | translate }}</h2>
           <ul class="chip-list">
             @for (role of secondaryRoles(); track role) {
               <li class="chip">{{ role }}</li>
@@ -87,7 +87,7 @@
 
       @if (socialLinks().length) {
         <div class="card">
-          <h2>Social & Music</h2>
+          <h2>{{ 'PUBLIC_PROFILE.SOCIAL_AND_MUSIC' | translate }}</h2>
           <ul class="link-list">
             @for (link of socialLinks(); track link.key) {
               <li>
@@ -99,11 +99,11 @@
       }
 
       <div class="card">
-        <h2>Collaboration Tips</h2>
+        <h2>{{ 'PUBLIC_PROFILE.COLLABORATION_TIPS' | translate }}</h2>
         <ul class="info-list">
-          <li>Use the QR code in the app to pull this profile directly into split sheets.</li>
-          <li>All shared information respects the artist’s privacy preferences.</li>
-          <li>Once added, customise roles, percentages, and identifiers for each work.</li>
+          <li>{{ 'PUBLIC_PROFILE.TIP_1' | translate }}</li>
+          <li>{{ 'PUBLIC_PROFILE.TIP_2' | translate }}</li>
+          <li>{{ 'PUBLIC_PROFILE.TIP_3' | translate }}</li>
         </ul>
       </div>
     </section>

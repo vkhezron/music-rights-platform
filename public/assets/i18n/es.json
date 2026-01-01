@@ -739,5 +739,22 @@
     "SERIOUS_CONCERNS": "Para Preocupaciones Serias de Privacidad",
     "DPA_CONTACT": "Contacte a su Autoridad Local de Protección de Datos:",
     "FOOTER": "Este es un proyecto personal. Use bajo su propio riesgo."
+  },
+  "PUBLIC_PROFILE": {
+    "BACK_TO_APP": "Volver a la app",
+    "SHARE": "Compartir",
+    "ADD_TO_WORKSPACE": "Añadir al espacio de trabajo",
+    "ADDING": "Añadiendo…",
+    "IMPORT_COLLABORATOR": "Importa este colaborador a tu espacio de trabajo actual.",
+    "SIGN_IN_TO_ADD": "Inicia sesión y elige un espacio de trabajo para añadir este colaborador.",
+    "ALREADY_IN_WORKSPACE": "Este colaborador ya forma parte de tu espacio de trabajo.",
+    "ADDITIONAL_ROLES": "Roles Adicionales",
+    "SOCIAL_AND_MUSIC": "Social y Música",
+    "COLLABORATION_TIPS": "Consejos de Colaboración",
+    "TIP_1": "Usa el código QR en la app para agregar este perfil directamente a las hojas de división.",
+    "TIP_2": "Toda la información compartida respeta las preferencias de privacidad del artista.",
+    "TIP_3": "Una vez añadido, personaliza roles, porcentajes e identificadores para cada obra.",
+    "NO_PROFILE_FOUND": "No se encontró ningún perfil para este identificador.",
+    "UNABLE_TO_LOAD": "No se puede cargar este perfil en este momento."
   }
 }

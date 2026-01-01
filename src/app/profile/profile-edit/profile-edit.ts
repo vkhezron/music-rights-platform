@@ -9,7 +9,7 @@ import { ProfileFormData, PRIMARY_ROLES, SECONDARY_ROLES, LANGUAGES, SOCIAL_PLAT
 
 // Import Lucide Icons
 import { LucideAngularModule, CheckCircle, AlertCircle, ChevronDown, ChevronRight,
-         Camera, Twitter, Facebook, Music, Video, Globe, Headphones, Copy } from 'lucide-angular';
+         Camera, Twitter, Facebook, Music, Video, Globe, Headphones, Copy, Download } from 'lucide-angular';
 
 @Component({
   selector: 'app-profile-edit',
@@ -43,6 +43,7 @@ export class ProfileEdit implements OnInit {
   readonly Globe = Globe;
   readonly Headphones = Headphones;
   readonly Copy = Copy;
+  readonly Download = Download;
 
   profileForm!: FormGroup;
   isLoading = signal(false);
@@ -257,13 +258,16 @@ export class ProfileEdit implements OnInit {
    */
   async exportData() {
     try {
-      await this.gdprService.exportPersonalData();
+      this.isLoading.set(true);
+      await this.gdprService.downloadPersonalData();
       this.successMessage.set('Data exported successfully');
       setTimeout(() => this.successMessage.set(''), 3000);
     } catch (error) {
       console.error('Export error:', error);
-      this.errorMessage.set('PROFILE.EXPORT_ERROR');
+      this.errorMessage.set('Failed to export data. Please try again.');
       setTimeout(() => this.errorMessage.set(''), 5000);
+    } finally {
+      this.isLoading.set(false);
     }
   }
 }

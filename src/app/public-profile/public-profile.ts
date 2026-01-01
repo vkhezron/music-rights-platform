@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { TranslateModule } from '@ngx-translate/core';
 import { LucideAngularModule, Share2, UserPlus, ArrowLeft, Globe } from 'lucide-angular';
 import { ProfileService } from '../services/profile.service';
 import { RightsHoldersService } from '../services/rights-holder';
@@ -19,7 +20,7 @@ interface SocialLink {
 @Component({
   selector: 'app-public-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, RouterModule, LucideAngularModule, TranslateModule],
   templateUrl: './public-profile.html',
   styleUrls: ['./public-profile.scss'],
 })

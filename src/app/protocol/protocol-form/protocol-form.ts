@@ -95,6 +95,7 @@ export class ProtocolFormComponent implements OnInit {
       if (params['workId']) {
         this.workId.set(params['workId']);
         this.loadWorkData(params['workId']);
+        this.applyDuplicateTemplateIfPresent();
       }
     });
   }
@@ -429,5 +430,79 @@ export class ProtocolFormComponent implements OnInit {
    */
   getRoleLabel(role: ProtocolRoleKind): string {
     return this.protocolRoles.find(r => r.value === role)?.label || role;
+  }
+
+  private applyDuplicateTemplateIfPresent(): void {
+    const template = this.protocolService.consumeDuplicateTemplate();
+    if (!template) {
+      return;
+    }
+
+    this.work_title.set(template.work_title || '');
+    this.alternative_title.set(template.alternative_title || '');
+    this.release_title.set(template.release_title || '');
+    this.isrc.set(template.isrc || '');
+    this.iswc.set(template.iswc || '');
+    this.ean.set(template.ean || '');
+    this.primary_language.set(template.primary_language || '');
+    this.secondary_language.set(template.secondary_language || '');
+    this.is_cover_version.set(Boolean(template.is_cover_version));
+    this.original_work_title.set(template.original_work_title || '');
+
+    this.show_advanced.set(Boolean(
+      template.release_title ||
+      template.ean ||
+      template.primary_language ||
+      template.secondary_language
+    ));
+
+    const lyricRows = (template.lyric_authors || []).map((author, index): AuthorRow => ({
+      index: index + 1,
+      name: author.name,
+      middle_name: author.middle_name || '',
+      surname: author.surname,
+      aka: author.aka || '',
+      cmo_name: author.cmo_name || '',
+      pro_name: author.pro_name || '',
+      participation_percentage: String(author.participation_percentage ?? '')
+    }));
+    this.lyric_authors.set(lyricRows.length ? lyricRows : []);
+    if (!lyricRows.length) {
+      this.addLyricAuthor();
+    }
+
+    const musicRows = (template.music_authors || []).map((author, index): AuthorRow => ({
+      index: index + 1,
+      name: author.name,
+      middle_name: author.middle_name || '',
+      surname: author.surname,
+      aka: author.aka || '',
+      cmo_name: author.cmo_name || '',
+      pro_name: author.pro_name || '',
+      participation_percentage: String(author.participation_percentage ?? ''),
+      melody: Boolean(author.melody),
+      harmony: Boolean(author.harmony),
+      arrangement: Boolean(author.arrangement)
+    }));
+    this.music_authors.set(musicRows.length ? musicRows : []);
+    if (!musicRows.length) {
+      this.addMusicAuthor();
+    }
+
+    const neighbouringRows = (template.neighbouring_rightsholders || []).map((holder, index): AuthorRow => ({
+      index: index + 1,
+      name: holder.name,
+      middle_name: holder.middle_name || '',
+      surname: holder.surname,
+      aka: holder.aka || '',
+      cmo_name: holder.cmo_name || '',
+      pro_name: holder.pro_name || '',
+      participation_percentage: String(holder.participation_percentage ?? ''),
+      roles: holder.roles || []
+    }));
+    this.neighbouring_rightsholders.set(neighbouringRows.length ? neighbouringRows : []);
+    if (!neighbouringRows.length) {
+      this.addNeighbouringRightsholder();
+    }
   }
 }

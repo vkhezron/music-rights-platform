@@ -21,6 +21,8 @@ export class WorksService {
   private currentWorkSubject = new BehaviorSubject<Work | null>(null);
   public currentWork$ = this.currentWorkSubject.asObservable();
 
+  private readonly allowedStatuses: Work['status'][] = ['draft', 'registered', 'published', 'archived'];
+
   constructor() {
     // Load works when workspace changes
     this.workspaceService.currentWorkspace$.subscribe(workspace => {
@@ -28,6 +30,29 @@ export class WorksService {
         this.loadWorks(workspace.id);
       }
     });
+  }
+
+  private normalizeStatus(status?: string | null): Work['status'] {
+    const candidate = (status ?? 'draft').toLowerCase();
+    return this.allowedStatuses.includes(candidate as Work['status'])
+      ? (candidate as Work['status'])
+      : 'draft';
+  }
+
+  private mapSupabaseRecordToWork(record: Record<string, unknown> & {
+    work_creation_declarations?: WorkCreationDeclaration[];
+  }): Work {
+    const { work_creation_declarations, ...rest } = record;
+    const base = rest as Record<string, unknown>;
+
+    const normalized = {
+      ...(base as unknown as Work),
+      status: this.normalizeStatus((base as { status?: string }).status),
+      is_cover_version: Boolean((base as { is_cover_version?: boolean }).is_cover_version),
+      ai_disclosures: work_creation_declarations ?? [],
+    } as Work;
+
+    return normalized;
   }
 
   private resolveRightsLayer(splitType: SplitType): 'ip' | 'neighboring' {
@@ -59,16 +84,13 @@ export class WorksService {
 
       if (error) throw error;
 
-      const works = (data ?? []).map(record => {
-        const { work_creation_declarations, ...rest } = record as (Work & {
-          work_creation_declarations?: WorkCreationDeclaration[];
-        }) & Record<string, unknown>;
-
-        return {
-          ...rest,
-          ai_disclosures: work_creation_declarations ?? [],
-        } satisfies Work;
-      });
+      const works = (data ?? []).map(record =>
+        this.mapSupabaseRecordToWork(
+          record as Record<string, unknown> & {
+            work_creation_declarations?: WorkCreationDeclaration[];
+          }
+        )
+      );
 
       this.worksSubject.next(works);
     } catch (error) {
@@ -107,11 +129,15 @@ export class WorksService {
       const aiDrafts = ai_disclosures ?? [];
       await this.replaceWorkAIDeclarations(data.id, aiDrafts);
       const aiDeclarations = await this.getWorkAIDeclarations(data.id);
-      const workWithAi: Work = { ...data, ai_disclosures: aiDeclarations };
+      const workWithAi = this.mapSupabaseRecordToWork({
+        ...(data as Record<string, unknown>),
+        work_creation_declarations: aiDeclarations,
+      });
 
       // Update local state
       const currentWorks = this.worksSubject.value;
-      this.worksSubject.next([workWithAi, ...currentWorks]);
+      const nextWorks: Work[] = [workWithAi, ...currentWorks];
+      this.worksSubject.next(nextWorks);
 
       return workWithAi;
     } catch (error) {
@@ -138,11 +164,14 @@ export class WorksService {
       }
 
       const aiDeclarations = await this.getWorkAIDeclarations(id);
-      const workWithAi: Work = { ...data, ai_disclosures: aiDeclarations };
+      const workWithAi = this.mapSupabaseRecordToWork({
+        ...(data as Record<string, unknown>),
+        work_creation_declarations: aiDeclarations,
+      });
 
       // Update local state
       const currentWorks = this.worksSubject.value;
-      const updatedWorks = currentWorks.map(w => (w.id === id ? workWithAi : w));
+      const updatedWorks = currentWorks.map(w => (w.id === id ? workWithAi : w)) as Work[];
       this.worksSubject.next(updatedWorks);
 
       // Update current work if it's the one being edited
@@ -180,6 +209,32 @@ export class WorksService {
     }
   }
 
+  async archiveWork(id: string): Promise<void> {
+    try {
+      const { data, error } = await this.supabase.client
+        .from('works')
+        .update({ status: 'archived' })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const currentWorks = this.worksSubject.value;
+      const updatedWorks = currentWorks.map(work =>
+        work.id === id ? { ...work, status: 'archived' } : work
+      ) as Work[];
+      this.worksSubject.next(updatedWorks);
+
+      if (this.currentWork?.id === id && this.currentWork) {
+        this.currentWorkSubject.next({ ...this.currentWork, status: 'archived' });
+      }
+    } catch (error) {
+      console.error('Error archiving work:', error);
+      throw error;
+    }
+  }
+
   async getWork(id: string): Promise<Work | null> {
     try {
       const { data, error } = await this.supabase.client
@@ -191,7 +246,10 @@ export class WorksService {
       if (error) throw error;
 
       const aiDeclarations = await this.getWorkAIDeclarations(id);
-      const workWithAi: Work = { ...data, ai_disclosures: aiDeclarations };
+      const workWithAi = this.mapSupabaseRecordToWork({
+        ...(data as Record<string, unknown>),
+        work_creation_declarations: aiDeclarations,
+      });
 
       this.currentWorkSubject.next(workWithAi);
       return workWithAi;

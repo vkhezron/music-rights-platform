@@ -1,0 +1,167 @@
+<div class="protocols-page">
+  <header class="page-header">
+    <button class="back-btn" type="button" (click)="goBack()">
+      <lucide-icon [img]="ArrowLeft" [size]="18"></lucide-icon>
+      <span>{{ 'PROTOCOL_LIST.BACK' | translate }}</span>
+    </button>
+
+    <div class="header-titles">
+      <h1>{{ 'PROTOCOL_LIST.TITLE' | translate }}</h1>
+      <p>{{ 'PROTOCOL_LIST.SUBTITLE' | translate }}</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="refresh-btn" type="button" (click)="refreshProtocols()" [disabled]="isLoading()">
+        <lucide-icon [img]="RefreshCcw" [size]="18"></lucide-icon>
+        <span>{{ 'PROTOCOL_LIST.REFRESH' | translate }}</span>
+      </button>
+      <button class="create-btn" type="button" (click)="createWorkToStart()">
+        <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
+        <span>{{ 'PROTOCOL_LIST.CREATE' | translate }}</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="workspace-info" *ngIf="currentWorkspace() as workspace">
+    <div class="badge">{{ 'PROTOCOL_LIST.ACTIVE_WORKSPACE' | translate }}</div>
+    <h2>{{ workspace.name }}</h2>
+    <p *ngIf="workspace.description">{{ workspace.description }}</p>
+  </section>
+
+  <section class="protocol-actions" *ngIf="!isLoading()">
+    <div class="action-card">
+      <div class="action-card__header">
+        <h3>{{ 'PROTOCOL_LIST.NEW_PROTOCOL_LABEL' | translate }}</h3>
+        <p>{{ 'PROTOCOL_LIST.NEW_PROTOCOL_SUBTITLE' | translate }}</p>
+      </div>
+      <div class="action-card__controls">
+        <select
+          [value]="selectedWorkId()"
+          (change)="selectWorkForProtocol($any($event.target).value)"
+          [disabled]="!hasAvailableWorkOptions()"
+        >
+          <option value="">{{ 'PROTOCOL_LIST.SELECT_WORK_PLACEHOLDER' | translate }}</option>
+          <option *ngFor="let work of availableWorkOptions()" [value]="work.id">
+            {{ work.work_title }}{{ workHasProtocol(work.id) ? ' • ' + ('PROTOCOL_LIST.EXISTING_PROTOCOL_OPTION' | translate) : '' }}
+          </option>
+        </select>
+        <button type="button" (click)="startNewProtocol()" [disabled]="!selectedWorkId()">
+          {{ 'PROTOCOL_LIST.OPEN_WORK' | translate }}
+        </button>
+      </div>
+      <p class="action-card__hint" *ngIf="!hasAvailableWorkOptions()">
+        {{ 'PROTOCOL_LIST.NO_AVAILABLE_WORKS' | translate }}
+      </p>
+    </div>
+
+    <div class="action-card" *ngIf="duplicateSource() as source">
+      <div class="action-card__header">
+        <h3>{{ 'PROTOCOL_LIST.DUPLICATE_TITLE' | translate:{ work: source.work_title } }}</h3>
+        <p>{{ 'PROTOCOL_LIST.DUPLICATE_SUBTITLE' | translate }}</p>
+      </div>
+      <div class="action-card__controls">
+        <select
+          [value]="duplicateTargetWorkId()"
+          (change)="selectDuplicateTarget($any($event.target).value)"
+          [disabled]="duplicateInProgress() || !duplicateTargets().length"
+        >
+          <option value="">{{ 'PROTOCOL_LIST.SELECT_DUPLICATE_TARGET' | translate }}</option>
+          <option *ngFor="let work of duplicateTargets()" [value]="work.id">
+            {{ work.work_title }}
+          </option>
+        </select>
+        <div class="duplicate-actions">
+          <button
+            type="button"
+            class="secondary"
+            (click)="cancelDuplicate()"
+            [disabled]="duplicateInProgress()"
+          >
+            {{ 'PROTOCOL_LIST.DUPLICATE_CANCEL' | translate }}
+          </button>
+          <button
+            type="button"
+            (click)="confirmDuplicate()"
+            [disabled]="duplicateInProgress() || !duplicateTargetWorkId()"
+          >
+            <lucide-icon [img]="CopyPlus" [size]="16"></lucide-icon>
+            <span>{{ 'PROTOCOL_LIST.DUPLICATE_CONFIRM' | translate }}</span>
+          </button>
+        </div>
+      </div>
+      <p class="action-card__hint" *ngIf="!duplicateTargets().length">
+        {{ 'PROTOCOL_LIST.NO_DUPLICATE_TARGETS' | translate }}
+      </p>
+      <p class="action-card__error" *ngIf="duplicateError()">
+        {{ duplicateError() | translate }}
+      </p>
+    </div>
+  </section>
+
+  <section class="status" *ngIf="isLoading() || errorMessage()">
+    <div class="loading" *ngIf="isLoading()">{{ 'COMMON.LOADING' | translate }}</div>
+    <div class="error" *ngIf="errorMessage()">{{ errorMessage() | translate }}</div>
+  </section>
+
+  <section class="protocol-list" *ngIf="!isLoading()">
+    <ng-container *ngIf="(protocols() || []).length as total; else emptyState">
+      <div class="protocol-table" *ngIf="total > 0">
+        <div class="protocol-table__header">
+          <span>{{ 'PROTOCOL_LIST.WORK' | translate }}</span>
+          <span>{{ 'PROTOCOL_LIST.STATUS' | translate }}</span>
+          <span>{{ 'PROTOCOL_LIST.UPDATED' | translate }}</span>
+          <span></span>
+        </div>
+
+        <div
+          class="protocol-table__row"
+          *ngFor="let protocol of protocols(); trackBy: trackByProtocolId"
+          (click)="openProtocol(protocol)"
+        >
+          <div class="protocol-table__cell">
+            <lucide-icon [img]="FileText" [size]="18"></lucide-icon>
+            <div class="protocol-table__cell-text">
+              <span class="title">{{ protocol.work_title }}</span>
+              <span class="subtitle" *ngIf="protocol.release_title">{{ protocol.release_title }}</span>
+            </div>
+          </div>
+          <div class="protocol-table__cell status">
+            <span class="status-pill status-{{ protocol.status || 'draft' }}">{{ getStatusKey(protocol) | translate }}</span>
+          </div>
+          <div class="protocol-table__cell">
+            <span>{{ protocol.updated_at | date:'medium' }}</span>
+          </div>
+          <div class="protocol-table__cell action">
+            <button
+              type="button"
+              class="duplicate-btn"
+              (click)="$event.stopPropagation(); duplicateProtocol(protocol)"
+            >
+              <lucide-icon [img]="CopyPlus" [size]="16"></lucide-icon>
+              <span>{{ 'PROTOCOL_LIST.DUPLICATE' | translate }}</span>
+            </button>
+            <button type="button" class="open-btn" (click)="$event.stopPropagation(); openProtocol(protocol)">
+              {{ 'PROTOCOL_LIST.OPEN_WORK' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </section>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <lucide-icon [img]="FileText" [size]="72" [strokeWidth]="1.5"></lucide-icon>
+      <h3>{{ 'PROTOCOL_LIST.EMPTY_TITLE' | translate }}</h3>
+      <p>{{ 'PROTOCOL_LIST.EMPTY_DESC' | translate }}</p>
+      <div class="empty-actions">
+        <button type="button" (click)="goToWorks()">
+          {{ 'PROTOCOL_LIST.GO_TO_WORKS' | translate }}
+        </button>
+        <button type="button" (click)="createWorkToStart()">
+          {{ 'PROTOCOL_LIST.CREATE_WORK' | translate }}
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</div>

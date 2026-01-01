@@ -479,15 +479,15 @@
     }
   }
 
-  &.delete {
-    background: #fef2f2;
-    
+  &.archive {
+    background: #f1f5f9;
+
     lucide-icon {
-      color: #ef4444;
+      color: #475569;
     }
 
     &:hover {
-      background: #fee2e2;
+      background: #e2e8f0;
       transform: scale(1.1);
     }
   }

@@ -1,0 +1,83 @@
+<div class="archived-page">
+  <header class="page-header">
+    <button class="back-btn" type="button" (click)="goBack()">
+      <lucide-icon [img]="ArrowLeft" [size]="18"></lucide-icon>
+      <span>{{ 'ARCHIVED_WORKS.BACK' | translate }}</span>
+    </button>
+
+    <div class="header-titles">
+      <h1>{{ 'ARCHIVED_WORKS.TITLE' | translate }}</h1>
+      <p>{{ 'ARCHIVED_WORKS.SUBTITLE' | translate }}</p>
+    </div>
+
+    <button class="refresh-btn" type="button" (click)="loadWorks()" [disabled]="isLoading()">
+      <lucide-icon [img]="RefreshCcw" [size]="18"></lucide-icon>
+      <span>{{ 'ARCHIVED_WORKS.REFRESH' | translate }}</span>
+    </button>
+  </header>
+
+  <section class="status" *ngIf="isLoading() || errorMessage()">
+    <div class="loading" *ngIf="isLoading()">{{ 'COMMON.LOADING' | translate }}</div>
+    <div class="error" *ngIf="errorMessage()">{{ errorMessage() | translate }}</div>
+  </section>
+
+  <section class="search-bar" *ngIf="!isLoading() && !errorMessage()">
+    <div class="search-input">
+      <lucide-icon [img]="Archive" [size]="18"></lucide-icon>
+      <input
+        type="text"
+        [value]="searchQuery()"
+        (input)="onSearchChange($any($event.target).value)"
+        [placeholder]="'ARCHIVED_WORKS.SEARCH_PLACEHOLDER' | translate"
+      />
+      <button type="button" (click)="clearSearch()" *ngIf="searchQuery()">{{ 'COMMON.CLEAR' | translate }}</button>
+    </div>
+  </section>
+
+  <section class="archived-list" *ngIf="!isLoading() && !errorMessage()">
+    <ng-container *ngIf="filteredArchivedWorks().length; else archiveEmpty">
+      <div class="archived-card" *ngFor="let work of filteredArchivedWorks()" (click)="openWork(work)">
+        <div class="card-header">
+          <div class="titles">
+            <h3>{{ work.work_title }}</h3>
+          </div>
+          <span class="status-pill">{{ 'ARCHIVED_WORKS.ARCHIVED_LABEL' | translate }}</span>
+        </div>
+
+        <div class="card-meta">
+          <span *ngIf="work.isrc">
+            <strong>{{ 'ARCHIVED_WORKS.ISRC' | translate }}:</strong>
+            {{ work.isrc }}
+          </span>
+          <span *ngIf="work.iswc">
+            <strong>{{ 'ARCHIVED_WORKS.ISWC' | translate }}:</strong>
+            {{ work.iswc }}
+          </span>
+          <span>
+            <strong>{{ 'ARCHIVED_WORKS.UPDATED' | translate }}:</strong>
+            {{ work.updated_at | date:'medium' }}
+          </span>
+        </div>
+
+        <div class="card-actions" (click)="$event.stopPropagation()">
+          <button type="button" class="restore-btn" (click)="restoreWork(work, $event)">
+            <lucide-icon [img]="RotateCcw" [size]="16"></lucide-icon>
+            <span>{{ 'ARCHIVED_WORKS.RESTORE' | translate }}</span>
+          </button>
+          <button type="button" class="open-btn" (click)="openWork(work)">
+            {{ 'ARCHIVED_WORKS.OPEN' | translate }}
+          </button>
+        </div>
+      </div>
+    </ng-container>
+  </section>
+
+  <ng-template #archiveEmpty>
+    <div class="empty-state">
+      <lucide-icon [img]="Archive" [size]="72" [strokeWidth]="1.5"></lucide-icon>
+      <h3>{{ 'ARCHIVED_WORKS.EMPTY_TITLE' | translate }}</h3>
+      <p>{{ 'ARCHIVED_WORKS.EMPTY_DESC' | translate }}</p>
+      <button type="button" (click)="goBack()">{{ 'ARCHIVED_WORKS.BACK_TO_DASHBOARD' | translate }}</button>
+    </div>
+  </ng-template>
+</div>

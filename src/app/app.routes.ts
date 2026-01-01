@@ -11,6 +11,16 @@ export const routes: Routes = [
         canActivate: [AuthGuard]
     },
     {
+        path: 'protocols'
+        , loadComponent: () => import('./protocol/protocol-list/protocol-list').then(m => m.ProtocolListComponent)
+        , canActivate: [AuthGuard]
+    },
+    {
+        path: 'archive'
+        , loadComponent: () => import('./works/archived-works/archived-works').then(m => m.ArchivedWorksComponent)
+        , canActivate: [AuthGuard]
+    },
+    {
         path: 'profile-hub'
         , loadComponent: () => import('./profile/profile-hub/profile-hub').then(m => m.ProfileHubComponent)
         , canActivate: [AuthGuard]

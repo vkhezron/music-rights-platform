@@ -12,10 +12,35 @@ import { WorksService } from '../services/works';
 import { UserProfile } from '../../models/profile.model';
 
 // Import Lucide Icons
-import { LucideAngularModule, Music, Disc, Disc3, FolderOpen, Plus, LogOut, 
-         Home, Users, Edit, Archive, Check, Circle, ChevronDown, 
-         ChevronRight, Smartphone, Camera, Twitter, Facebook, Video, 
-         Globe, Headphones, Copy, ExternalLink, Search } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  Music,
+  Disc,
+  Disc3,
+  FolderOpen,
+  Plus,
+  LogOut,
+  Home,
+  Users,
+  Edit,
+  Archive,
+  FileText,
+  Recycle,
+  Check,
+  Circle,
+  ChevronDown,
+  ChevronRight,
+  Smartphone,
+  Camera,
+  Twitter,
+  Facebook,
+  Video,
+  Globe,
+  Headphones,
+  Copy,
+  ExternalLink,
+  Search,
+} from 'lucide-angular';
 
 @Component({
   selector: 'app-dashboard',
@@ -47,6 +72,8 @@ export class Dashboard implements OnInit {
   readonly Users = Users;
   readonly Edit = Edit;
   readonly Archive = Archive;
+  readonly ProtocolsIcon = FileText;
+  readonly ArchivesIcon = Recycle;
   readonly Check = Check;
   readonly Circle = Circle;
   readonly ChevronDown = ChevronDown;
@@ -73,7 +100,7 @@ export class Dashboard implements OnInit {
 
   // UI State
   profileDetailsVisible = signal(false);
-  activeTab = signal<'dashboard' | 'rights-holders' | 'works'>('dashboard');
+  activeTab = signal<'dashboard' | 'works' | 'rights-holders' | 'protocols' | 'archive'>('dashboard');
   isLoading = signal(false);
   errorMessage = signal('');
   successMessage = signal('');
@@ -393,7 +420,7 @@ export class Dashboard implements OnInit {
 
   
 
-  setActiveTab(tab: 'dashboard' | 'rights-holders' | 'works') {
+  setActiveTab(tab: 'dashboard' | 'rights-holders' | 'works' | 'protocols' | 'archive') {
     this.activeTab.set(tab);
     
     switch(tab) {
@@ -402,6 +429,12 @@ export class Dashboard implements OnInit {
         break;
       case 'works':
         this.router.navigate(['/works']);
+        break;
+      case 'protocols':
+        this.router.navigate(['/protocols']);
+        break;
+      case 'archive':
+        this.router.navigate(['/archive']);
         break;
       default:
         break;

@@ -147,10 +147,10 @@
               <lucide-icon [img]="Edit" [size]="18"></lucide-icon>
             </button>
             <button 
-              class="action-btn delete" 
-              (click)="deleteWork(work)"
-              [title]="'COMMON.DELETE' | translate">
-              <lucide-icon [img]="Trash2" [size]="18"></lucide-icon>
+              class="action-btn archive" 
+              (click)="archiveWork(work, $event)"
+              [title]="'WORKS.ARCHIVE' | translate">
+              <lucide-icon [img]="Archive" [size]="18"></lucide-icon>
             </button>
           </div>
         </div>

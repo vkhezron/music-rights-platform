@@ -195,7 +195,9 @@
     "COMPLETION": "Fortschritt",
     "UPDATE_WORK_DATA": "Werkdaten aktualisieren",
     "MANAGE_RIGHTS_HOLDERS": "Rechteinhaber verwalten",
-    "ARCHIVE_PROJECT": "Projekt archivieren"
+    "ARCHIVE_PROJECT": "Projekt archivieren",
+    "PROTOCOLS": "Protokolle",
+    "ARCHIVE": "Archiv"
   },
   "WORKS": {
     "WORKS": "Werke",
@@ -211,6 +213,16 @@
     "NO_WORKS_DESCRIPTION": "Beginnen Sie mit der Erstellung Ihres ersten Musikwerks",
     "NO_RESULTS": "Keine Ergebnisse gefunden",
     "NO_RESULTS_FOR": "Keine Ergebnisse für",
+    "ARCHIVE": "Archivieren",
+    "ARCHIVE_CONFIRM": "Werk \"{{ title }}\" archivieren? Dadurch wird das Werk in den Archiv-Tab verschoben und alle Daten bleiben erhalten.",
+    "ARCHIVE_SUCCESS": "\"{{ title }}\" wurde erfolgreich archiviert.",
+    "ARCHIVE_ERROR": "Dieses Werk konnte nicht archiviert werden. Bitte versuchen Sie es erneut.",
+    "ARCHIVED_TAB": "Archivierte Werke",
+    "VIEW_ARCHIVED": "Archivierte Werke anzeigen",
+    "RESTORE": "Wiederherstellen",
+    "RESTORE_SUCCESS": "\"{{ title }}\" wurde erfolgreich wiederhergestellt.",
+    "RESTORE_ERROR": "Dieses Werk konnte nicht wiederhergestellt werden. Bitte versuchen Sie es erneut.",
+    "RESTORED_TAG": "Wiederhergestellt",
     "SEARCH_PLACEHOLDER": "Suche nach Titel, ISRC, ISWC...",
     "BASIC_INFO": "Grundinformationen",
     "WORK_TITLE": "Werktitel",
@@ -248,6 +260,40 @@
     "ADDITIONAL_NOTES": "Zusätzliche Notizen",
     "NOTES": "Notizen",
     "MANAGE_SPLITS": "Splits verwalten"
+  },
+  "AI_DISCLOSURE_FORM": {
+    "TITLE": "KI-Offenlegung (gesetzliche Anforderung)",
+    "HINT": "Informiere Kollaborateur:innen und Verwertungsgesellschaften darüber, wo KI beim kreativen Prozess geholfen hat.",
+    "SECTIONS": {
+      "IP": "Komposition & Texte",
+      "MIXING": "Mixing",
+      "MASTERING": "Mastering",
+      "SESSION_MUSICIANS": "Studiomusiker:innen",
+      "VISUALS": "Artwork & Visuals"
+    },
+    "OPTIONS": {
+      "HUMAN": "100% Menschlich",
+      "AI_ASSISTED": "KI-unterstützt",
+      "AI_GENERATED": "KI-generiert",
+      "AI_TOOL_LABEL": "KI-Tool",
+      "AI_TOOL_PLACEHOLDER": "z. B. Suno, Stable Audio, Midjourney",
+      "NOTES_LABEL": "Notizen (optional)",
+      "NOTES_PLACEHOLDER": "Kontext für Mitwirkende, Clearance-Notizen, Prompts..."
+    },
+    "SUMMARY": {
+      "TITLE": "Zusammenfassung",
+      "HUMAN": "Vollständig von Menschen erstellt",
+      "AI_ASSISTED": "Mit Unterstützung eines KI-Tools",
+      "AI_ASSISTED_WITH_TOOL": "Unterstützt von {{ tool }}",
+      "AI_GENERATED": "Mit einem KI-Tool erzeugt",
+      "AI_GENERATED_WITH_TOOL": "Erzeugt mit {{ tool }}",
+      "UNKNOWN": "Unbekannt"
+    },
+    "VALIDATION": {
+      "TITLE": "Aktualisierung erforderlich",
+      "INSTRUCTIONS": "Artwork, Visuals, Musik, Mixing und Mastering: Für Artwork und Visuals das verwendete KI-Tool oder -Modell angeben. Bei Musik deutlich kennzeichnen, ob eines der folgenden Elemente vollständig oder teilweise mit KI erstellt wurde: Text, Melodie, Harmonie, Arrangements, Lead-Gesang, Background-Gesang, Instrumentalparts oder Soundeffekte. Dieselben Angaben gelten für Mixing und Mastering.",
+      "TOOL_REQUIRED": "{{ section }}: Bitte das verwendete KI-Tool angeben."
+    }
   },
   "RIGHTS_HOLDERS": {
     "TITLE": "Rechteinhaber",
@@ -541,7 +587,64 @@
   },
   "PROTOCOL": {
     "LYRICS": "Liedtext",
-    "MUSIC": "Musik"
+    "MUSIC": "Musik",
+    "STATUS": {
+      "DRAFT": "Entwurf",
+      "SUBMITTED": "Eingereicht",
+      "APPROVED": "Genehmigt",
+      "ARCHIVED": "Archiviert"
+    }
+  },
+  "PROTOCOL_LIST": {
+    "BACK": "Zurück zum Dashboard",
+    "TITLE": "Protokolle",
+    "SUBTITLE": "Protokolle für diesen Workspace überprüfen und verwalten.",
+    "REFRESH": "Aktualisieren",
+    "CREATE": "Werk erstellen",
+    "ACTIVE_WORKSPACE": "Aktiver Workspace",
+    "ERROR_LOADING": "Protokolle konnten nicht geladen werden.",
+    "NEW_PROTOCOL_LABEL": "Protokoll starten",
+    "NEW_PROTOCOL_SUBTITLE": "Wähle ein Werk, um ein Protokoll zu starten oder zu verwalten.",
+    "SELECT_WORK_PLACEHOLDER": "Werk auswählen",
+    "START_PROTOCOL": "Protokoll starten",
+    "EDIT_WORK": "Werkdetails öffnen",
+    "EXISTING_PROTOCOL_OPTION": "hat Protokoll",
+    "NO_AVAILABLE_WORKS": "Erstelle zuerst ein Werk, um ein Protokoll zu starten.",
+    "WORK": "Werk",
+    "STATUS": "Status",
+    "UPDATED": "Aktualisiert",
+    "OPEN": "Öffnen",
+    "OPEN_WORK": "Werk öffnen",
+    "DUPLICATE": "Duplizieren",
+    "DUPLICATE_TITLE": "{{ work }} duplizieren",
+    "DUPLICATE_SUBTITLE": "Kopiere Protokolldaten in ein anderes Werk.",
+    "SELECT_DUPLICATE_TARGET": "Zielwerk auswählen",
+    "DUPLICATE_CANCEL": "Abbrechen",
+    "DUPLICATE_CONFIRM": "Duplizieren bestätigen",
+    "NO_DUPLICATE_TARGETS": "Keine geeigneten Werke zum Duplizieren verfügbar.",
+    "DUPLICATE_ERROR": "Das Duplizieren konnte nicht vorbereitet werden. Bitte versuche es erneut.",
+    "EMPTY_TITLE": "Noch keine Protokolle",
+    "EMPTY_DESC": "Erstelle ein Werk und starte ein Protokoll, um Mitwirkende zu erfassen.",
+    "GO_TO_WORKS": "Zu den Werken",
+    "CREATE_WORK": "Neues Werk erstellen"
+  },
+  "ARCHIVED_WORKS": {
+    "BACK": "Zurück zum Dashboard",
+    "TITLE": "Archiv",
+    "SUBTITLE": "Archivierte Werke ansehen und bei Bedarf wiederherstellen.",
+    "REFRESH": "Aktualisieren",
+    "NO_WORKSPACE": "Wähle einen Workspace, um archivierte Werke zu sehen.",
+    "ERROR_LOADING": "Archivierte Werke konnten nicht geladen werden.",
+    "SEARCH_PLACEHOLDER": "Archivierte Werke suchen",
+    "ARCHIVED_LABEL": "Archiviert",
+    "ISRC": "ISRC",
+    "ISWC": "ISWC",
+    "UPDATED": "Aktualisiert",
+    "RESTORE": "Wiederherstellen",
+    "OPEN": "Öffnen",
+    "EMPTY_TITLE": "Keine archivierten Werke",
+    "EMPTY_DESC": "Wiederhergestellte Werke erscheinen wieder in deiner Werkliste.",
+    "BACK_TO_DASHBOARD": "Zurück zum Dashboard"
   },
   "PRIVACY": {
     "TITLE": "Datenschutzerklärung",

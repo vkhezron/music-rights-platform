@@ -26,6 +26,8 @@ export class ProtocolService {
   private currentProtocolSubject = new BehaviorSubject<Protocol | null>(null);
   public currentProtocol$ = this.currentProtocolSubject.asObservable();
 
+  private duplicateTemplateSubject = new BehaviorSubject<ProtocolFormData | null>(null);
+
   /**
    * Create a new protocol (music work registration)
    */
@@ -442,5 +444,45 @@ export class ProtocolService {
       console.error('Error deleting protocol:', error);
       throw error;
     }
+  }
+
+  /**
+   * Prepare duplication template by caching protocol data with authors
+   */
+  async prepareDuplicate(protocolId: string): Promise<void> {
+    try {
+      const { protocol, lyric_authors, music_authors, neighbouring_rightsholders } =
+        await this.getProtocolWithAuthors(protocolId);
+
+      const template: ProtocolFormData = {
+        work_title: protocol.work_title,
+        alternative_title: protocol.alternative_title ?? undefined,
+        release_title: protocol.release_title ?? undefined,
+        isrc: protocol.isrc ?? undefined,
+        iswc: protocol.iswc ?? undefined,
+        ean: protocol.ean ?? undefined,
+        primary_language: protocol.primary_language ?? undefined,
+        secondary_language: protocol.secondary_language ?? undefined,
+        is_cover_version: protocol.is_cover_version,
+        original_work_title: protocol.original_work_title ?? undefined,
+        lyric_authors: lyric_authors ?? [],
+        music_authors: music_authors ?? [],
+        neighbouring_rightsholders: neighbouring_rightsholders ?? []
+      };
+
+      this.duplicateTemplateSubject.next(template);
+    } catch (error) {
+      console.error('Error preparing protocol duplicate:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieve and clear duplicate template data
+   */
+  consumeDuplicateTemplate(): ProtocolFormData | null {
+    const template = this.duplicateTemplateSubject.value;
+    this.duplicateTemplateSubject.next(null);
+    return template;
   }
 }

@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorksService } from '../../services/works';
 import { Work } from '../../../models/work.model';
@@ -9,7 +9,7 @@ import { WorkSplit } from '../../../models/work-split.model';
 
 // Lucide Icons
 import { LucideAngularModule, Music,
-   Plus, Edit, Trash2, Search, Calendar, Clock, Globe, ArrowLeft } from 'lucide-angular';
+  Plus, Edit, Archive, Search, Calendar, Clock, Globe, ArrowLeft } from 'lucide-angular';
 
 @Component({
   selector: 'app-works-list',
@@ -26,12 +26,13 @@ export class WorksListComponent implements OnInit {
   private router = inject(Router);
   private workspaceService = inject(WorkspaceService);
   private worksService = inject(WorksService);
+  private translateService = inject(TranslateService);
 
   // Lucide Icons
   readonly Music = Music;
   readonly Plus = Plus;
   readonly Edit = Edit;
-  readonly Trash2 = Trash2;
+  readonly Archive = Archive;
   readonly Search = Search;
   readonly Calendar = Calendar;
   readonly Clock = Clock;
@@ -47,8 +48,9 @@ export class WorksListComponent implements OnInit {
   ngOnInit() {
     // Subscribe to works from service
     this.worksService.works$.subscribe(works => {
-      this.works.set(works);
-      this.filteredWorks.set(works);
+      const activeWorks = works.filter(work => work.status !== 'archived');
+      this.works.set(activeWorks);
+      this.filteredWorks.set(activeWorks);
       this.isLoading.set(false);
     });
 
@@ -97,16 +99,23 @@ export class WorksListComponent implements OnInit {
     this.router.navigate(['/works/edit', work.id]);
   }
 
-  async deleteWork(work: Work) {
-    const confirmed = confirm(`Delete "${work.work_title}"? This action cannot be undone.`);
+  async archiveWork(work: Work, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    const confirmed = confirm(
+      this.t('WORKS.ARCHIVE_CONFIRM', { title: work.work_title })
+    );
+
     if (!confirmed) return;
 
     try {
-      await this.worksService.deleteWork(work.id);
-      // Works will be updated via observable
+      await this.worksService.archiveWork(work.id);
+      this.loadWorks();
     } catch (error) {
-      console.error('Error deleting work:', error);
-      alert('Failed to delete work');
+      console.error('Error archiving work:', error);
+      alert(this.t('WORKS.ARCHIVE_ERROR'));
     }
   }
 
@@ -167,5 +176,9 @@ export class WorksListComponent implements OnInit {
       visuals: 'Artwork/Visuals',
     };
     return labels[section] ?? section;
+  }
+
+  private t(key: string, params?: Record<string, unknown>): string {
+    return this.translateService.instant(key, params);
   }
 }

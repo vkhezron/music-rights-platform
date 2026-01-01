@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { LucideAngularModule, PenLine, Sparkles, Bot } from 'lucide-angular';
+import { TranslateModule } from '@ngx-translate/core';
 import {
   WorkCreationDeclarationDraft,
   WorkCreationDeclarationMap,
@@ -12,24 +14,29 @@ import { input, output } from '@angular/core';
 
 interface DisclosureSectionMeta {
   key: WorkCreationSection;
-  label: string;
+  labelKey: string;
+}
+
+interface SummaryDescriptor {
+  key: string;
+  params?: Record<string, unknown>;
 }
 
 @Component({
   selector: 'app-ai-disclosure-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslateModule],
   template: `
     <div class="ai-disclosure-form">
-      <h3 class="form-title">AI Disclosure (Legal Requirement)</h3>
+      <h3 class="form-title">{{ 'AI_DISCLOSURE_FORM.TITLE' | translate }}</h3>
       <p class="form-hint">
-        Let collaborators and collecting societies know where AI assisted the creative process.
+        {{ 'AI_DISCLOSURE_FORM.HINT' | translate }}
       </p>
 
       @for (section of sections; track section.key) {
         <section class="disclosure-section">
           <header class="section-header">
-            <h4>{{ section.label }}</h4>
+            <h4>{{ section.labelKey | translate }}</h4>
           </header>
 
           <div class="option-grid">
@@ -42,8 +49,8 @@ interface DisclosureSectionMeta {
                 (ngModelChange)="setCreationType(section.key, $event)"
               />
               <span class="option-content">
-                <span class="emoji">✍️</span>
-                <span class="label">100% Human</span>
+                <lucide-icon class="option-icon" [img]="HumanIcon" [size]="18"></lucide-icon>
+                <span class="label">{{ 'AI_DISCLOSURE_FORM.OPTIONS.HUMAN' | translate }}</span>
               </span>
             </label>
 
@@ -56,8 +63,8 @@ interface DisclosureSectionMeta {
                 (ngModelChange)="setCreationType(section.key, $event)"
               />
               <span class="option-content">
-                <span class="emoji">⚡</span>
-                <span class="label">AI Assisted</span>
+                <lucide-icon class="option-icon" [img]="AssistedIcon" [size]="18"></lucide-icon>
+                <span class="label">{{ 'AI_DISCLOSURE_FORM.OPTIONS.AI_ASSISTED' | translate }}</span>
               </span>
             </label>
 
@@ -70,8 +77,8 @@ interface DisclosureSectionMeta {
                 (ngModelChange)="setCreationType(section.key, $event)"
               />
               <span class="option-content">
-                <span class="emoji">🤖</span>
-                <span class="label">AI Generated</span>
+                <lucide-icon class="option-icon" [img]="GeneratedIcon" [size]="18"></lucide-icon>
+                <span class="label">{{ 'AI_DISCLOSURE_FORM.OPTIONS.AI_GENERATED' | translate }}</span>
               </span>
             </label>
           </div>
@@ -79,22 +86,22 @@ interface DisclosureSectionMeta {
           @if (disclosures()[section.key].creation_type !== 'human') {
             <div class="ai-details">
               <label class="field-label">
-                AI tool
+                {{ 'AI_DISCLOSURE_FORM.OPTIONS.AI_TOOL_LABEL' | translate }}
                 <input
                   type="text"
                   class="text-input"
-                  placeholder="e.g. Suno, Stable Audio, Midjourney"
+                  [placeholder]="'AI_DISCLOSURE_FORM.OPTIONS.AI_TOOL_PLACEHOLDER' | translate"
                   [ngModel]="disclosures()[section.key].ai_tool ?? ''"
                   (ngModelChange)="setAiTool(section.key, $event)"
                 />
               </label>
 
               <label class="field-label">
-                Notes (optional)
+                {{ 'AI_DISCLOSURE_FORM.OPTIONS.NOTES_LABEL' | translate }}
                 <textarea
                   rows="2"
                   class="textarea"
-                  placeholder="Context for collaborators, clearance notes, prompts..."
+                  [placeholder]="'AI_DISCLOSURE_FORM.OPTIONS.NOTES_PLACEHOLDER' | translate"
                   [ngModel]="disclosures()[section.key].notes ?? ''"
                   (ngModelChange)="setNotes(section.key, $event)"
                 ></textarea>
@@ -105,12 +112,13 @@ interface DisclosureSectionMeta {
       }
 
       <section class="summary">
-        <h4>Summary</h4>
+        <h4>{{ 'AI_DISCLOSURE_FORM.SUMMARY.TITLE' | translate }}</h4>
         <ul>
           @for (section of sections; track section.key) {
+            @let summary = describe(disclosures()[section.key]);
             <li>
-              <strong>{{ section.label }}:</strong>
-              {{ describe(disclosures()[section.key]) }}
+              <strong>{{ section.labelKey | translate }}:</strong>
+              {{ summary.key | translate:summary.params }}
             </li>
           }
         </ul>
@@ -118,10 +126,15 @@ interface DisclosureSectionMeta {
 
       @if (validationErrors().length) {
         <section class="validation">
-          <h4>Update required</h4>
+          <h4>{{ 'AI_DISCLOSURE_FORM.VALIDATION.TITLE' | translate }}</h4>
+          <p class="validation-hint">
+            {{ 'AI_DISCLOSURE_FORM.VALIDATION.INSTRUCTIONS' | translate }}
+          </p>
           <ul>
-            @for (error of validationErrors(); track error) {
-              <li>{{ error }}</li>
+            @for (missing of validationErrors(); track missing.key) {
+              <li>
+                {{ 'AI_DISCLOSURE_FORM.VALIDATION.TOOL_REQUIRED' | translate:{ section: (missing.labelKey | translate) } }}
+              </li>
             }
           </ul>
         </section>
@@ -199,8 +212,8 @@ interface DisclosureSectionMeta {
         font-weight: 600;
       }
 
-      .emoji {
-        font-size: 18px;
+      .option-icon {
+        color: var(--primary-color, #0d6efd);
       }
 
       .ai-details {
@@ -281,12 +294,16 @@ interface DisclosureSectionMeta {
   ],
 })
 export class AIDisclosureFormComponent {
+  readonly HumanIcon = PenLine;
+  readonly AssistedIcon = Sparkles;
+  readonly GeneratedIcon = Bot;
+
   readonly sections: DisclosureSectionMeta[] = [
-    { key: 'ip', label: 'Composition & Lyrics' },
-    { key: 'mixing', label: 'Mixing' },
-    { key: 'mastering', label: 'Mastering' },
-    { key: 'session_musicians', label: 'Session Musicians' },
-    { key: 'visuals', label: 'Artwork & Visuals' },
+    { key: 'ip', labelKey: 'AI_DISCLOSURE_FORM.SECTIONS.IP' },
+    { key: 'mixing', labelKey: 'AI_DISCLOSURE_FORM.SECTIONS.MIXING' },
+    { key: 'mastering', labelKey: 'AI_DISCLOSURE_FORM.SECTIONS.MASTERING' },
+    { key: 'session_musicians', labelKey: 'AI_DISCLOSURE_FORM.SECTIONS.SESSION_MUSICIANS' },
+    { key: 'visuals', labelKey: 'AI_DISCLOSURE_FORM.SECTIONS.VISUALS' },
   ];
 
   initialDisclosures = input<WorkCreationDeclarationMap>(createDefaultWorkCreationDeclarationMap());
@@ -294,7 +311,7 @@ export class AIDisclosureFormComponent {
   validChange = output<boolean>();
 
   protected disclosures = signal<WorkCreationDeclarationMap>(createDefaultWorkCreationDeclarationMap());
-  protected validationErrors = computed(() => this.calculateValidationErrors());
+  protected validationErrors = computed<DisclosureSectionMeta[]>(() => this.calculateValidationErrors());
 
   constructor() {
     effect(() => {
@@ -341,20 +358,22 @@ export class AIDisclosureFormComponent {
     this.emitChanges();
   }
 
-  describe(disclosure: WorkCreationDeclarationDraft): string {
+  describe(disclosure: WorkCreationDeclarationDraft): SummaryDescriptor {
+    const tool = disclosure.ai_tool?.trim();
+
     switch (disclosure.creation_type) {
       case 'human':
-        return 'Created entirely by people';
+        return { key: 'AI_DISCLOSURE_FORM.SUMMARY.HUMAN' };
       case 'ai_assisted':
-        return disclosure.ai_tool
-          ? `Assisted by ${disclosure.ai_tool}`
-          : 'Assisted by AI tool';
+        return tool
+          ? { key: 'AI_DISCLOSURE_FORM.SUMMARY.AI_ASSISTED_WITH_TOOL', params: { tool } }
+          : { key: 'AI_DISCLOSURE_FORM.SUMMARY.AI_ASSISTED' };
       case 'ai_generated':
-        return disclosure.ai_tool
-          ? `Generated with ${disclosure.ai_tool}`
-          : 'Generated with an AI tool';
+        return tool
+          ? { key: 'AI_DISCLOSURE_FORM.SUMMARY.AI_GENERATED_WITH_TOOL', params: { tool } }
+          : { key: 'AI_DISCLOSURE_FORM.SUMMARY.AI_GENERATED' };
       default:
-        return 'Unknown';
+        return { key: 'AI_DISCLOSURE_FORM.SUMMARY.UNKNOWN' };
     }
   }
 
@@ -363,14 +382,14 @@ export class AIDisclosureFormComponent {
     this.disclosuresChange.emit(snapshot);
   }
 
-  private calculateValidationErrors(): string[] {
-    const errors: string[] = [];
+  private calculateValidationErrors(): DisclosureSectionMeta[] {
+    const errors: DisclosureSectionMeta[] = [];
     const snapshot = this.disclosures();
 
     for (const meta of this.sections) {
       const disclosure = snapshot[meta.key];
       if (disclosure.creation_type !== 'human' && !disclosure.ai_tool) {
-        errors.push(`${meta.label}: specify the AI tool used.`);
+        errors.push(meta);
       }
     }
 

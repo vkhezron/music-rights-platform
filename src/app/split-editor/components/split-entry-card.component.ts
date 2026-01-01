@@ -3,11 +3,13 @@ import { Component, OnChanges, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import type { SplitEntry } from '../models/split-entry.model';
 import { RoleSelectorComponent } from './role-selector.component';
+import { HelpTooltipComponent } from '../../components/help-tooltip/help-tooltip.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-split-entry-card',
   standalone: true,
-  imports: [CommonModule, FormsModule, RoleSelectorComponent],
+  imports: [CommonModule, FormsModule, RoleSelectorComponent, HelpTooltipComponent, TranslateModule],
   templateUrl: './split-entry-card.component.html',
   styleUrls: ['./split-entry-card.component.scss'],
 })

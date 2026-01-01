@@ -5,10 +5,11 @@ import { Router, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ProfileService } from '../../services/profile.service';
 import { GdprService } from '../../services/gdpr.service';
+import { FeedbackService } from '../../services/feedback.service';
 import { ProfileFormData, PRIMARY_ROLES, SECONDARY_ROLES, LANGUAGES, SOCIAL_PLATFORMS } from '../../../models/profile.model';
 
 // Import Lucide Icons
-import { LucideAngularModule, CheckCircle, AlertCircle, ChevronDown, ChevronRight,
+import { LucideAngularModule, ChevronDown, ChevronRight,
          Camera, Twitter, Facebook, Music, Video, Globe, Headphones, Copy, Download } from 'lucide-angular';
 
 @Component({
@@ -28,11 +29,10 @@ export class ProfileEdit implements OnInit {
   private fb = inject(FormBuilder);
   private profileService = inject(ProfileService);
   private gdprService = inject(GdprService);
+  private feedback = inject(FeedbackService);
   private router = inject(Router);
 
   // Lucide Icons
-  readonly CheckCircle = CheckCircle;
-  readonly AlertCircle = AlertCircle;
   readonly ChevronDown = ChevronDown;
   readonly ChevronRight = ChevronRight;
   readonly Camera = Camera;
@@ -47,8 +47,6 @@ export class ProfileEdit implements OnInit {
 
   profileForm!: FormGroup;
   isLoading = signal(false);
-  errorMessage = signal('');
-  successMessage = signal('');
   showOptional = signal(false);
 
   // Constants
@@ -90,19 +88,10 @@ export class ProfileEdit implements OnInit {
     
     try {
       await navigator.clipboard.writeText(value);
-      // Show temporary success message
-      const originalSuccess = this.successMessage();
-      this.successMessage.set(`${platformName} link copied!`);
-      
-      // Clear after 2 seconds
-      setTimeout(() => {
-        if (this.successMessage() === `${platformName} link copied!`) {
-          this.successMessage.set(originalSuccess);
-        }
-      }, 2000);
+      this.feedback.success(`${platformName} link copied to clipboard.`);
     } catch (err) {
       console.error('Failed to copy:', err);
-      this.errorMessage.set('Failed to copy to clipboard');
+      this.feedback.error('We could not copy that link. Please try again.');
     }
   }
 
@@ -169,7 +158,7 @@ export class ProfileEdit implements OnInit {
       }
     } catch (error: any) {
       console.error('Error loading profile:', error);
-      this.errorMessage.set('Failed to load profile');
+      this.feedback.handleError(error, 'We could not load your profile. Please try again.');
     } finally {
       this.isLoading.set(false);
     }
@@ -203,13 +192,11 @@ export class ProfileEdit implements OnInit {
   async onSubmit() {
     if (this.profileForm.invalid) {
       this.profileForm.markAllAsTouched();
-      this.errorMessage.set('PROFILE.REQUIRED_FIELDS_ERROR');
+      this.feedback.error('Please fix the highlighted fields before saving.');
       return;
     }
 
     this.isLoading.set(true);
-    this.errorMessage.set('');
-    this.successMessage.set('');
 
     try {
       const formValue = this.profileForm.value;
@@ -235,15 +222,15 @@ export class ProfileEdit implements OnInit {
 
       await this.profileService.updateProfile(profileData);
 
-      this.successMessage.set('Profile updated successfully!');
-      
+      this.feedback.success('Profile updated successfully.');
+
       setTimeout(() => {
         this.router.navigate(['/profile-hub']);
-      }, 2000);
+      }, 1500);
 
     } catch (error: any) {
       console.error('Profile update error:', error);
-      this.errorMessage.set(error.message || 'PROFILE.UPDATE_ERROR');
+      this.feedback.handleError(error, 'We could not save your profile. Please try again.');
     } finally {
       this.isLoading.set(false);
     }
@@ -260,12 +247,10 @@ export class ProfileEdit implements OnInit {
     try {
       this.isLoading.set(true);
       await this.gdprService.downloadPersonalData();
-      this.successMessage.set('Data exported successfully');
-      setTimeout(() => this.successMessage.set(''), 3000);
+      this.feedback.success('Your personal data export has started. Check your downloads.');
     } catch (error) {
       console.error('Export error:', error);
-      this.errorMessage.set('Failed to export data. Please try again.');
-      setTimeout(() => this.errorMessage.set(''), 5000);
+      this.feedback.handleError(error, 'Failed to export your personal data. Please try again.');
     } finally {
       this.isLoading.set(false);
     }

@@ -1,9 +1,14 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, InjectionToken, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ProfileService } from '../../services/profile.service';
 import * as QRCode from 'qrcode';
+
+export const QR_CODE = new InjectionToken<typeof QRCode>('QR_CODE', {
+  providedIn: 'root',
+  factory: () => QRCode,
+});
 
 @Component({
   selector: 'app-qr-code-display',
@@ -15,6 +20,7 @@ import * as QRCode from 'qrcode';
 export class QrCodeDisplayComponent implements OnInit {
   private router = inject(Router);
   private profileService = inject(ProfileService);
+  private qrCode = inject(QR_CODE);
 
   // Signals for state
   qrCodeDataUrl = signal<string>('');
@@ -54,7 +60,7 @@ export class QrCodeDisplayComponent implements OnInit {
 
     try {
       // Generate QR code as data URL
-      const dataUrl = await QRCode.toDataURL(JSON.stringify(qrData), {
+      const dataUrl = await this.qrCode.toDataURL(JSON.stringify(qrData), {
         width: 300,
         margin: 2,
         color: {

@@ -96,6 +96,26 @@
   cursor: not-allowed;
 }
 
+.entry-card__field--with-help {
+  position: relative;
+
+  > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  app-help-tooltip {
+    margin-left: auto;
+  }
+}
+
+.entry-card__field-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .entry-card__handle {
   display: flex;
   align-items: center;

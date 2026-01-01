@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { WorksService } from '../../services/works';
 import { WorkspaceService } from '../../services/workspace.service';
+import { FeedbackService } from '../../services/feedback.service';
 import { WorkFormData } from '../../models/work.model';
 import {
   WorkCreationDeclaration,
@@ -15,7 +16,7 @@ import {
 import { AIDisclosureFormComponent } from '../../components/ai-disclosure-form/ai-disclosure-form.component';
 
 // Lucide Icons
-import { LucideAngularModule, ArrowLeft, Save, Plus, X, Music, Clock, Calendar, Globe, Tag, CheckCircle, AlertCircle, Edit } from 'lucide-angular';
+import { LucideAngularModule, ArrowLeft, Save, Plus, X, Music, Clock, Calendar, Globe, Tag, Edit } from 'lucide-angular';
 
 @Component({
   selector: 'app-work-form',
@@ -36,6 +37,7 @@ export class WorkFormComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private worksService = inject(WorksService);
   private workspaceService = inject(WorkspaceService);
+  private feedback = inject(FeedbackService);
 
   // Lucide Icons
   readonly ArrowLeft = ArrowLeft;
@@ -47,16 +49,12 @@ export class WorkFormComponent implements OnInit {
   readonly Calendar = Calendar;
   readonly Globe = Globe;
   readonly Tag = Tag;
-  readonly CheckCircle = CheckCircle;
-  readonly AlertCircle = AlertCircle;
   readonly Edit = Edit;
 
   workForm!: FormGroup;
   isLoading = signal(false);
   isEditMode = signal(false);
   workId = signal<string | null>(null);
-  errorMessage = signal('');
-  successMessage = signal('');
   aiDisclosures = signal<WorkCreationDeclarationMap>(createDefaultWorkCreationDeclarationMap());
   aiDisclosuresValid = signal(true);
 
@@ -147,7 +145,7 @@ export class WorkFormComponent implements OnInit {
     try {
       const work = await this.worksService.getWork(id);
       if (!work) {
-        this.errorMessage.set('Work not found');
+        this.feedback.error('We could not find that work.');
         this.router.navigate(['/works']);
         return;
       }
@@ -182,7 +180,7 @@ export class WorkFormComponent implements OnInit {
       }
     } catch (error) {
       console.error('Error loading work:', error);
-      this.errorMessage.set('Failed to load work');
+      this.feedback.handleError(error, 'Failed to load this work.');
     } finally {
       this.isLoading.set(false);
     }
@@ -228,18 +226,16 @@ export class WorkFormComponent implements OnInit {
   async onSubmit() {
     if (this.workForm.invalid) {
       this.workForm.markAllAsTouched();
-      this.errorMessage.set('Please fill in all required fields');
+      this.feedback.error('Please fix the highlighted fields before saving.');
       return;
     }
 
     if (!this.aiDisclosuresValid()) {
-      this.errorMessage.set('Complete the AI disclosure section before saving.');
+      this.feedback.warning('Complete the AI disclosure section before saving.');
       return;
     }
 
     this.isLoading.set(true);
-    this.errorMessage.set('');
-    this.successMessage.set('');
 
     try {
       const formValue = this.workForm.value;
@@ -266,13 +262,13 @@ export class WorkFormComponent implements OnInit {
 
       if (this.isEditMode() && this.workId()) {
         await this.worksService.updateWork(this.workId()!, workData);
-        this.successMessage.set('Work updated successfully!');
+        this.feedback.success('Work updated successfully.');
         setTimeout(() => {
           this.router.navigate(['/works']);
         }, 1500);
       } else {
         const newWork = await this.worksService.createWork(workData);
-        this.successMessage.set('Work created successfully!');
+        this.feedback.success('Work created successfully.');
         
         // Ensure we have the work ID before navigating
         if (newWork && newWork.id) {
@@ -290,7 +286,7 @@ export class WorkFormComponent implements OnInit {
 
     } catch (error: any) {
       console.error('Error saving work:', error);
-      this.errorMessage.set(error.message || 'Failed to save work');
+      this.feedback.handleError(error, 'We could not save this work. Please try again.');
     } finally {
       this.isLoading.set(false);
     }

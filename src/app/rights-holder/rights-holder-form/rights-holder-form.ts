@@ -2,11 +2,17 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormBuilder, FormGroup, Validators, ReactiveFormsModule, ValidatorFn } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { RightsHoldersService, RightsHolder } from '../../services/rights-holder';
+import { FeedbackService } from '../../services/feedback.service';
+import { HelpTooltipComponent } from '../../components/help-tooltip/help-tooltip.component';
+import { ipiFormatValidator } from '../../validators/ipi.validator';
+import { IpiLookupService } from '../../services/ipi-lookup.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 // Lucide Icons
-import { LucideAngularModule, ArrowLeft, Save, User, Building2, Mail, Phone, Award, Hash, FileText, CheckCircle, AlertCircle } from 'lucide-angular';
+import { LucideAngularModule, ArrowLeft, Save, User, Building2, Mail, Phone, Award, Hash, FileText } from 'lucide-angular';
 
 @Component({
   selector: 'app-rights-holder-form',
@@ -15,7 +21,8 @@ import { LucideAngularModule, ArrowLeft, Save, User, Building2, Mail, Phone, Awa
     CommonModule,
     ReactiveFormsModule,
     TranslateModule,
-    LucideAngularModule
+    LucideAngularModule,
+    HelpTooltipComponent
   ],
   templateUrl: './rights-holder-form.html',
   styleUrl: './rights-holder-form.scss'
@@ -25,6 +32,9 @@ export class RightsHolderFormComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private rightsHoldersService = inject(RightsHoldersService);
+  private feedback = inject(FeedbackService);
+  private translate = inject(TranslateService);
+  private ipiLookup = inject(IpiLookupService);
 
   // Lucide Icons
   readonly ArrowLeft = ArrowLeft;
@@ -36,8 +46,6 @@ export class RightsHolderFormComponent implements OnInit {
   readonly Award = Award;
   readonly Hash = Hash;
   readonly FileText = FileText;
-  readonly CheckCircle = CheckCircle;
-  readonly AlertCircle = AlertCircle;
 
   // Form
   rhForm: FormGroup;
@@ -45,10 +53,10 @@ export class RightsHolderFormComponent implements OnInit {
   // State
   isEditMode = signal(false);
   isLoading = signal(false);
-  errorMessage = signal('');
-  successMessage = signal('');
   currentRightsHolder = signal<RightsHolder | null>(null);
   workId = signal<string | null>(null);
+  protected ipiLookupState = signal<IpiLookupUiState>({ status: 'idle', message: '' });
+  private ipiRequestCursor = 0;
 
   // CMO/PRO options (major organizations)
   cmoOptions = [
@@ -90,10 +98,17 @@ export class RightsHolderFormComponent implements OnInit {
       email: ['', [Validators.email]],
       phone: [''],
       cmo_pro: [''],
-      ipi_number: ['', [Validators.pattern(/^\d{9,11}$/)]],
+      ipi_number: ['', [ipiFormatValidator()]],
       tax_id: [''],
       notes: ['']
     });
+
+    this.ipiLookupState.set({
+      status: 'idle',
+      message: this.translate.instant('RIGHTS_HOLDERS.IPI_HINT_DEFAULT'),
+    });
+
+    this.setupIpiWatcher();
 
     // Watch type changes to update validators
     this.rhForm.get('type')?.valueChanges.subscribe(type => {
@@ -142,12 +157,75 @@ export class RightsHolderFormComponent implements OnInit {
     companyNameControl?.updateValueAndValidity();
   }
 
+  private setupIpiWatcher(): void {
+    const control = this.rhForm.get('ipi_number');
+    if (!control) {
+      return;
+    }
+
+    control.valueChanges
+      .pipe(debounceTime(400), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(value => {
+        void this.handleIpiValueChange(typeof value === 'string' ? value : '');
+      });
+  }
+
+  private setIpiState(status: IpiLookupUiState['status'], messageKey: string, params?: Record<string, unknown>): void {
+    this.ipiLookupState.set({
+      status,
+      message: this.translate.instant(messageKey, params),
+    });
+  }
+
+  private async handleIpiValueChange(value: string): Promise<void> {
+    const trimmed = value.trim();
+
+    if (!trimmed) {
+      this.setIpiState('idle', 'RIGHTS_HOLDERS.IPI_HINT_DEFAULT');
+      return;
+    }
+
+    if (!this.ipiLookup.validateFormat(trimmed)) {
+      this.setIpiState('invalid', 'RIGHTS_HOLDERS.IPI_HINT_FORMAT');
+      return;
+    }
+
+    const cursor = ++this.ipiRequestCursor;
+    this.setIpiState('loading', 'RIGHTS_HOLDERS.IPI_HINT_LOOKING');
+
+    try {
+      const result = await this.ipiLookup.lookup(trimmed);
+      if (this.ipiRequestCursor !== cursor) {
+        return;
+      }
+
+      if (result) {
+        this.setIpiState('resolved', 'RIGHTS_HOLDERS.IPI_HINT_FOUND', {
+          name: result.name ?? this.translate.instant('RIGHTS_HOLDERS.IPI_HINT_UNKNOWN_NAME'),
+          society: result.society ?? 'PRO',
+        });
+
+        const displayNameControl = this.rhForm.get('display_name');
+        if (result.name && displayNameControl && !displayNameControl.value) {
+          displayNameControl.patchValue(result.name, { emitEvent: false });
+        }
+      } else {
+        this.setIpiState('not_found', 'RIGHTS_HOLDERS.IPI_HINT_FALLBACK');
+      }
+    } catch (error) {
+      console.error('IPI lookup failed', error);
+      if (this.ipiRequestCursor === cursor) {
+        this.setIpiState('not_found', 'RIGHTS_HOLDERS.IPI_HINT_FALLBACK');
+      }
+    }
+  }
+
   async loadRightsHolder(id: string) {
     this.isLoading.set(true);
     try {
       const rh = await this.rightsHoldersService.getRightsHolder(id);
       if (!rh) {
-        this.errorMessage.set('Rights holder not found');
+        this.feedback.error('We could not find that rights holder.');
         this.router.navigate(['/rights-holders']);
         return;
       }
@@ -172,9 +250,11 @@ export class RightsHolderFormComponent implements OnInit {
 
       // Update validators based on type
       this.updateValidators(rh.type);
+
+      void this.handleIpiValueChange(rh.ipi_number || '');
     } catch (error) {
       console.error('Error loading rights holder:', error);
-      this.errorMessage.set('Failed to load rights holder');
+      this.feedback.handleError(error, 'Failed to load rights holder.');
     } finally {
       this.isLoading.set(false);
     }
@@ -208,20 +288,20 @@ export class RightsHolderFormComponent implements OnInit {
   async onSubmit() {
     if (this.rhForm.invalid) {
       this.rhForm.markAllAsTouched();
-      this.errorMessage.set('Please fill in all required fields');
+      this.feedback.error('Please fix the highlighted fields before saving.');
       return;
     }
 
     this.isLoading.set(true);
-    this.errorMessage.set('');
-    this.successMessage.set('');
 
     try {
       const formValue = this.rhForm.value;
+      const normalizedIpi = this.ipiLookup.normalize(formValue.ipi_number);
       const formData = {
         ...formValue,
         nickname: this.normalizeNickname(formValue.nickname),
         display_name: formValue.display_name?.trim() || undefined,
+        ipi_number: normalizedIpi || undefined,
       };
 
       if (this.isEditMode()) {
@@ -230,7 +310,7 @@ export class RightsHolderFormComponent implements OnInit {
           this.currentRightsHolder()!.id,
           formData
         );
-        this.successMessage.set('Rights holder updated successfully!');
+        this.feedback.success('Rights holder updated successfully.');
         // Navigate back after short delay
         setTimeout(() => {
           this.router.navigate(['/rights-holders']);
@@ -238,7 +318,7 @@ export class RightsHolderFormComponent implements OnInit {
       } else {
         // Create new rights holder
         await this.rightsHoldersService.createRightsHolder(formData);
-        this.successMessage.set('Rights holder created successfully!');
+        this.feedback.success('Rights holder created successfully.');
 
         // If workId is provided, navigate to split editor; otherwise go to rights-holders list
         setTimeout(() => {
@@ -252,7 +332,7 @@ export class RightsHolderFormComponent implements OnInit {
 
     } catch (error: any) {
       console.error('Error saving rights holder:', error);
-      this.errorMessage.set(error.message || 'Failed to save rights holder');
+      this.feedback.handleError(error, 'We could not save this rights holder. Please try again.');
     } finally {
       this.isLoading.set(false);
     }
@@ -286,4 +366,9 @@ export class RightsHolderFormComponent implements OnInit {
     const withoutAt = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed;
     return withoutAt || undefined;
   }
+}
+
+interface IpiLookupUiState {
+  status: 'idle' | 'invalid' | 'loading' | 'resolved' | 'not_found';
+  message: string;
 }

@@ -22,7 +22,8 @@
         type="button"
         class="primary-btn"
         (click)="saveSplits()"
-        [disabled]="isSaving() || isLoading()"
+        [disabled]="saveDisabled()"
+        [attr.title]="saveBlockedReason() || null"
       >
         @if (!isSaving()) {
           {{ 'COMMON.SAVE' | translate }}
@@ -48,22 +49,64 @@
     </div>
   } @else {
     <div class="split-totals">
-      <div class="total-card" [class.progress-valid]="lyricsProgressClass() === 'progress-valid'" [class.progress-warning]="lyricsProgressClass() === 'progress-warning'">
+      <div
+        class="total-card"
+        [class.progress-valid]="lyricsStatus().state === 'complete'"
+        [class.progress-warning]="lyricsStatus().state === 'over'"
+        [class.progress-error]="lyricsStatus().state === 'over'"
+        [class.progress-idle]="lyricsStatus().state !== 'complete' && lyricsStatus().state !== 'over'"
+      >
         <span class="total-card__label">{{ 'PROTOCOL.LYRICS' | translate }}</span>
         <span class="total-card__value">{{ lyricsTotal() | number:'1.0-2' }}%</span>
-        <p class="total-card__hint">Target 100% for this category.</p>
+        <p
+          class="total-card__hint"
+          [class.total-card__hint--alert]="lyricsStatus().state === 'under' || lyricsStatus().state === 'over'"
+          [class.total-card__hint--info]="!lyricsStatus().hasEntries"
+        >
+          {{ totalHint(lyricsStatus()) }}
+        </p>
       </div>
-      <div class="total-card" [class.progress-valid]="musicProgressClass() === 'progress-valid'" [class.progress-warning]="musicProgressClass() === 'progress-warning'">
+      <div
+        class="total-card"
+        [class.progress-valid]="musicStatus().state === 'complete'"
+        [class.progress-warning]="musicStatus().state === 'over'"
+        [class.progress-error]="musicStatus().state === 'over'"
+        [class.progress-idle]="musicStatus().state !== 'complete' && musicStatus().state !== 'over'"
+      >
         <span class="total-card__label">{{ 'PROTOCOL.MUSIC' | translate }}</span>
         <span class="total-card__value">{{ musicTotal() | number:'1.0-2' }}%</span>
-        <p class="total-card__hint">Target 100% for this category.</p>
+        <p
+          class="total-card__hint"
+          [class.total-card__hint--alert]="musicStatus().state === 'under' || musicStatus().state === 'over'"
+          [class.total-card__hint--info]="!musicStatus().hasEntries"
+        >
+          {{ totalHint(musicStatus()) }}
+        </p>
       </div>
-      <div class="total-card" [class.progress-valid]="neighbouringProgressClass() === 'progress-valid'" [class.progress-warning]="neighbouringProgressClass() === 'progress-warning'">
+      <div
+        class="total-card"
+        [class.progress-valid]="neighbouringStatus().state === 'complete'"
+        [class.progress-warning]="neighbouringStatus().state === 'over'"
+        [class.progress-error]="neighbouringStatus().state === 'over'"
+        [class.progress-idle]="neighbouringStatus().state !== 'complete' && neighbouringStatus().state !== 'over'"
+      >
         <span class="total-card__label">{{ 'SPLITS.NEIGHBORING_RIGHTS' | translate }}</span>
         <span class="total-card__value">{{ neighbouringTotal() | number:'1.0-2' }}%</span>
-        <p class="total-card__hint">Target 100% for this category.</p>
+        <p
+          class="total-card__hint"
+          [class.total-card__hint--alert]="neighbouringStatus().state === 'under' || neighbouringStatus().state === 'over'"
+          [class.total-card__hint--info]="!neighbouringStatus().hasEntries"
+        >
+          {{ totalHint(neighbouringStatus()) }}
+        </p>
       </div>
     </div>
+
+    @if (totalsAlertMessage()) {
+      <div class="split-validation-alert">
+        {{ totalsAlertMessage() }}
+      </div>
+    }
 
     <section class="split-section">
       <header class="split-section__header">

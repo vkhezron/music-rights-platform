@@ -1,0 +1,26 @@
+<span class="help-tooltip" [attr.data-state]="isOpen() ? 'open' : 'closed'">
+  <button
+    type="button"
+    class="help-tooltip__trigger"
+    [attr.aria-expanded]="isOpen()"
+    [attr.aria-controls]="tooltipId"
+    [attr.aria-label]="label()"
+    (click)="toggle()"
+    (focus)="show()"
+    (blur)="onBlur($event)"
+  >
+    <lucide-icon [img]="Info" [size]="14"></lucide-icon>
+  </button>
+
+  @if (isOpen()) {
+    <div class="help-tooltip__panel" role="tooltip" [id]="tooltipId">
+      @if (heading()) {
+        <p class="help-tooltip__heading">{{ heading() }}</p>
+      }
+      @if (text()) {
+        <p class="help-tooltip__text">{{ text() }}</p>
+      }
+      <ng-content></ng-content>
+    </div>
+  }
+</span>

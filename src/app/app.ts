@@ -4,10 +4,11 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { CookieConsentComponent } from './legal/cookie-consent/cookie-consent';
+import { FeedbackToastsComponent } from './components/feedback/feedback-toasts.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, TranslateModule, CommonModule, CookieConsentComponent],
+  imports: [RouterOutlet, TranslateModule, CommonModule, CookieConsentComponent, FeedbackToastsComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

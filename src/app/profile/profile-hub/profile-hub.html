@@ -2,17 +2,17 @@
   @if (isLoading()) {
     <div class="hub-card loading">
       <lucide-icon [img]="LoaderIcon" [size]="28" class="spinner"></lucide-icon>
-      <p>Loading your profile…</p>
+      <p>{{ 'PROFILE_HUB.LOADING' | translate }}</p>
     </div>
   } @else if (errorMessage()) {
     <div class="hub-card error">
       <lucide-icon [img]="WarningIcon" [size]="32"></lucide-icon>
-      <h2>{{ errorMessage() }}</h2>
+      <h2>{{ errorMessage() | translate }}</h2>
       <button class="primary" type="button" (click)="goToEditProfile()">
-        Complete My Profile
+        {{ 'PROFILE_HUB.ERROR_ACTION' | translate }}
       </button>
       <button class="ghost" type="button" (click)="skipToDashboard()">
-        Skip to Dashboard
+        {{ 'PROFILE_HUB.ERROR_SKIP' | translate }}
       </button>
     </div>
   } @else if (profile(); as currentProfile) {
@@ -26,9 +26,13 @@
           }
         </div>
         <div class="headline">
-          <p class="eyebrow">Welcome back</p>
+          <p class="eyebrow">{{ 'PROFILE_HUB.WELCOME' | translate }}</p>
           <h1>{{ displayName() }}</h1>
           <p class="nickname">@{{ currentProfile.nickname }}</p>
+          <button class="qr-button" type="button" (click)="goToQrCode()">
+            <lucide-icon [img]="QrCodeIcon" [size]="18"></lucide-icon>
+            <span>{{ 'PROFILE_HUB.SHOW_QR' | translate }}</span>
+          </button>
 
           <div class="completeness" [class.low]="hasIncompleteProfile()">
             <div class="bar">
@@ -36,60 +40,60 @@
             </div>
             <div class="label">
               <lucide-icon [img]="GaugeIcon" [size]="16"></lucide-icon>
-              <span>Profile {{ profileCompleteness() }}% complete</span>
+              <span>{{ 'PROFILE_HUB.PROFILE_COMPLETE' | translate: { value: profileCompleteness() } }}</span>
             </div>
           </div>
         </div>
       </header>
 
       <div class="cards">
-        <article class="card" (click)="goToEditProfile()">
+        <article class="card" (click)="goToDashboard()">
           <div class="icon">
-            <lucide-icon [img]="EditIcon" [size]="36"></lucide-icon>
+            <lucide-icon [img]="DashboardIcon" [size]="36"></lucide-icon>
           </div>
-          <h2>Edit My Profile</h2>
-          <p>Update your roles, bio, and visibility preferences.</p>
-          @if (hasIncompleteProfile()) {
-            <span class="badge warn">Action needed</span>
-          }
+          <h2>{{ 'PROFILE_HUB.DASHBOARD_CARD_TITLE' | translate }}</h2>
+          <p>{{ 'PROFILE_HUB.DASHBOARD_CARD_DESCRIPTION' | translate }}</p>
+          <span class="badge primary">{{ 'PROFILE_HUB.DASHBOARD_CARD_BADGE' | translate }}</span>
         </article>
 
         <article class="card" (click)="goToPublicProfile()">
           <div class="icon">
             <lucide-icon [img]="PublicIcon" [size]="36"></lucide-icon>
           </div>
-          <h2>View Public Profile</h2>
-          <p>Preview what collaborators see when they scan your QR code.</p>
-          <span class="badge info">Preview</span>
+          <h2>{{ 'PROFILE_HUB.PUBLIC_CARD_TITLE' | translate }}</h2>
+          <p>{{ 'PROFILE_HUB.PUBLIC_CARD_DESCRIPTION' | translate }}</p>
+          <span class="badge info">{{ 'PROFILE_HUB.PUBLIC_CARD_BADGE' | translate }}</span>
         </article>
 
-        <article class="card" (click)="goToDashboard()">
+        <article class="card" (click)="goToEditProfile()">
           <div class="icon">
-            <lucide-icon [img]="DashboardIcon" [size]="36"></lucide-icon>
+            <lucide-icon [img]="EditIcon" [size]="36"></lucide-icon>
           </div>
-          <h2>Go to Dashboard</h2>
-          <p>Manage works, splits, protocols, and collaborators.</p>
-          <span class="badge primary">Main app</span>
+          <h2>{{ 'PROFILE_HUB.EDIT_CARD_TITLE' | translate }}</h2>
+          <p>{{ 'PROFILE_HUB.EDIT_CARD_DESCRIPTION' | translate }}</p>
+          @if (hasIncompleteProfile()) {
+            <span class="badge warn">{{ 'PROFILE_HUB.EDIT_CARD_BADGE' | translate }}</span>
+          }
         </article>
       </div>
 
       <section class="stats">
         <div class="stat">
           <span class="value">{{ quickStats().works }}</span>
-          <span class="label">Works</span>
+          <span class="label">{{ 'PROFILE_HUB.STATS_WORKS' | translate }}</span>
         </div>
         <div class="stat">
           <span class="value">{{ quickStats().collaborators }}</span>
-          <span class="label">Collaborators</span>
+          <span class="label">{{ 'PROFILE_HUB.STATS_COLLABORATORS' | translate }}</span>
         </div>
         <div class="stat">
           <span class="value">{{ quickStats().protocols }}</span>
-          <span class="label">Protocols</span>
+          <span class="label">{{ 'PROFILE_HUB.STATS_PROTOCOLS' | translate }}</span>
         </div>
       </section>
 
       <footer class="hub-footer">
-        <a routerLink="/dashboard">Skip to Dashboard</a>
+        <a routerLink="/dashboard">{{ 'PROFILE_HUB.FOOTER_SKIP' | translate }}</a>
       </footer>
     </section>
   }

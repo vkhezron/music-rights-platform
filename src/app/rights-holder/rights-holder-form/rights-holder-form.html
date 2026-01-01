@@ -15,23 +15,13 @@
 
   <!-- Form -->
   <form [formGroup]="rhForm" (ngSubmit)="onSubmit()" class="rh-form">
+    @if (isLoading()) {
+      <div class="loading-overlay">
+        <div class="spinner"></div>
+        <p>{{ 'COMMON.LOADING' | translate }}</p>
+      </div>
+    }
     
-    <!-- Success Message -->
-    @if (successMessage()) {
-      <div class="success-alert">
-        <lucide-icon [img]="CheckCircle" [size]="20" class="success-icon"></lucide-icon>
-        <span>{{ successMessage() }}</span>
-      </div>
-    }
-
-    <!-- Error Message -->
-    @if (errorMessage()) {
-      <div class="error-alert">
-        <lucide-icon [img]="AlertCircle" [size]="20" class="error-icon"></lucide-icon>
-        <span>{{ errorMessage() }}</span>
-      </div>
-    }
-
     <!-- Type Selection -->
     <div class="form-section">
       <h2 class="section-title">{{ 'RIGHTS_HOLDERS.TYPE' | translate }}</h2>
@@ -262,25 +252,58 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label for="ipi_number">
-            <lucide-icon [img]="Hash" [size]="16"></lucide-icon>
-            {{ 'RIGHTS_HOLDERS.IPI_NUMBER' | translate }}
+          <label for="ipi_number" class="form-label-with-help">
+            <span class="form-label-with-help__text">
+              <lucide-icon [img]="Hash" [size]="16"></lucide-icon>
+              {{ 'RIGHTS_HOLDERS.IPI_NUMBER' | translate }}
+            </span>
+            <app-help-tooltip
+              [label]="'RIGHTS_HOLDERS.IPI_HELP_A11Y' | translate"
+              [heading]="'RIGHTS_HOLDERS.IPI_HELP_TITLE' | translate"
+            >
+              <p>{{ 'RIGHTS_HOLDERS.IPI_HELP_BODY' | translate }}</p>
+              <ul class="help-tooltip__list">
+                <li>
+                  <a href="https://www.gema.de/en/musikurheber/mitglied-werden" target="_blank" rel="noopener">
+                    {{ 'RIGHTS_HOLDERS.IPI_HELP_LINK_GEMA' | translate }}
+                  </a>
+                </li>
+                <li>
+                  <a href="https://www.ascap.com/help/my-ascap-membership" target="_blank" rel="noopener">
+                    {{ 'RIGHTS_HOLDERS.IPI_HELP_LINK_ASCAP' | translate }}
+                  </a>
+                </li>
+                <li>
+                  <a href="https://www.bmi.com/creators" target="_blank" rel="noopener">
+                    {{ 'RIGHTS_HOLDERS.IPI_HELP_LINK_BMI' | translate }}
+                  </a>
+                </li>
+              </ul>
+            </app-help-tooltip>
           </label>
           <input
             id="ipi_number"
             type="text"
             formControlName="ipi_number"
             class="form-input code-input"
-            [class.error]="hasError('ipi_number', 'pattern')"
+            [class.error]="hasError('ipi_number', 'ipiFormat') || ipiLookupState().status === 'invalid'"
             placeholder="123456789"
             maxlength="11"
           />
-          @if (hasError('ipi_number', 'pattern')) {
+          @if (hasError('ipi_number', 'ipiFormat')) {
             <div class="error-message">
               {{ 'RIGHTS_HOLDERS.IPI_INVALID' | translate }}
             </div>
           }
           <div class="field-hint">{{ 'RIGHTS_HOLDERS.IPI_FORMAT' | translate }}</div>
+          @if (ipiLookupState().message) {
+            <div
+              class="ipi-lookup-status"
+              [attr.data-status]="ipiLookupState().status"
+            >
+              {{ ipiLookupState().message }}
+            </div>
+          }
         </div>
 
         <div class="form-group">

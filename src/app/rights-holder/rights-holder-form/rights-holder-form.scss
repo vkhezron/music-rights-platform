@@ -71,46 +71,9 @@
 // =====================================================
 
 .rh-form {
+  position: relative;
   max-width: 900px;
   margin: 0 auto;
-}
-
-// =====================================================
-// ALERTS
-// =====================================================
-
-.success-alert {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem;
-  background: #d1fae5;
-  border: 1px solid #6ee7b7;
-  border-radius: 12px;
-  color: #065f46;
-  margin-bottom: 1.5rem;
-
-  lucide-icon.success-icon {
-    color: #10b981;
-    flex-shrink: 0;
-  }
-}
-
-.error-alert {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem;
-  background: #fee2e2;
-  border: 1px solid #fca5a5;
-  border-radius: 12px;
-  color: #991b1b;
-  margin-bottom: 1.5rem;
-
-  lucide-icon.error-icon {
-    color: #ef4444;
-    flex-shrink: 0;
-  }
 }
 
 // =====================================================
@@ -268,6 +231,59 @@ label {
   font-size: 0.75rem;
   color: #718096;
   margin-top: 0.375rem;
+
+.form-label-with-help {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  &__text {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  app-help-tooltip {
+    flex-shrink: 0;
+  }
+}
+
+.help-tooltip__list {
+  margin: 0.5rem 0 0 1rem;
+  padding: 0;
+  list-style: disc;
+
+  li {
+    margin: 0.25rem 0;
+    color: #f9fafb;
+  }
+
+  a {
+    color: #bfdbfe;
+    text-decoration: underline;
+  }
+}
+
+.ipi-lookup-status {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+
+  &[data-status='invalid'],
+  &[data-status='not_found'] {
+    color: #fca5a5;
+  }
+
+  &[data-status='resolved'] {
+    color: #bbf7d0;
+  }
+
+  &[data-status='loading'] {
+    color: #fde68a;
+  }
+}
 }
 
 // =====================================================

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { SplitEntryCardComponent } from './components/split-entry-card.component';
@@ -38,12 +38,14 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   private readonly qrScannerService = inject(QRScannerService);
   private readonly pdfGenerator = inject(PdfGeneratorService);
   private readonly supabase = inject(SupabaseService);
+  private readonly translate = inject(TranslateService);
 
   @ViewChild('qrVideo') qrVideo?: ElementRef<HTMLVideoElement>;
 
   protected readonly Math = Math;
 
   private workId = '';
+  private readonly totalTolerance = 0.01;
 
   protected work = signal<Work | null>(null);
   protected rightsHolders = signal<RightsHolder[]>([]);
@@ -80,13 +82,126 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   protected musicProgressClass = computed(() => this.splitCalculator.getProgressClass(this.musicTotal()));
   protected neighbouringProgressClass = computed(() => this.splitCalculator.getProgressClass(this.neighbouringTotal()));
 
+  protected readonly lyricsStatus = computed(() => this.computeTotalStatus('lyrics'));
+  protected readonly musicStatus = computed(() => this.computeTotalStatus('music'));
+  protected readonly neighbouringStatus = computed(() => this.computeTotalStatus('neighbouring'));
+  protected readonly totalStatuses = computed(() => [this.lyricsStatus(), this.musicStatus(), this.neighbouringStatus()]);
+  protected readonly hasAnyEntries = computed(() => this.entries().length > 0);
+  protected readonly totalsBalanced = computed(() =>
+    this.totalStatuses().every(status => !status.hasEntries || status.state === 'complete')
+  );
+  protected readonly canSubmit = computed(() => this.hasAnyEntries() && this.totalsBalanced());
+  protected readonly saveDisabled = computed(() => this.isSaving() || this.isLoading() || !this.canSubmit());
+  protected readonly saveBlockedReason = computed(() => this.resolveSaveBlockedReason());
+  protected readonly totalsAlertMessage = computed(() => this.resolveTotalsAlertMessage());
+
   protected readonly trackEntry = (_index: number, entry: SplitEntry) =>
     entry.id ?? entry.tempId ?? `${_index}`;
+
+  protected totalHint(status: SplitTotalStatus): string {
+    if (!status.hasEntries) {
+      return this.translate.instant('SPLITS.TOTAL_HINT_EMPTY');
+    }
+
+    if (status.state === 'complete') {
+      return this.translate.instant('SPLITS.TOTAL_HINT_COMPLETE');
+    }
+
+    const diff = Math.abs(status.difference).toFixed(2);
+    const key = status.state === 'under' ? 'SPLITS.TOTAL_HINT_MISSING' : 'SPLITS.TOTAL_HINT_OVER';
+    return this.translate.instant(key, { value: diff });
+  }
 
   constructor() {
     this.rightsHoldersService.rightsHolders$
       .pipe(takeUntilDestroyed())
       .subscribe(list => this.rightsHolders.set(list));
+  }
+
+  private computeTotalStatus(category: SplitCategory): SplitTotalStatus {
+    return this.computeTotalStatusInternal(this.entries(), category);
+  }
+
+  private computeTotalStatusInternal(entries: SplitEntry[], category: SplitCategory): SplitTotalStatus {
+    const categoryEntries = entries.filter(entry => entry.splitType === category);
+    const total = categoryEntries.reduce((sum, entry) => sum + (entry.ownershipPercentage || 0), 0);
+    const difference = total - 100;
+    const hasEntries = categoryEntries.length > 0;
+
+    if (!hasEntries) {
+      return {
+        category,
+        total,
+        difference,
+        state: 'empty',
+        hasEntries,
+      };
+    }
+
+    if (Math.abs(difference) <= this.totalTolerance) {
+      return {
+        category,
+        total,
+        difference,
+        state: 'complete',
+        hasEntries,
+      };
+    }
+
+    return {
+      category,
+      total,
+      difference,
+      state: difference > 0 ? 'over' : 'under',
+      hasEntries,
+    };
+  }
+
+  private resolveSaveBlockedReason(): string {
+    if (this.isSaving() || this.isLoading()) {
+      return '';
+    }
+
+    if (!this.hasAnyEntries()) {
+      return this.translate.instant('SPLITS.SAVE_DISABLED_NO_ENTRIES');
+    }
+
+    const issue = this.totalStatuses().find(status => status.hasEntries && status.state !== 'complete');
+    if (!issue) {
+      return '';
+    }
+
+    const diff = Math.abs(issue.difference).toFixed(2);
+    const categoryLabel = this.translate.instant(this.categoryTranslationKey(issue.category));
+    const key = issue.state === 'under' ? 'SPLITS.SAVE_DISABLED_MISSING' : 'SPLITS.SAVE_DISABLED_OVER';
+    return this.translate.instant(key, { value: diff, category: categoryLabel });
+  }
+
+  private resolveTotalsAlertMessage(): string {
+    if (!this.hasAnyEntries()) {
+      return this.translate.instant('SPLITS.TOTAL_ALERT_NO_ENTRIES');
+    }
+
+    const issue = this.totalStatuses().find(status => status.hasEntries && status.state !== 'complete');
+    if (!issue) {
+      return '';
+    }
+
+    const diff = Math.abs(issue.difference).toFixed(2);
+    const categoryLabel = this.translate.instant(this.categoryTranslationKey(issue.category));
+    const key = issue.state === 'under' ? 'SPLITS.TOTAL_ALERT_MISSING' : 'SPLITS.TOTAL_ALERT_OVER';
+    return this.translate.instant(key, { value: diff, category: categoryLabel });
+  }
+
+  private categoryTranslationKey(category: SplitCategory): string {
+    switch (category) {
+      case 'lyrics':
+        return 'PROTOCOL.LYRICS';
+      case 'music':
+        return 'PROTOCOL.MUSIC';
+      default:
+        return 'SPLITS.NEIGHBORING_RIGHTS';
+    }
   }
 
   async ngOnInit(): Promise<void> {
@@ -218,6 +333,14 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
     this.clearMessages();
 
     const entries = this.entries();
+    if (!this.canSubmit()) {
+      const reason = this.saveBlockedReason();
+      if (reason) {
+        this.errorMessage.set(reason);
+      }
+      return;
+    }
+
     const validationError = this.validateEntries(entries);
 
     if (validationError) {
@@ -472,20 +595,20 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
       }
     }
 
-    const tolerance = 0.01;
-    const groups: Array<{ key: SplitCategory; label: string }> = [
-      { key: 'lyrics', label: 'Lyrics' },
-      { key: 'music', label: 'Music' },
-      { key: 'neighbouring', label: 'Neighbouring rights' },
-    ];
+    const groups: SplitCategory[] = ['lyrics', 'music', 'neighbouring'];
 
-    for (const group of groups) {
-      const groupEntries = entries.filter(entry => entry.splitType === group.key);
-      if (!groupEntries.length) continue;
+    for (const category of groups) {
+      const status = this.computeTotalStatusInternal(entries, category);
+      if (!status.hasEntries) continue;
 
-      const total = groupEntries.reduce((sum, entry) => sum + (entry.ownershipPercentage || 0), 0);
-      if (Math.abs(total - 100) > tolerance) {
-        return `${group.label} splits must add up to 100%. Currently ${total.toFixed(2)}%.`;
+      const label = this.translate.instant(this.categoryTranslationKey(category));
+
+      if (status.state === 'under') {
+        return `${label} splits must add up to 100%. Currently ${status.total.toFixed(2)}%.`;
+      }
+
+      if (status.state === 'over') {
+        return `${label} splits exceed 100%. Currently ${status.total.toFixed(2)}%.`;
       }
     }
 
@@ -632,5 +755,13 @@ export interface WorkSplitUpsert {
   notes?: string;
   contribution_types?: SplitEntry['contributionTypes'] | null;
   roles?: string[] | null;
+}
+
+export interface SplitTotalStatus {
+  category: SplitCategory;
+  total: number;
+  difference: number;
+  state: 'empty' | 'complete' | 'under' | 'over';
+  hasEntries: boolean;
 }
 

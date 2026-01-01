@@ -11,6 +11,7 @@ import {
   Gauge,
   AlertTriangle,
   Loader2,
+  QrCode,
 } from 'lucide-angular';
 import { ProfileService } from '../../services/profile.service';
 import { SupabaseService } from '../../services/supabase.service';
@@ -19,6 +20,7 @@ import { WorksService } from '../../services/works';
 import { RightsHoldersService } from '../../services/rights-holder';
 import { ProtocolService } from '../../services/protocol.service';
 import type { UserProfile } from '../../../models/profile.model';
+import { TranslateModule } from '@ngx-translate/core';
 
 interface QuickStats {
   works: number;
@@ -29,7 +31,7 @@ interface QuickStats {
 @Component({
   selector: 'app-profile-hub',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule],
+  imports: [CommonModule, RouterLink, LucideAngularModule, TranslateModule],
   templateUrl: './profile-hub.html',
   styleUrls: ['./profile-hub.scss'],
 })
@@ -49,6 +51,7 @@ export class ProfileHubComponent implements OnInit {
   readonly GaugeIcon = Gauge;
   readonly WarningIcon = AlertTriangle;
   readonly LoaderIcon = Loader2;
+  readonly QrCodeIcon = QrCode;
 
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
@@ -147,6 +150,10 @@ export class ProfileHubComponent implements OnInit {
     this.goToDashboard();
   }
 
+  protected goToQrCode(): void {
+    this.router.navigate(['/profile/qr-code']);
+  }
+
   protected displayName(): string {
     const current = this.profile();
     if (!current) {
@@ -164,14 +171,18 @@ export class ProfileHubComponent implements OnInit {
 
       if (!profile) {
         this.profile.set(null);
-        this.errorMessage.set('Profile not found yet. Finish your profile to unlock collaboration.');
+        this.errorMessage.set('PROFILE_HUB.ERROR_PROFILE_MISSING');
         return;
       }
 
       this.profile.set(profile);
     } catch (error: any) {
       console.error('Error loading profile hub data', error);
-      this.errorMessage.set(error?.message || 'Unable to load your profile right now.');
+      const fallbackKey = 'PROFILE_HUB.ERROR_GENERIC';
+      const message = typeof error?.message === 'string' && error.message.trim().length > 0
+        ? error.message
+        : fallbackKey;
+      this.errorMessage.set(message);
     } finally {
       this.isLoading.set(false);
     }

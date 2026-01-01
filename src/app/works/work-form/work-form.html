@@ -15,23 +15,13 @@
 
   <!-- Form -->
   <form [formGroup]="workForm" (ngSubmit)="onSubmit()" class="work-form">
+    @if (isLoading()) {
+      <div class="loading-overlay">
+        <div class="spinner"></div>
+        <p>{{ 'COMMON.LOADING' | translate }}</p>
+      </div>
+    }
     
-    <!-- Success Message -->
-    @if (successMessage()) {
-      <div class="success-alert">
-        <lucide-icon [img]="CheckCircle" [size]="20" class="success-icon"></lucide-icon>
-        <span>{{ successMessage() }}</span>
-      </div>
-    }
-
-    <!-- Error Message -->
-    @if (errorMessage()) {
-      <div class="error-alert">
-        <lucide-icon [img]="AlertCircle" [size]="20" class="error-icon"></lucide-icon>
-        <span>{{ errorMessage() }}</span>
-      </div>
-    }
-
     <!-- Basic Information Section -->
     <div class="form-section">
       <h2 class="section-title">

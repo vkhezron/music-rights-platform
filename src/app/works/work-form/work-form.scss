@@ -65,46 +65,9 @@
 // =====================================================
 
 .work-form {
+  position: relative;
   max-width: 900px;
   margin: 0 auto;
-}
-
-// =====================================================
-// ALERTS
-// =====================================================
-
-.success-alert {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem;
-  background: #d1fae5;
-  border: 1px solid #6ee7b7;
-  border-radius: 12px;
-  color: #065f46;
-  margin-bottom: 1.5rem;
-
-  lucide-icon.success-icon {
-    color: #10b981;
-    flex-shrink: 0;
-  }
-}
-
-.error-alert {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem;
-  background: #fee2e2;
-  border: 1px solid #fca5a5;
-  border-radius: 12px;
-  color: #991b1b;
-  margin-bottom: 1.5rem;
-
-  lucide-icon.error-icon {
-    color: #ef4444;
-    flex-shrink: 0;
-  }
 }
 
 // =====================================================

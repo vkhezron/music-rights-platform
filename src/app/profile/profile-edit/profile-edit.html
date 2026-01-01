@@ -8,22 +8,6 @@
 
     <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="edit-form">
       
-      <!-- Success Message -->
-      @if (successMessage()) {
-        <div class="success-alert">
-          <lucide-icon [img]="CheckCircle" [size]="20" class="success-icon"></lucide-icon>
-          <span>{{ successMessage() }}</span>
-        </div>
-      }
-
-      <!-- Error Message -->
-      @if (errorMessage()) {
-        <div class="error-alert">
-          <lucide-icon [img]="AlertCircle" [size]="20" class="error-icon"></lucide-icon>
-          <span>{{ errorMessage() | translate }}</span>
-        </div>
-      }
-
       <!-- Loading State -->
       @if (isLoading()) {
         <div class="loading-overlay">

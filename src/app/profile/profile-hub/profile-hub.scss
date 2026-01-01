@@ -132,6 +132,28 @@
     font-size: 1rem;
     color: rgba(15, 23, 42, 0.55);
   }
+
+  .qr-button {
+    margin-top: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    background: rgba(14, 116, 144, 0.08);
+    color: #0f172a;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.12);
+      background: rgba(14, 116, 144, 0.16);
+    }
+  }
 }
 
 .completeness {

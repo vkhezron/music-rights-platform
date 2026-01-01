@@ -163,7 +163,7 @@
 
   <div class="entry-card__grid" *ngIf="showContributionFlags()">
     <div class="entry-card__field">
-      <span>Contribution</span>
+      <span class="entry-card__field-label">Contribution</span>
       <div class="entry-card__checkbox-group">
         <label>
           <input
@@ -194,8 +194,13 @@
   </div>
 
   <div class="entry-card__grid" *ngIf="showRoleSelector()">
-    <label class="entry-card__field">
+    <label class="entry-card__field entry-card__field--with-help">
       <span>Roles</span>
+      <app-help-tooltip
+        [label]="'SPLITS.ROLE_HELP_A11Y' | translate"
+        [heading]="'SPLITS.ROLE_HELP_TITLE' | translate"
+        [text]="'SPLITS.ROLE_HELP_BODY' | translate"
+      ></app-help-tooltip>
       <app-role-selector
         [selectedRoles]="localEntry.roles || []"
         (rolesChange)="onRoleChange($event)"

@@ -16,7 +16,9 @@ export class SplitCalculatorService {
   }
 
   calculateIPRightsTotal(lyricsTotal: number, musicTotal: number): number {
-    return (lyricsTotal * 0.5) + (musicTotal * 0.5);
+    const normalizedLyrics = this.normalizeShare(lyricsTotal);
+    const normalizedMusic = this.normalizeShare(musicTotal);
+    return Math.min(normalizedLyrics + normalizedMusic, 100);
   }
 
   getIPRightsSummary(entries: SplitEntry[]): IPRightsSummary {
@@ -25,19 +27,23 @@ export class SplitCalculatorService {
 
     const lyricsTotal = this.calculateLyricsTotal(entries);
     const musicTotal = this.calculateMusicTotal(entries);
+    const normalizedLyrics = this.normalizeShare(lyricsTotal);
+    const normalizedMusic = this.normalizeShare(musicTotal);
+    const combined = normalizedLyrics + normalizedMusic;
+    const weightDenominator = combined > 0 ? combined : 1;
 
     return {
       lyrics: {
         entries: lyricsEntries,
         total: lyricsTotal,
-        weight: 0.5,
+        weight: combined > 0 ? normalizedLyrics / weightDenominator : 0,
       },
       music: {
         entries: musicEntries,
         total: musicTotal,
-        weight: 0.5,
+        weight: combined > 0 ? normalizedMusic / weightDenominator : 0,
       },
-      total: this.calculateIPRightsTotal(lyricsTotal, musicTotal),
+      total: Math.min(combined, 100),
     };
   }
 
@@ -91,5 +97,13 @@ export class SplitCalculatorService {
       valid: errors.length === 0,
       errors,
     };
+  }
+
+  private normalizeShare(value: number): number {
+    if (!Number.isFinite(value)) {
+      return 0;
+    }
+
+    return Math.max(0, Math.min(value, 100));
   }
 }

@@ -59,7 +59,13 @@ describe('SplitEditorComponent', () => {
           } as unknown as ProfileService,
         },
         { provide: QRScannerService, useValue: { hasCameraSupport: () => Promise.resolve(false), startScanning: () => Promise.resolve(), stopScanning: () => {} } as unknown as QRScannerService },
-        { provide: PdfGeneratorService, useValue: { generateProtocolPDF: () => Promise.resolve(new Blob()) } as unknown as PdfGeneratorService },
+        {
+          provide: PdfGeneratorService,
+          useValue: {
+            generateProtocolPDF: () => Promise.resolve(new Blob()),
+            downloadProtocol: () => Promise.resolve(),
+          } as unknown as PdfGeneratorService,
+        },
         { provide: SupabaseService, useValue: { currentUser: { id: 'user-1', email: 'test@example.com' } } as unknown as SupabaseService },
       ],
     })

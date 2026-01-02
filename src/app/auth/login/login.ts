@@ -76,4 +76,5 @@ export class Login {
     const field = this.loginForm.get(fieldName);
     return field ? field.hasError(errorType) && (field.dirty || field.touched) : false;
   }
+
 }

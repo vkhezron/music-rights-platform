@@ -88,7 +88,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   protected readonly totalStatuses = computed(() => [this.lyricsStatus(), this.musicStatus(), this.neighbouringStatus()]);
   protected readonly hasAnyEntries = computed(() => this.entries().length > 0);
   protected readonly totalsBalanced = computed(() =>
-    this.totalStatuses().every(status => !status.hasEntries || status.state === 'complete')
+    this.totalStatuses().every(status => !status.hasEntries || status.state !== 'over')
   );
   protected readonly canSubmit = computed(() => this.hasAnyEntries() && this.totalsBalanced());
   protected readonly saveDisabled = computed(() => this.isSaving() || this.isLoading() || !this.canSubmit());
@@ -171,10 +171,13 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
       return '';
     }
 
+    if (issue.state !== 'over') {
+      return '';
+    }
+
     const diff = Math.abs(issue.difference).toFixed(2);
     const categoryLabel = this.translate.instant(this.categoryTranslationKey(issue.category));
-    const key = issue.state === 'under' ? 'SPLITS.SAVE_DISABLED_MISSING' : 'SPLITS.SAVE_DISABLED_OVER';
-    return this.translate.instant(key, { value: diff, category: categoryLabel });
+    return this.translate.instant('SPLITS.SAVE_DISABLED_OVER', { value: diff, category: categoryLabel });
   }
 
   private resolveTotalsAlertMessage(): string {
@@ -213,6 +216,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
 
     this.workId = workId;
     this.hasCameraSupport.set(await this.qrScannerService.hasCameraSupport());
+    await this.ensureProfileLoaded();
     await this.loadData(workId);
   }
 
@@ -332,7 +336,9 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
 
     this.clearMessages();
 
-    const entries = this.entries();
+    const preparedEntries = this.entries().map(entry => this.ensureEntryNickname(entry));
+    this.entries.set(preparedEntries);
+
     if (!this.canSubmit()) {
       const reason = this.saveBlockedReason();
       if (reason) {
@@ -341,7 +347,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const validationError = this.validateEntries(entries);
+    const validationError = this.validateEntries(preparedEntries);
 
     if (validationError) {
       this.errorMessage.set(validationError);
@@ -351,7 +357,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
     this.isSaving.set(true);
 
     try {
-      const entriesWithHolders = await this.ensureRightsHolderIds(entries);
+      const entriesWithHolders = await this.ensureRightsHolderIds(preparedEntries);
 
       const normalizeContributionTypes = (entry: SplitEntry) => ({
         melody: entry.contributionTypes?.melody ?? false,
@@ -440,16 +446,10 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
           roles: entry.roles ?? null,
         }));
 
-      const blob = await this.pdfGenerator.generateSplitSheetPDF(work, ipRows, neighbouringRows);
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${work.work_title.replace(/\s+/g, '-').toLowerCase()}-splits.pdf`;
-      link.click();
-      URL.revokeObjectURL(url);
+      await this.pdfGenerator.downloadProtocol(work, ipRows, neighbouringRows);
     } catch (error) {
       console.error('Failed to generate PDF', error);
-      this.errorMessage.set('Unable to generate the split sheet PDF right now.');
+      this.errorMessage.set('Unable to generate the protocol PDF right now.');
     }
   }
 
@@ -533,17 +533,125 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
     return base;
   }
 
+  private ensureEntryNickname(entry: SplitEntry): SplitEntry {
+    const direct = this.normalizeNickname(entry.nickname);
+    if (direct) {
+      return { ...entry, nickname: direct };
+    }
+
+    const candidates = [
+      entry.displayName,
+      `${entry.firstName ?? ''} ${entry.lastName ?? ''}`.trim(),
+      entry.email ? entry.email.split('@')[0] : undefined,
+    ];
+
+    for (const candidate of candidates) {
+      const normalized = this.normalizeNickname(candidate);
+      if (normalized) {
+        return { ...entry, nickname: normalized };
+      }
+    }
+
+    return { ...entry, nickname: this.generateFallbackNickname() };
+  }
+
+  private normalizeNickname(value?: string | null): string | undefined {
+    if (!value) return undefined;
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+
+    const lower = trimmed.toLowerCase();
+    const withoutPrefix = lower.startsWith('@') ? lower.slice(1) : lower;
+    const sanitized = withoutPrefix
+      .replace(/[^a-z0-9._-]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    return sanitized || undefined;
+  }
+
+  private generateFallbackNickname(): string {
+    const cryptoRef = globalThis.crypto as Crypto | undefined;
+    const fragment = cryptoRef?.randomUUID?.().split('-')[0] ?? Math.random().toString(36).slice(2, 8);
+    return `holder-${fragment}`;
+  }
+
+  protected shouldShowAddMe(splitType: SplitCategory): boolean {
+    if (!this.supabase.currentUser && !this.profileService.currentProfile) {
+      return false;
+    }
+
+    return !this.entries()
+      .filter(entry => entry.splitType === splitType)
+      .some(entry => this.entryBelongsToCurrentUser(entry));
+  }
+
+  private entryBelongsToCurrentUser(entry: SplitEntry): boolean {
+    const profile = this.profileService.currentProfile;
+    const currentUser = this.supabase.currentUser;
+
+    if (entry.entryMethod === 'add_me') {
+      return true;
+    }
+
+    if (!entry.rightsHolderId) {
+      return false;
+    }
+
+    const holder = this.findRightsHolderById(entry.rightsHolderId);
+    if (!holder) {
+      return false;
+    }
+
+    if (profile?.id && holder.profile_id === profile.id) {
+      return true;
+    }
+
+    if (currentUser?.id && holder.linked_user_id === currentUser.id) {
+      return true;
+    }
+
+    if (profile?.nickname && holder.nickname === profile.nickname) {
+      return true;
+    }
+
+    if (currentUser?.email && holder.email === currentUser.email) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private async ensureProfileLoaded(): Promise<void> {
+    const currentUser = this.supabase.currentUser;
+    if (!currentUser?.id) {
+      return;
+    }
+
+    if (this.profileService.currentProfile) {
+      return;
+    }
+
+    try {
+      await this.profileService.loadProfile(currentUser.id);
+    } catch (error) {
+      console.warn('Unable to preload profile for split editor', error);
+    }
+  }
+
   private async ensureRightsHolderIds(entries: SplitEntry[]): Promise<SplitEntry[]> {
     const resolved: SplitEntry[] = [];
 
     for (const entry of entries) {
-      if (entry.rightsHolderId) {
-        resolved.push(entry);
+      const normalized = this.ensureEntryNickname(entry);
+
+      if (normalized.rightsHolderId) {
+        resolved.push(normalized);
         continue;
       }
 
-      const holder = await this.createRightsHolder(entry);
-      resolved.push({ ...entry, rightsHolderId: holder.id });
+      const holder = await this.createRightsHolder(normalized);
+      resolved.push({ ...normalized, rightsHolderId: holder.id });
     }
 
     return resolved;
@@ -602,10 +710,6 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
       if (!status.hasEntries) continue;
 
       const label = this.translate.instant(this.categoryTranslationKey(category));
-
-      if (status.state === 'under') {
-        return `${label} splits must add up to 100%. Currently ${status.total.toFixed(2)}%.`;
-      }
 
       if (status.state === 'over') {
         return `${label} splits exceed 100%. Currently ${status.total.toFixed(2)}%.`;

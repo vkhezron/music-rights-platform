@@ -20,7 +20,7 @@
 
   <div class="entry-card__grid entry-card__grid--identity">
     <label class="entry-card__field">
-      <span>Public handle</span>
+      <span class="entry-card__label entry-card__label--required">Public handle</span>
       <div class="entry-card__handle">
         <span class="entry-card__handle-prefix">@</span>
         <input
@@ -98,7 +98,7 @@
 
   <div class="entry-card__grid entry-card__grid--equal">
     <label class="entry-card__field">
-      <span>Share</span>
+      <span class="entry-card__label entry-card__label--required">Share</span>
       <div class="entry-card__percentage">
         <input
           type="number"
@@ -151,7 +151,7 @@
 
   <div class="entry-card__grid" *ngIf="localEntry.aiDisclosure.creationType !== 'human'">
     <label class="entry-card__field">
-      <span>AI tool</span>
+      <span class="entry-card__label entry-card__label--required">AI tool</span>
       <input
         type="text"
         [(ngModel)]="localEntry.aiDisclosure.aiTool"
@@ -195,7 +195,7 @@
 
   <div class="entry-card__grid" *ngIf="showRoleSelector()">
     <label class="entry-card__field entry-card__field--with-help">
-      <span>Roles</span>
+      <span class="entry-card__label entry-card__label--required">Roles</span>
       <app-help-tooltip
         [label]="'SPLITS.ROLE_HELP_A11Y' | translate"
         [heading]="'SPLITS.ROLE_HELP_TITLE' | translate"

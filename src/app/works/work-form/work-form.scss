@@ -517,6 +517,248 @@ label {
 }
 
 // =====================================================
+// REVIEW & SUCCESS OVERLAYS
+// =====================================================
+
+.submission-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 50;
+}
+
+.review-dialog,
+.success-dialog {
+  width: min(640px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 18px;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+  padding: 2rem;
+}
+
+.review-header {
+  margin-bottom: 1.5rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a202c;
+  }
+
+  p {
+    margin: 0.5rem 0 0;
+    color: #4a5568;
+    font-size: 0.95rem;
+  }
+}
+
+.review-section {
+  margin-bottom: 1.75rem;
+
+  &:last-of-type {
+    margin-bottom: 2rem;
+  }
+
+  h4 {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2d3748;
+  }
+}
+
+.review-list {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.review-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+
+  dt {
+    min-width: 160px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #4a5568;
+  }
+
+  dd {
+    margin: 0;
+    flex: 1;
+    font-size: 0.95rem;
+    color: #1a202c;
+    line-height: 1.4;
+  }
+}
+
+.inline-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0;
+
+  li {
+    list-style: none;
+    background: #eef2ff;
+    color: #4338ca;
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+  }
+}
+
+.ai-summary-list {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  li {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+
+    strong {
+      font-size: 0.9rem;
+      color: #2d3748;
+    }
+
+    span {
+      font-size: 0.9rem;
+      color: #1a202c;
+    }
+  }
+}
+
+.ai-note {
+  display: block;
+  font-size: 0.85rem;
+  color: #4a5568;
+  font-style: italic;
+}
+
+.review-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.primary-button,
+.ghost-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.75rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.primary-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.ghost-button {
+  background: white;
+  border: 2px solid #e2e8f0;
+  color: #4a5568;
+
+  &:hover:not(:disabled) {
+    border-color: #cbd5e0;
+    color: #1a202c;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.button-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+.success-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+
+  lucide-icon {
+    color: #10b981;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #064e3b;
+  }
+
+  p {
+    margin: 0;
+    color: #4a5568;
+    font-size: 0.95rem;
+  }
+}
+
+.success-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .secondary-button {
+    justify-content: center;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .ghost-button {
+    width: 100%;
+  }
+}
+
+// =====================================================
 // RESPONSIVE
 // =====================================================
 
@@ -565,6 +807,28 @@ label {
 
 @media (max-width: 480px) {
   .header-info {
+
+    .review-dialog,
+    .success-dialog {
+      padding: 1.5rem;
+    }
+
+    .review-row {
+      flex-direction: column;
+
+      dt {
+        min-width: 0;
+      }
+    }
+
+    .review-actions {
+      flex-direction: column;
+
+      .primary-button,
+      .ghost-button {
+        width: 100%;
+      }
+    }
     h1 {
       font-size: 1.5rem;
     }

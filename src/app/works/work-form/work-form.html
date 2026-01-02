@@ -392,10 +392,10 @@
       <button
         type="submit"
         class="submit-button"
-        [disabled]="isLoading() || workForm.invalid || !aiDisclosuresValid()">
+        [disabled]="isLoading() || workForm.invalid || !aiDisclosuresValid() || isSubmitting()">
         @if (!isLoading()) {
           <lucide-icon [img]="Save" [size]="20"></lucide-icon>
-          <span>{{ (isEditMode() ? 'COMMON.SAVE' : 'WORKS.SAVE_AND_ADD_HOLDER') | translate }}</span>
+          <span>{{ (isEditMode() ? 'WORKS.REVIEW_AND_SAVE' : 'WORKS.REVIEW_AND_SUBMIT') | translate }}</span>
         }
         @if (isLoading()) {
           <span class="loading">
@@ -406,4 +406,174 @@
       </button>
     </div>
   </form>
+
+  @if (showReview()) {
+    @if (pendingWorkData(); as review) {
+      <div class="submission-overlay" role="dialog" aria-modal="true">
+        <div class="review-dialog">
+          <header class="review-header">
+            <h3>{{ 'WORKS.REVIEW_MODAL.TITLE' | translate }}</h3>
+            <p>{{ 'WORKS.REVIEW_MODAL.DESCRIPTION' | translate }}</p>
+          </header>
+
+          <section class="review-section">
+            <h4>{{ 'WORKS.REVIEW_MODAL.SECTIONS.BASIC' | translate }}</h4>
+            <dl class="review-list">
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.TITLE' | translate }}</dt>
+                <dd>{{ review.work_title || ('WORKS.REVIEW_MODAL.EMPTY.NOT_SET' | translate) }}</dd>
+              </div>
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.STATUS' | translate }}</dt>
+                <dd>{{ review.status | titlecase }}</dd>
+              </div>
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.GENRE' | translate }}</dt>
+                <dd>{{ review.genre || ('WORKS.REVIEW_MODAL.EMPTY.NOT_SET' | translate) }}</dd>
+              </div>
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.LANGUAGES' | translate }}</dt>
+                @let languages = formatLanguages(review.languages);
+                <dd>{{ languages || ('WORKS.REVIEW_MODAL.EMPTY.NO_LANGUAGES' | translate) }}</dd>
+              </div>
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.ALTERNATIVE_TITLES' | translate }}</dt>
+                <dd>
+                  @if (review.alternative_titles?.length) {
+                    <ul class="inline-list">
+                      @for (title of review.alternative_titles; track $index) {
+                        <li>{{ title }}</li>
+                      }
+                    </ul>
+                  } @else {
+                    {{ 'WORKS.REVIEW_MODAL.EMPTY.NO_ALTERNATIVE_TITLES' | translate }}
+                  }
+                </dd>
+              </div>
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.NOTES' | translate }}</dt>
+                <dd>{{ review.notes || ('WORKS.REVIEW_MODAL.EMPTY.NO_NOTES' | translate) }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="review-section">
+            <h4>{{ 'WORKS.REVIEW_MODAL.SECTIONS.IDENTIFIERS' | translate }}</h4>
+            <dl class="review-list">
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.ISRC' | translate }}</dt>
+                <dd>{{ review.isrc || ('WORKS.REVIEW_MODAL.EMPTY.NOT_SET' | translate) }}</dd>
+              </div>
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.ISWC' | translate }}</dt>
+                <dd>{{ review.iswc || ('WORKS.REVIEW_MODAL.EMPTY.NOT_SET' | translate) }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="review-section">
+            <h4>{{ 'WORKS.REVIEW_MODAL.SECTIONS.TIMING' | translate }}</h4>
+            <dl class="review-list">
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.RECORDING_DATE' | translate }}</dt>
+                <dd>{{ formatDate(review.recording_date) || ('WORKS.REVIEW_MODAL.EMPTY.NOT_SET' | translate) }}</dd>
+              </div>
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.RELEASE_DATE' | translate }}</dt>
+                <dd>{{ formatDate(review.release_date) || ('WORKS.REVIEW_MODAL.EMPTY.NOT_SET' | translate) }}</dd>
+              </div>
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.DURATION' | translate }}</dt>
+                <dd>{{ formatDuration(review.duration_seconds) || ('WORKS.REVIEW_MODAL.EMPTY.NOT_SET' | translate) }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="review-section">
+            <h4>{{ 'WORKS.REVIEW_MODAL.SECTIONS.COVER' | translate }}</h4>
+            <dl class="review-list">
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.COVER' | translate }}</dt>
+                <dd>{{ review.is_cover_version ? ('COMMON.YES' | translate) : ('COMMON.NO' | translate) }}</dd>
+              </div>
+              @if (review.is_cover_version) {
+                <div class="review-row">
+                  <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.ORIGINAL_TITLE' | translate }}</dt>
+                  <dd>{{ review.original_work_title || ('WORKS.REVIEW_MODAL.EMPTY.NOT_SET' | translate) }}</dd>
+                </div>
+              }
+            </dl>
+          </section>
+
+          <section class="review-section">
+            <h4>{{ 'WORKS.REVIEW_MODAL.SECTIONS.AI' | translate }}</h4>
+            <ul class="ai-summary-list">
+              @let disclosures = aiDisclosures();
+              @for (section of disclosureSections; track section.key) {
+                @let disclosure = disclosures[section.key];
+                @let summary = describeDisclosure(disclosure);
+                <li>
+                  <strong>{{ section.labelKey | translate }}</strong>
+                  <span>{{ summary.key | translate:summary.params }}</span>
+                  @if (disclosure.notes) {
+                    <span class="ai-note">“{{ disclosure.notes }}”</span>
+                  }
+                </li>
+              }
+            </ul>
+          </section>
+
+          <footer class="review-actions">
+            <button
+              type="button"
+              class="ghost-button"
+              (click)="closeReview()"
+              [disabled]="isSubmitting()">
+              {{ 'WORKS.REVIEW_MODAL.ACTIONS.BACK' | translate }}
+            </button>
+            <button
+              type="button"
+              class="primary-button"
+              (click)="confirmSubmission()"
+              [disabled]="isSubmitting()">
+              @if (isSubmitting()) {
+                <span class="button-spinner"></span>
+                <span>{{ 'COMMON.SAVING' | translate }}</span>
+              } @else {
+                <span>{{ 'WORKS.REVIEW_MODAL.ACTIONS.CONFIRM' | translate }}</span>
+              }
+            </button>
+          </footer>
+        </div>
+      </div>
+    }
+  }
+
+  @if (submissionSuccess()) {
+    <div class="submission-overlay" role="dialog" aria-modal="true">
+      <div class="success-dialog">
+        <header class="success-header">
+          <lucide-icon [img]="CheckCircle" [size]="36"></lucide-icon>
+          <h3>
+            {{ (isCreateSubmission() ? 'WORKS.SUBMISSION_SUCCESS.CREATED_TITLE' : 'WORKS.SUBMISSION_SUCCESS.UPDATED_TITLE') | translate:{ title: submittedWorkTitle() } }}
+          </h3>
+          <p>
+            {{ (isCreateSubmission() ? 'WORKS.SUBMISSION_SUCCESS.CREATED_BODY' : 'WORKS.SUBMISSION_SUCCESS.UPDATED_BODY') | translate }}
+          </p>
+        </header>
+
+        <div class="success-actions">
+          <button class="primary-button" (click)="handlePrimarySuccessAction()">
+            {{ (isCreateSubmission() ? 'WORKS.SUBMISSION_SUCCESS.PRIMARY_CREATE' : 'WORKS.SUBMISSION_SUCCESS.PRIMARY_UPDATE') | translate }}
+          </button>
+          <button class="secondary-button" (click)="handleSecondarySuccessAction()">
+            {{ (isCreateSubmission() ? 'WORKS.SUBMISSION_SUCCESS.SECONDARY_CREATE' : 'WORKS.SUBMISSION_SUCCESS.SECONDARY_UPDATE') | translate }}
+          </button>
+          <button class="ghost-button" (click)="goToDashboard()">
+            {{ 'WORKS.SUBMISSION_SUCCESS.TERTIARY' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

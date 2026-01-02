@@ -2,21 +2,44 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { WorksService } from '../../services/works';
-import { WorkspaceService } from '../../services/workspace.service';
 import { FeedbackService } from '../../services/feedback.service';
 import { WorkFormData } from '../../models/work.model';
 import {
   WorkCreationDeclaration,
   WorkCreationDeclarationDraft,
   WorkCreationDeclarationMap,
+  WorkCreationSection,
   createDefaultWorkCreationDeclarationMap,
 } from '../../models/work-creation-declaration.model';
 import { AIDisclosureFormComponent } from '../../components/ai-disclosure-form/ai-disclosure-form.component';
 
 // Lucide Icons
-import { LucideAngularModule, ArrowLeft, Save, Plus, X, Music, Clock, Calendar, Globe, Tag, Edit } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  ArrowLeft,
+  Save,
+  Plus,
+  X,
+  Music,
+  Clock,
+  Calendar,
+  Globe,
+  Tag,
+  Edit,
+  CheckCircle
+} from 'lucide-angular';
+
+interface ReviewDisclosureMeta {
+  key: WorkCreationSection;
+  labelKey: string;
+}
+
+interface SummaryDescriptor {
+  key: string;
+  params?: Record<string, unknown>;
+}
 
 @Component({
   selector: 'app-work-form',
@@ -36,8 +59,8 @@ export class WorkFormComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private worksService = inject(WorksService);
-  private workspaceService = inject(WorkspaceService);
   private feedback = inject(FeedbackService);
+  private translate = inject(TranslateService);
 
   // Lucide Icons
   readonly ArrowLeft = ArrowLeft;
@@ -50,6 +73,7 @@ export class WorkFormComponent implements OnInit {
   readonly Globe = Globe;
   readonly Tag = Tag;
   readonly Edit = Edit;
+  readonly CheckCircle = CheckCircle;
 
   workForm!: FormGroup;
   isLoading = signal(false);
@@ -57,6 +81,21 @@ export class WorkFormComponent implements OnInit {
   workId = signal<string | null>(null);
   aiDisclosures = signal<WorkCreationDeclarationMap>(createDefaultWorkCreationDeclarationMap());
   aiDisclosuresValid = signal(true);
+  protected pendingWorkData = signal<WorkFormData | null>(null);
+  protected showReview = signal(false);
+  protected isSubmitting = signal(false);
+  protected submissionSuccess = signal(false);
+  protected submittedWorkId = signal<string | null>(null);
+  protected submittedWorkTitle = signal<string>('');
+  protected isCreateSubmission = signal(true);
+
+  protected readonly disclosureSections: ReviewDisclosureMeta[] = [
+    { key: 'ip', labelKey: 'AI_DISCLOSURE_FORM.SECTIONS.IP' },
+    { key: 'mixing', labelKey: 'AI_DISCLOSURE_FORM.SECTIONS.MIXING' },
+    { key: 'mastering', labelKey: 'AI_DISCLOSURE_FORM.SECTIONS.MASTERING' },
+    { key: 'session_musicians', labelKey: 'AI_DISCLOSURE_FORM.SECTIONS.SESSION_MUSICIANS' },
+    { key: 'visuals', labelKey: 'AI_DISCLOSURE_FORM.SECTIONS.VISUALS' }
+  ];
 
   // Options
   statusOptions = ['draft', 'registered', 'published', 'archived'];
@@ -223,7 +262,7 @@ export class WorkFormComponent implements OnInit {
     return languages.includes(language);
   }
 
-  async onSubmit() {
+  onSubmit() {
     if (this.workForm.invalid) {
       this.workForm.markAllAsTouched();
       this.feedback.error('Please fix the highlighted fields before saving.');
@@ -235,67 +274,89 @@ export class WorkFormComponent implements OnInit {
       return;
     }
 
-    this.isLoading.set(true);
-
-    try {
-      const formValue = this.workForm.value;
-      
-      const workData: WorkFormData = {
-        work_title: formValue.work_title,
-        alternative_titles: this.alternativeTitles.value.filter((t: string) => t.trim()),
-        isrc: formValue.isrc || undefined,
-        iswc: formValue.iswc || undefined,
-        duration_seconds: formValue.duration_seconds || undefined,
-        recording_date: formValue.recording_date || undefined,
-        release_date: formValue.release_date || undefined,
-        languages: formValue.languages.length > 0 ? formValue.languages : undefined,
-        genre: formValue.genre || undefined,
-        is_cover_version: formValue.is_cover_version,
-        original_work_title: formValue.original_work_title || undefined,
-        original_work_isrc: formValue.original_work_isrc || undefined,
-        original_work_iswc: formValue.original_work_iswc || undefined,
-        original_work_info: formValue.original_work_info || undefined,
-        status: formValue.status,
-        notes: formValue.notes || undefined,
-        ai_disclosures: this.toDisclosureArray(),
-      };
-
-      if (this.isEditMode() && this.workId()) {
-        await this.worksService.updateWork(this.workId()!, workData);
-        this.feedback.success('Work updated successfully.');
-        setTimeout(() => {
-          this.router.navigate(['/works']);
-        }, 1500);
-      } else {
-        const newWork = await this.worksService.createWork(workData);
-        this.feedback.success('Work created successfully.');
-        
-        // Ensure we have the work ID before navigating
-        if (newWork && newWork.id) {
-          console.log('Navigating to split editor for work:', newWork.id);
-          setTimeout(() => {
-            this.router.navigate(['/works', newWork.id, 'splits']);
-          }, 1500);
-        } else {
-          console.error('Work created but no ID returned:', newWork);
-          setTimeout(() => {
-            this.router.navigate(['/works']);
-          }, 1500);
-        }
-      }
-
-    } catch (error: any) {
-      console.error('Error saving work:', error);
-      this.feedback.handleError(error, 'We could not save this work. Please try again.');
-    } finally {
-      this.isLoading.set(false);
-    }
+    const workData = this.buildWorkFormData();
+    this.pendingWorkData.set(workData);
+    this.showReview.set(true);
   }
 
   editRightsHolders() {
     if (this.workId()) {
       this.router.navigate([`/works/${this.workId()}/splits`]);
     }
+  }
+
+  closeReview(): void {
+    if (this.isSubmitting()) {
+      return;
+    }
+    this.showReview.set(false);
+  }
+
+  async confirmSubmission(): Promise<void> {
+    const workData = this.pendingWorkData();
+    if (!workData) {
+      return;
+    }
+
+    this.isSubmitting.set(true);
+
+    try {
+      if (this.isEditMode() && this.workId()) {
+        await this.worksService.updateWork(this.workId()!, workData);
+        this.feedback.success(this.translate.instant('WORKS.ALERTS.UPDATE_SUCCESS'));
+        this.handleSubmissionSuccess(this.workId()!, workData.work_title, false);
+      } else {
+        const newWork = await this.worksService.createWork(workData);
+        const createdId = newWork?.id;
+
+        if (!createdId) {
+          throw new Error('WORKS.ALERTS.MISSING_WORK_ID');
+        }
+
+        this.feedback.success(this.translate.instant('WORKS.ALERTS.CREATE_SUCCESS'));
+        this.handleSubmissionSuccess(createdId, workData.work_title, true);
+      }
+    } catch (error) {
+      console.error('Error saving work:', error);
+      const message = this.translate.instant('WORKS.ALERTS.SUBMIT_FAILED');
+      this.feedback.handleError(error, message);
+    } finally {
+      this.isSubmitting.set(false);
+    }
+  }
+
+  handlePrimarySuccessAction(): void {
+    const workId = this.submittedWorkId();
+
+    if (this.isCreateSubmission()) {
+      if (workId) {
+        this.closeSuccessOverlay();
+        this.router.navigate([`/works/${workId}/splits`]);
+      }
+      return;
+    }
+
+    this.closeSuccessOverlay();
+    this.router.navigate(['/works']);
+  }
+
+  handleSecondarySuccessAction(): void {
+    const workId = this.submittedWorkId();
+
+    if (this.isCreateSubmission()) {
+      this.resetForNewWork();
+      return;
+    }
+
+    if (workId) {
+      this.closeSuccessOverlay();
+      this.router.navigate([`/works/${workId}/splits`]);
+    }
+  }
+
+  goToDashboard(): void {
+    this.closeSuccessOverlay();
+    this.router.navigate(['/dashboard']);
   }
 
   cancel() {
@@ -346,5 +407,121 @@ export class WorkFormComponent implements OnInit {
       }
       return Boolean(entry.ai_tool && entry.ai_tool.trim());
     });
+  }
+
+  protected describeDisclosure(disclosure: WorkCreationDeclarationDraft): SummaryDescriptor {
+    const tool = disclosure.ai_tool?.trim();
+
+    switch (disclosure.creation_type) {
+      case 'human':
+        return { key: 'AI_DISCLOSURE_FORM.SUMMARY.HUMAN' };
+      case 'ai_assisted':
+        return tool
+          ? { key: 'AI_DISCLOSURE_FORM.SUMMARY.AI_ASSISTED_WITH_TOOL', params: { tool } }
+          : { key: 'AI_DISCLOSURE_FORM.SUMMARY.AI_ASSISTED' };
+      case 'ai_generated':
+        return tool
+          ? { key: 'AI_DISCLOSURE_FORM.SUMMARY.AI_GENERATED_WITH_TOOL', params: { tool } }
+          : { key: 'AI_DISCLOSURE_FORM.SUMMARY.AI_GENERATED' };
+      default:
+        return { key: 'AI_DISCLOSURE_FORM.SUMMARY.UNKNOWN' };
+    }
+  }
+
+  protected formatLanguages(languages?: string[]): string | null {
+    return languages && languages.length ? languages.join(', ') : null;
+  }
+
+  protected formatDuration(seconds?: number): string | null {
+    if (!seconds && seconds !== 0) {
+      return null;
+    }
+
+    const mins = Math.floor((seconds ?? 0) / 60);
+    const secs = Math.abs((seconds ?? 0) % 60);
+    const paddedSecs = secs.toString().padStart(2, '0');
+    return `${mins}:${paddedSecs}`;
+  }
+
+  protected formatDate(value?: string | null): string | null {
+    if (!value) {
+      return null;
+    }
+    return value;
+  }
+
+  private buildWorkFormData(): WorkFormData {
+    const formValue = this.workForm.value;
+
+    return {
+      work_title: formValue.work_title,
+      alternative_titles: this.alternativeTitles.value.filter((t: string) => t.trim()),
+      isrc: formValue.isrc || undefined,
+      iswc: formValue.iswc || undefined,
+      duration_seconds: formValue.duration_seconds || undefined,
+      recording_date: formValue.recording_date || undefined,
+      release_date: formValue.release_date || undefined,
+      languages: formValue.languages.length > 0 ? formValue.languages : undefined,
+      genre: formValue.genre || undefined,
+      is_cover_version: formValue.is_cover_version,
+      original_work_title: formValue.original_work_title || undefined,
+      original_work_isrc: formValue.original_work_isrc || undefined,
+      original_work_iswc: formValue.original_work_iswc || undefined,
+      original_work_info: formValue.original_work_info || undefined,
+      status: formValue.status,
+      notes: formValue.notes || undefined,
+      ai_disclosures: this.toDisclosureArray(),
+    };
+  }
+
+  private handleSubmissionSuccess(workId: string, title: string, isNew: boolean): void {
+    this.pendingWorkData.set(null);
+    this.showReview.set(false);
+    this.submissionSuccess.set(true);
+    this.submittedWorkId.set(workId);
+    this.submittedWorkTitle.set(title);
+    this.isCreateSubmission.set(isNew);
+
+    if (isNew) {
+      this.workId.set(workId);
+      this.isEditMode.set(true);
+    }
+  }
+
+  private closeSuccessOverlay(): void {
+    this.submissionSuccess.set(false);
+  }
+
+  private resetForNewWork(): void {
+    this.closeSuccessOverlay();
+    this.workForm.reset({
+      work_title: '',
+      isrc: '',
+      iswc: '',
+      duration_seconds: null,
+      recording_date: '',
+      release_date: '',
+      languages: [],
+      genre: '',
+      is_cover_version: false,
+      original_work_title: '',
+      original_work_isrc: '',
+      original_work_iswc: '',
+      original_work_info: '',
+      status: 'draft',
+      notes: ''
+    });
+
+    while (this.alternativeTitles.length) {
+      this.alternativeTitles.removeAt(0);
+    }
+
+    this.aiDisclosures.set(createDefaultWorkCreationDeclarationMap());
+    this.aiDisclosuresValid.set(true);
+    this.workId.set(null);
+    this.isEditMode.set(false);
+    this.submittedWorkId.set(null);
+    this.submittedWorkTitle.set('');
+    this.isCreateSubmission.set(true);
   }
 }

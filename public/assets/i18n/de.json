@@ -4,6 +4,17 @@
   "WELCOME": "Willkommen bei der Musikindustrie-Plattform!",
   "DESCRIPTION": "Verwalten Sie Ihre Rechte, verbinden Sie sich mit Künstlern und erweitern Sie Ihr Netzwerk.",
   "LANGUAGE": "Sprache",
+  "NAV": {
+    "BRAND": "Musikrechte-Plattform",
+    "DASHBOARD": "Dashboard",
+    "WORKS": "Werke",
+    "PROTOCOLS": "Protokolle",
+    "RIGHTS_HOLDERS": "Rechteinhaber",
+    "PROFILE": "Profil",
+    "CURRENT_WORKSPACE": "Arbeitsbereich",
+    "MANAGE_WORKSPACES": "Arbeitsbereiche verwalten",
+    "ADD_FIRST_WORKSPACE": "Erstelle deinen ersten Arbeitsbereich"
+  },
   "BUTTONS": {
     "SAVE": "Speichern",
     "CANCEL": "Abbrechen",
@@ -259,7 +270,62 @@
     "ORIGINAL_WORK_INFO_HINT": "Geben Sie zusätzliche Details an, falls ISRC/ISWC nicht verfügbar sind",
     "ADDITIONAL_NOTES": "Zusätzliche Notizen",
     "NOTES": "Notizen",
-    "MANAGE_SPLITS": "Splits verwalten"
+    "MANAGE_SPLITS": "Splits verwalten",
+    "REVIEW_AND_SUBMIT": "Prüfen & einreichen",
+    "REVIEW_AND_SAVE": "Prüfen & speichern",
+    "REVIEW_MODAL": {
+      "TITLE": "Werkdetails prüfen",
+      "DESCRIPTION": "Kontrolliere die Angaben, bevor du das Werk einreichst.",
+      "SECTIONS": {
+        "BASIC": "Kerndaten",
+        "IDENTIFIERS": "Kennungen",
+        "TIMING": "Daten & Dauer",
+        "COVER": "Cover-Informationen",
+        "AI": "Zusammenfassung KI-Offenlegung"
+      },
+      "FIELDS": {
+        "TITLE": "Werktitel",
+        "STATUS": "Status",
+        "GENRE": "Genre",
+        "LANGUAGES": "Sprachen",
+        "ALTERNATIVE_TITLES": "Alternative Titel",
+        "NOTES": "Notizen",
+        "ISRC": "ISRC",
+        "ISWC": "ISWC",
+        "RECORDING_DATE": "Aufnahmedatum",
+        "RELEASE_DATE": "Veröffentlichungsdatum",
+        "DURATION": "Dauer",
+        "COVER": "Coverversion",
+        "ORIGINAL_TITLE": "Titel des Originalwerks"
+      },
+      "ACTIONS": {
+        "BACK": "Weiter bearbeiten",
+        "CONFIRM": "Bestätigen & einreichen"
+      },
+      "EMPTY": {
+        "NOT_SET": "Nicht angegeben",
+        "NO_LANGUAGES": "Keine Sprachen ausgewählt",
+        "NO_ALTERNATIVE_TITLES": "Keine alternativen Titel hinzugefügt",
+        "NO_NOTES": "Keine zusätzlichen Notizen"
+      }
+    },
+    "SUBMISSION_SUCCESS": {
+      "CREATED_TITLE": "„{{ title }}“ wurde erstellt",
+      "UPDATED_TITLE": "„{{ title }}“ wurde aktualisiert",
+      "CREATED_BODY": "Du kannst jetzt Splits verteilen oder ein weiteres Werk registrieren.",
+      "UPDATED_BODY": "Änderungen gespeichert. Verwalte die Rechte weiter oder kehre zur Werkübersicht zurück.",
+      "PRIMARY_CREATE": "Zu den Split-Verteilungen",
+      "PRIMARY_UPDATE": "Zur Werkübersicht",
+      "SECONDARY_CREATE": "Weiteres Werk registrieren",
+      "SECONDARY_UPDATE": "Rechteinhaber bearbeiten",
+      "TERTIARY": "Zurück zum Dashboard"
+    },
+    "ALERTS": {
+      "CREATE_SUCCESS": "Werk erfolgreich gespeichert.",
+      "UPDATE_SUCCESS": "Änderungen erfolgreich gespeichert.",
+      "SUBMIT_FAILED": "Werk konnte nicht gespeichert werden. Bitte versuche es erneut.",
+      "MISSING_WORK_ID": "Werk wurde erstellt, aber es wurde keine ID zurückgegeben."
+    }
   },
   "AI_DISCLOSURE_FORM": {
     "TITLE": "KI-Offenlegung (gesetzliche Anforderung)",
@@ -495,6 +561,8 @@
     "SCAN_QR_CODE": "QR-Code scannen",
     "SCAN_QR": "QR scannen",
     "ADD_MANUALLY": "Manuell hinzufügen",
+    "ADD_NEW_BY_QR": "Neu per QR hinzufügen",
+    "ADD_NEW_RIGHTSHOLDER_MANUALLY": "Neuen Rechteinhaber manuell hinzufügen",
     "SELECT_RIGHTS_HOLDER": "Rechteinhaber auswählen...",
     "NO_RIGHTS_HOLDERS_AVAILABLE": "Alle Rechteinhaber wurden hinzugefügt. Erstellen Sie neue, um fortzufahren.",
     "SCAN_INSTRUCTION": "Positionieren Sie den QR-Code im Rahmen",

@@ -4,6 +4,17 @@
   "WELCOME": "Welcome to the Music Industry Platform!",
   "DESCRIPTION": "Manage your rights, connect with artists, and grow your network.",
   "LANGUAGE": "Language",
+  "NAV": {
+    "BRAND": "Music Rights Platform",
+    "DASHBOARD": "Dashboard",
+    "WORKS": "Works",
+    "PROTOCOLS": "Protocols",
+    "RIGHTS_HOLDERS": "Rights Holders",
+    "PROFILE": "Profile",
+    "CURRENT_WORKSPACE": "Workspace",
+    "MANAGE_WORKSPACES": "Manage workspaces",
+    "ADD_FIRST_WORKSPACE": "Add your first workspace"
+  },
   "BUTTONS": {
     "SAVE": "Save",
     "CANCEL": "Cancel",
@@ -259,7 +270,62 @@
     "ORIGINAL_WORK_INFO_HINT": "Provide any additional details if ISRC/ISWC not available",
     "ADDITIONAL_NOTES": "Additional Notes",
     "NOTES": "Notes",
-    "MANAGE_SPLITS": "Manage Splits"
+    "MANAGE_SPLITS": "Manage Splits",
+    "REVIEW_AND_SUBMIT": "Review & submit",
+    "REVIEW_AND_SAVE": "Review & save",
+    "REVIEW_MODAL": {
+      "TITLE": "Review work details",
+      "DESCRIPTION": "Take a moment to confirm everything looks right before submitting.",
+      "SECTIONS": {
+        "BASIC": "Core details",
+        "IDENTIFIERS": "Identifiers",
+        "TIMING": "Dates & duration",
+        "COVER": "Cover information",
+        "AI": "AI disclosure summary"
+      },
+      "FIELDS": {
+        "TITLE": "Work title",
+        "STATUS": "Status",
+        "GENRE": "Genre",
+        "LANGUAGES": "Languages",
+        "ALTERNATIVE_TITLES": "Alternative titles",
+        "NOTES": "Notes",
+        "ISRC": "ISRC",
+        "ISWC": "ISWC",
+        "RECORDING_DATE": "Recording date",
+        "RELEASE_DATE": "Release date",
+        "DURATION": "Duration",
+        "COVER": "Cover version",
+        "ORIGINAL_TITLE": "Original work title"
+      },
+      "ACTIONS": {
+        "BACK": "Keep editing",
+        "CONFIRM": "Confirm & submit"
+      },
+      "EMPTY": {
+        "NOT_SET": "Not provided",
+        "NO_LANGUAGES": "No languages selected",
+        "NO_ALTERNATIVE_TITLES": "No alternative titles added",
+        "NO_NOTES": "No additional notes"
+      }
+    },
+    "SUBMISSION_SUCCESS": {
+      "CREATED_TITLE": "“{{ title }}” was created",
+      "UPDATED_TITLE": "“{{ title }}” was updated",
+      "CREATED_BODY": "Assign rights splits now or register another work.",
+      "UPDATED_BODY": "Changes saved. Continue managing rights or return to your works list.",
+      "PRIMARY_CREATE": "Go to rights distribution",
+      "PRIMARY_UPDATE": "Back to works list",
+      "SECONDARY_CREATE": "Register another work",
+      "SECONDARY_UPDATE": "Edit rights holders",
+      "TERTIARY": "Back to dashboard"
+    },
+    "ALERTS": {
+      "CREATE_SUCCESS": "Work saved successfully.",
+      "UPDATE_SUCCESS": "Changes saved successfully.",
+      "SUBMIT_FAILED": "We could not save this work. Please try again.",
+      "MISSING_WORK_ID": "Work was created but no identifier was returned."
+    }
   },
   "AI_DISCLOSURE_FORM": {
     "TITLE": "AI Disclosure (Legal Requirement)",
@@ -495,6 +561,8 @@
     "SCAN_QR_CODE": "Scan QR Code",
     "SCAN_QR": "Scan QR",
     "ADD_MANUALLY": "Add Manually",
+    "ADD_NEW_BY_QR": "Add new by QR",
+    "ADD_NEW_RIGHTSHOLDER_MANUALLY": "Add new rights holder manually",
     "SELECT_RIGHTS_HOLDER": "Select rights holder...",
     "NO_RIGHTS_HOLDERS_AVAILABLE": "All rights holders have been added. Create new ones to continue.",
     "SCAN_INSTRUCTION": "Position the QR code within the frame",

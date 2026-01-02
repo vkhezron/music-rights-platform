@@ -80,6 +80,14 @@
   font-weight: 600;
 }
 
+.entry-card__label--required {
+  color: var(--text-danger, #b42318);
+
+  &::after {
+    content: ' *';
+  }
+}
+
 .entry-card__field input,
 .entry-card__field select {
   width: 100%;

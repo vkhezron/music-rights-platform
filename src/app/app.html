@@ -1,27 +1,144 @@
-<div class="container">
-  <!--
-  <h1>{{ 'TITLE' | translate }}</h1>
-  <h2>{{ 'WELCOME' | translate }}</h2>
-  <p>{{ 'DESCRIPTION' | translate }}</p>
-  -->
-  
-  <div class="language-switcher">
-    <button (click)="switchLanguage('en')" [class.active]="currentLang === 'en'">
-      🇬🇧 English
+<ng-template #languageSwitcher let-mode="mode">
+  <div
+    #languageSwitcherRef
+    class="language-switcher"
+    [class.language-switcher--auth]="mode === 'auth'"
+  >
+    <button
+      type="button"
+      class="language-switcher__trigger"
+      (click)="toggleLanguageMenu()"
+      aria-haspopup="listbox"
+      [attr.aria-expanded]="languageMenuOpen"
+      [attr.aria-label]="('LANGUAGE' | translate) + ': ' + currentLanguage.label"
+      [attr.title]="('LANGUAGE' | translate) + ': ' + currentLanguage.label"
+    >
+      <span class="flag" aria-hidden="true">{{ currentLanguage.flag }}</span>
+      <span class="label">{{ currentLanguage.label }}</span>
+      <span class="chevron" [class.open]="languageMenuOpen" aria-hidden="true"></span>
     </button>
-    <button (click)="switchLanguage('de')" [class.active]="currentLang === 'de'">
-      🇩🇪 Deutsch
-    </button>
-    <button (click)="switchLanguage('es')" [class.active]="currentLang === 'es'">
-      🇪🇸 Español
-    </button>
-    <button (click)="switchLanguage('ua')" [class.active]="currentLang === 'ua'">
-      🇺🇦 Українська
-    </button>
+    @if (mode !== 'auth' && languageMenuOpen) {
+      <div
+        class="language-switcher__menu"
+        role="listbox"
+      >
+        @for (lang of languages; track lang.code) {
+          <button
+            type="button"
+            class="language-switcher__option"
+            role="option"
+            (click)="switchLanguage(lang.code)"
+            [class.active]="currentLang === lang.code"
+            [attr.aria-selected]="currentLang === lang.code"
+          >
+            <span class="flag">{{ lang.flag }}</span>
+            <span class="label">{{ lang.label }}</span>
+          </button>
+        }
+      </div>
+    }
   </div>
-</div>
 
-<router-outlet />
+  @if (mode === 'auth' && isLoginRoute()) {
+    <div
+      class="language-switcher__auth-rail"
+      role="listbox"
+      aria-label="{{ 'LANGUAGE' | translate }}"
+    >
+      @for (lang of languages; track lang.code) {
+        <button
+          type="button"
+          class="language-switcher__auth-button"
+          role="option"
+          (click)="switchLanguage(lang.code)"
+          [class.active]="currentLang === lang.code"
+          [attr.aria-selected]="currentLang === lang.code"
+        >
+          <span class="flag" aria-hidden="true">{{ lang.flag }}</span>
+          <span class="label">{{ lang.label }}</span>
+        </button>
+      }
+    </div>
+  }
+
+  @if (mode === 'auth' && languageMenuOpen) {
+    <div
+      class="language-switcher__overlay"
+      role="dialog"
+      aria-modal="true"
+      (click)="closeLanguageMenu()"
+    >
+      <div
+        class="language-switcher__overlay-panel"
+        [class.language-switcher__overlay-panel--grid]="isLoginRoute()"
+        #languageSwitcherRef
+        role="document"
+        (click)="$event.stopPropagation()"
+      >
+        <button
+          type="button"
+          class="language-switcher__overlay-close"
+          (click)="closeLanguageMenu()"
+          [attr.aria-label]="'BUTTONS.CLOSE' | translate"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <div class="language-switcher__overlay-heading">
+          {{ 'LANGUAGE' | translate }}
+        </div>
+        <div
+          class="language-switcher__overlay-options"
+          [class.language-switcher__overlay-options--grid]="isLoginRoute()"
+          role="listbox"
+        >
+          @for (lang of languages; track lang.code) {
+            <button
+              type="button"
+              class="language-switcher__overlay-option"
+              role="option"
+              (click)="switchLanguage(lang.code)"
+              [class.active]="currentLang === lang.code"
+              [attr.aria-selected]="currentLang === lang.code"
+            >
+              <span class="flag">{{ lang.flag }}</span>
+              <div class="language-switcher__overlay-text">
+                <span class="label">{{ lang.label }}</span>
+              </div>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</ng-template>
+
+<div class="app-shell">
+  @if (shouldShowHeader()) {
+    <header class="app-header">
+      <div class="header-left">
+        <a class="brand" routerLink="/dashboard">
+          {{ 'NAV.BRAND' | translate }}
+        </a>
+        <button type="button" class="profile-button" (click)="goToProfileHub()">
+          {{ 'NAV.PROFILE' | translate }}
+        </button>
+      </div>
+
+      <div class="header-right">
+        <ng-container *ngTemplateOutlet="languageSwitcher; context: { mode: 'header' }"></ng-container>
+        <button type="button" class="logout-button" (click)="logout()">
+          {{ 'DASHBOARD.LOGOUT' | translate }}
+        </button>
+      </div>
+    </header>
+  } @else {
+    <ng-container *ngTemplateOutlet="languageSwitcher; context: { mode: 'auth' }"></ng-container>
+  }
+
+  <main class="app-main">
+    <router-outlet />
+  </main>
+</div>
 
 <app-feedback-toasts></app-feedback-toasts>
 

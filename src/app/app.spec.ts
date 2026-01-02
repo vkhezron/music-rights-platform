@@ -29,6 +29,7 @@ describe('App', () => {
           useValue: {
             currentUser: null,
             user$: of(null),
+            signOut: () => Promise.resolve(),
             client: {
               auth: {
                 getSession: () => Promise.resolve({ data: { session: null }, error: null }),

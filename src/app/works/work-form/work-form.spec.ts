@@ -2,11 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { of } from 'rxjs';
 
 import { WorkFormComponent } from './work-form';
 import { WorksService } from '../../services/works';
-import { WorkspaceService } from '../../services/workspace.service';
 import { FeedbackService } from '../../services/feedback.service';
 import { TranslateMockLoader } from '../../../testing/translate-mock.loader';
 
@@ -58,13 +56,6 @@ describe('WorkForm', () => {
                 updated_at: '',
               }),
           } as unknown as WorksService,
-        },
-        {
-          provide: WorkspaceService,
-          useValue: {
-            currentWorkspace: { id: 'workspace-1' },
-            currentWorkspace$: of({ id: 'workspace-1' }),
-          } as unknown as WorkspaceService,
         },
         {
           provide: FeedbackService,

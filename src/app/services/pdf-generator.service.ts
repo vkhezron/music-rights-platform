@@ -3,199 +3,451 @@ import type { Work } from '../../models/work.model';
 import type { RightsHolder } from './rights-holder';
 import type { WorkSplitRow } from '../split-editor/split-editor';
 
+interface PdfSectionStyle {
+  accent: string;
+  accentText: string;
+  headerFill: string;
+  headerText: string;
+}
+
 /**
  * PDF Generation Service
- * Creates professional split sheet PDFs for legal documentation
+ * Produces protocol-ready documentation for works and their splits
  */
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class PdfGeneratorService {
   /**
-   * Generate split sheet PDF document
-   * Uses canvas-based approach for maximum compatibility
+   * Generate the protocol PDF blob with enriched metadata
    */
-  async generateSplitSheetPDF(
+  async generateProtocolPDF(
     work: Work,
     ipSplits: WorkSplitRow[],
     neighboringSplits: WorkSplitRow[]
   ): Promise<Blob> {
     const { jsPDF } = await import('jspdf');
 
-    try {
-      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const margin = 40;
-        const lineHeight = 18;
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const margin = 48;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    let y = margin;
 
-        let y = margin;
+    const sectionStyles: {
+      overview: PdfSectionStyle;
+      metadata: PdfSectionStyle;
+      ai: PdfSectionStyle;
+      ip: PdfSectionStyle;
+      neighbouring: PdfSectionStyle;
+      signatures: PdfSectionStyle;
+    } = {
+      overview: {
+        accent: '#4338ca',
+        accentText: '#ffffff',
+        headerFill: '#e0e7ff',
+        headerText: '#1e3a8a',
+      },
+      metadata: {
+        accent: '#2563eb',
+        accentText: '#ffffff',
+        headerFill: '#dbeafe',
+        headerText: '#1d4ed8',
+      },
+      ai: {
+        accent: '#d97706',
+        accentText: '#ffffff',
+        headerFill: '#fef3c7',
+        headerText: '#92400e',
+      },
+      ip: {
+        accent: '#7c3aed',
+        accentText: '#ffffff',
+        headerFill: '#ede9fe',
+        headerText: '#5b21b6',
+      },
+      neighbouring: {
+        accent: '#0f766e',
+        accentText: '#ffffff',
+        headerFill: '#ccfbf1',
+        headerText: '#0f766e',
+      },
+      signatures: {
+        accent: '#374151',
+        accentText: '#ffffff',
+        headerFill: '#e5e7eb',
+        headerText: '#111827',
+      },
+    };
 
-        const ensureSpace = (height: number) => {
-          if (y + height > pageHeight - margin) {
-            doc.addPage();
-            y = margin;
-          }
-        };
+    const ensureSpace = (height: number) => {
+      if (y + height > pageHeight - margin) {
+        doc.addPage();
+        y = margin;
+      }
+    };
 
-        const drawHeader = () => {
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(22);
-          doc.text('Music Rights Split Sheet', margin, y);
-          y += lineHeight * 2;
+    const setBodyFont = () => {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor('#1a1a1a');
+    };
 
-          doc.setDrawColor('#e0e0e0');
-          doc.setFillColor('#f5f5f5');
-          doc.rect(margin, y, pageWidth - margin * 2, 90, 'F');
+    const drawTitle = () => {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(22);
+      doc.setTextColor('#1a1a1a');
+      doc.text('Protocol Summary', margin, y);
+      y += 26;
 
-          doc.setFontSize(12);
-          doc.setTextColor('#1a1a1a');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      doc.text(this.safeText(work.work_title || 'Untitled Work'), margin, y);
+      y += 18;
 
-          const infoLines: Array<[string, string]> = [
-            ['Work Title', work.work_title || 'Untitled'],
-            ['ISRC', work.isrc || 'N/A'],
-            ['ISWC', work.iswc || 'N/A'],
-          ];
+      doc.setFontSize(10);
+      doc.setTextColor('#555555');
+      const generatedStamp = `Generated ${new Date().toLocaleString()}`;
+      const identifiers = [`Work ID: ${work.id}`, `Workspace: ${work.workspace_id}`];
+      doc.text(generatedStamp, margin, y);
+      y += 14;
+      doc.text(identifiers.join('  •  '), margin, y);
+      y += 24;
+      setBodyFont();
+    };
 
-          infoLines.forEach((line, index) => {
-            const [label, value] = line;
-            const offsetY = y + 25 + index * 22;
-            doc.setFont('helvetica', 'bold');
-            doc.text(`${label}:`, margin + 12, offsetY);
-            doc.setFont('helvetica', 'normal');
-            doc.text(String(value), margin + 120, offsetY, { maxWidth: pageWidth - margin * 2 - 140 });
-          });
+    const drawSectionTitle = (title: string, style: PdfSectionStyle) => {
+      const blockHeight = 32;
+      ensureSpace(blockHeight + 12);
 
-          y += 110;
-        };
+      doc.setFillColor(style.accent);
+      doc.setDrawColor(style.accent);
+      doc.roundedRect(margin, y, pageWidth - margin * 2, blockHeight, 8, 8, 'F');
 
-        const drawTable = (
-          title: string,
-          rows: WorkSplitRow[],
-          totalLabel: string
-        ) => {
-          ensureSpace(120);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(style.accentText);
+      doc.text(title, margin + 16, y + 20);
 
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(14);
-          doc.setTextColor('#667eea');
-          doc.text(title, margin, y);
-          y += lineHeight * 1.3;
+      y += blockHeight + 12;
+      setBodyFont();
+    };
 
-          const columnWidths = [220, 120, 80, pageWidth - margin * 2 - 420];
-          const headers = ['Rights Holder', 'Split Type', 'Percentage', 'Notes'];
+    const drawKeyValueGrid = (items: Array<{ label: string; value: string }>) => {
+      if (!items.length) return;
 
-          doc.setFillColor('#f5f5f5');
-          doc.setTextColor('#1a1a1a');
-          doc.rect(margin, y - lineHeight + 6, pageWidth - margin * 2, lineHeight + 4, 'F');
-          doc.setFontSize(11);
-          headers.reduce((x, header, index) => {
-            doc.text(header, x + 10, y + 2);
-            return x + columnWidths[index];
-          }, margin);
+      const columnWidth = (pageWidth - margin * 2) / 2;
 
-          y += lineHeight + 6;
+      for (let i = 0; i < items.length; i += 2) {
+        const first = items[i];
+        const second = items[i + 1];
+        const rowY = y;
+        let rowHeight = 0;
 
-          doc.setFont('helvetica', 'normal');
-          rows.forEach((split, index) => {
-            ensureSpace(lineHeight * 1.4);
-            if (index % 2 === 0) {
-              doc.setFillColor('#fafafa');
-              doc.rect(margin, y - lineHeight + 4, pageWidth - margin * 2, lineHeight + 4, 'F');
-            }
+        if (first) {
+          const height = drawKeyValueItem(first, margin, columnWidth, rowY);
+          rowHeight = Math.max(rowHeight, height);
+        }
 
-            const holderName = this.getRightsHolderName(split.rights_holder);
-            const splitType = this.formatSplitType(split.split_type);
-            const percentage = (split.ownership_percentage ?? split.percentage ?? 0).toFixed(2) + '%';
-            const notes = (split.notes || '').slice(0, 60);
+        if (second) {
+          const height = drawKeyValueItem(second, margin + columnWidth, columnWidth, rowY);
+          rowHeight = Math.max(rowHeight, height);
+        }
 
-            const rowValues = [holderName, splitType, percentage, notes];
+        rowHeight = Math.max(rowHeight, 24);
+        ensureSpace(rowHeight + 4);
+        y = rowY + rowHeight + 6;
+      }
+    };
 
-            rowValues.reduce((x, value, colIndex) => {
-              doc.text(String(value), x + 10, y + 2, {
-                maxWidth: columnWidths[colIndex] - 20,
-              });
-              return x + columnWidths[colIndex];
-            }, margin);
+    const drawKeyValueItem = (
+      item: { label: string; value: string },
+      x: number,
+      width: number,
+      baseY: number
+    ): number => {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text(item.label, x, baseY);
+      setBodyFont();
+      const safeValue = this.safeText(item.value || '—');
+      const lines = doc.splitTextToSize(safeValue, width - 12);
+      doc.text(lines, x, baseY + 14);
+      const lineCount = Math.max(lines.length, 1);
+      return 14 + lineCount * 12;
+    };
 
-            y += lineHeight + 4;
-          });
+    const drawParagraph = (text: string) => {
+      if (!text) return;
+      const lines = doc.splitTextToSize(this.safeText(text), pageWidth - margin * 2);
+      ensureSpace(lines.length * 12 + 4);
+      doc.text(lines, margin, y);
+      y += lines.length * 12 + 6;
+    };
 
-          const total = rows.reduce((sum, split) => sum + (split.ownership_percentage ?? split.percentage ?? 0), 0);
-          ensureSpace(lineHeight * 1.5);
+    const drawAIDisclosures = () => {
+      drawSectionTitle('AI Disclosures', sectionStyles.ai);
 
-          doc.setFillColor('#667eea');
-          doc.setTextColor('#ffffff');
-          doc.rect(margin, y - lineHeight + 6, pageWidth - margin * 2, lineHeight + 4, 'F');
-          doc.text(totalLabel, margin + 10, y + 2);
-          doc.text(total.toFixed(2) + '%', margin + columnWidths[0] + columnWidths[1] + 10, y + 2);
+      if (!work.ai_disclosures || !work.ai_disclosures.length) {
+        drawParagraph('No AI disclosures recorded for this work.');
+        return;
+      }
 
-          doc.setTextColor('#1a1a1a');
-          y += lineHeight * 1.8;
-        };
+      work.ai_disclosures.forEach(disclosure => {
+        const sectionLabel = this.formatSectionLabel(disclosure.section);
+        const typeLabel = this.formatCreationType(disclosure.creation_type);
+        const details: string[] = [
+          `• ${sectionLabel}: ${typeLabel}`,
+        ];
 
-        const drawSignatures = () => {
-          doc.addPage();
-          y = margin;
+        if (disclosure.ai_tool) {
+          details.push(`Tool: ${disclosure.ai_tool}`);
+        }
 
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(16);
-          doc.setTextColor('#1a1a1a');
-          doc.text('Signatures', margin, y);
-          y += lineHeight * 1.8;
+        if (disclosure.notes) {
+          details.push(disclosure.notes);
+        }
 
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(11);
-          doc.text('This split sheet confirms the ownership percentages listed above.', margin, y);
-          y += lineHeight * 1.5;
+        drawParagraph(details.join(' – '));
+      });
+    };
 
-          const allHolders = [
-            ...ipSplits.map(s => s.rights_holder).filter(Boolean),
-            ...neighboringSplits.map(s => s.rights_holder).filter(Boolean),
-          ] as RightsHolder[];
+    const drawContributorTable = (
+      title: string,
+      rows: Array<[string, string, string, string, string]>,
+      totalShare: number,
+      emptyMessage: string,
+      style: PdfSectionStyle
+    ) => {
+      drawSectionTitle(title, style);
 
-          const unique = Array.from(new Map(allHolders.map(holder => [holder.id, holder])).values());
+      if (!rows.length) {
+        drawParagraph(emptyMessage);
+        return;
+      }
 
-          doc.setDrawColor('#d0d0d0');
-          unique.slice(0, 6).forEach(holder => {
-            ensureSpace(lineHeight * 4);
+      const columnWidths = [160, 90, 90, 60, pageWidth - margin * 2 - 400];
+      const headers = ['Rights Holder', 'Role', 'Split', 'Share', 'Details'];
 
-            const holderName = this.getRightsHolderName(holder);
-            doc.line(margin, y, margin + 250, y);
-            doc.line(margin + 300, y, margin + 520, y);
+      ensureSpace(26);
+      doc.setFillColor(style.headerFill);
+      doc.rect(margin, y - 12, pageWidth - margin * 2, 26, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(style.headerText);
 
-            doc.setFont('helvetica', 'bold');
-            doc.text('Signature', margin, y + lineHeight);
-            doc.text('Date', margin + 300, y + lineHeight);
+      let headerX = margin;
+      headers.forEach((header, index) => {
+        doc.text(header, headerX + 8, y + 4);
+        headerX += columnWidths[index];
+      });
 
-            doc.setFont('helvetica', 'normal');
-            doc.text(holderName, margin, y + lineHeight * 2);
+      y += 26;
+      setBodyFont();
 
-            y += lineHeight * 3;
-          });
-        };
-
-        drawHeader();
-        drawTable('Intellectual Property Rights', ipSplits, 'Total IP Rights');
-        drawTable('Neighboring Rights', neighboringSplits, 'Total Neighboring Rights');
-        drawSignatures();
-
-        doc.setFontSize(9);
-        doc.setTextColor('#777777');
-        doc.text(
-          `Generated by Music Rights Platform · ${new Date().toLocaleDateString()}`,
-          margin,
-          pageHeight - margin / 2
+      rows.forEach((row, rowIndex) => {
+        const cellLines = row.map((value, index) =>
+          doc.splitTextToSize(this.safeText(value || '—'), columnWidths[index] - 16)
         );
 
-      return doc.output('blob');
-    } catch (error) {
-      throw error;
+        const rowHeight = Math.max(...cellLines.map(lines => Math.max(lines.length, 1))) * 12 + 6;
+        ensureSpace(rowHeight + 6);
+
+        if (rowIndex % 2 === 0) {
+          doc.setFillColor('#fafafa');
+          doc.rect(margin, y - 10, pageWidth - margin * 2, rowHeight + 10, 'F');
+        }
+
+        let cellX = margin;
+        row.forEach((value, colIndex) => {
+          const lines = cellLines[colIndex];
+          doc.text(lines, cellX + 8, y + 2);
+          cellX += columnWidths[colIndex];
+        });
+
+        y += rowHeight + 10;
+      });
+
+      ensureSpace(30);
+      doc.setFillColor(style.accent);
+      doc.setTextColor(style.accentText);
+      doc.rect(margin, y - 12, pageWidth - margin * 2, 26, 'F');
+      doc.text('Total Share', margin + 8, y + 4);
+      doc.text(`${totalShare.toFixed(2)}%`, margin + columnWidths[0] + columnWidths[1] + columnWidths[2] + 8, y + 4);
+      doc.setTextColor('#1a1a1a');
+      y += 32;
+    };
+
+    const drawSignatures = (holders: RightsHolder[]) => {
+      if (!holders.length) {
+        return;
+      }
+
+      doc.addPage();
+      y = margin;
+      drawSectionTitle('Signatures', sectionStyles.signatures);
+      drawParagraph('Each contributor confirms the distribution of rights documented in this protocol.');
+
+      doc.setDrawColor('#d0d0d0');
+      holders.slice(0, 8).forEach(holder => {
+        ensureSpace(64);
+        const holderName = this.getRightsHolderName(holder);
+        doc.line(margin, y, margin + 250, y);
+        doc.line(margin + 300, y, margin + 520, y);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('Signature', margin, y + 14);
+        doc.text('Date', margin + 300, y + 14);
+        setBodyFont();
+        doc.text(holderName, margin, y + 30);
+        const contact = this.buildContactSummary(holder);
+        if (contact) {
+          doc.text(contact, margin, y + 42);
+        }
+        y += 54;
+      });
+    };
+
+    drawTitle();
+
+    drawSectionTitle('Work Overview', sectionStyles.overview);
+    drawKeyValueGrid([
+      { label: 'Status', value: this.formatStatus(work.status) },
+      { label: 'Genre', value: work.genre || '—' },
+      { label: 'Languages', value: this.formatList(work.languages) },
+      { label: 'Duration', value: this.formatDuration(work.duration_seconds) },
+      { label: 'Alternative Titles', value: this.formatList(work.alternative_titles) },
+      { label: 'Catalogue Number', value: work.catalog_number || '—' },
+      { label: 'EAN', value: work.ean || '—' },
+      { label: 'Created At', value: this.formatDate(work.created_at) },
+      { label: 'Updated At', value: this.formatDate(work.updated_at) },
+    ]);
+
+    if (work.notes) {
+      drawParagraph(`Notes: ${work.notes}`);
+    }
+
+    drawSectionTitle('Identification Codes', sectionStyles.metadata);
+    drawKeyValueGrid([
+      { label: 'ISRC', value: work.isrc || '—' },
+      { label: 'ISWC', value: work.iswc || '—' },
+    ]);
+
+    drawSectionTitle('Release Details', sectionStyles.metadata);
+    drawKeyValueGrid([
+      { label: 'Recording Date', value: this.formatDate(work.recording_date) },
+      { label: 'Release Date', value: this.formatDate(work.release_date) },
+      { label: 'Cover Version', value: work.is_cover_version ? 'Yes' : 'No' },
+    ]);
+
+    if (work.is_cover_version) {
+      drawKeyValueGrid([
+        { label: 'Original Work Title', value: work.original_work_title || '—' },
+        { label: 'Original Work ISRC', value: work.original_work_isrc || '—' },
+        { label: 'Original Work ISWC', value: work.original_work_iswc || '—' },
+      ]);
+      if (work.original_work_info) {
+        drawParagraph(`Original Work Info: ${work.original_work_info}`);
+      }
+    }
+
+    drawAIDisclosures();
+
+    const ipSummary = this.buildIPSummary(ipSplits);
+    drawSectionTitle('Intellectual Property Summary', sectionStyles.ip);
+    drawKeyValueGrid([
+      { label: 'Lyric Contributors', value: String(ipSummary.lyricsCount) },
+      { label: 'Music Contributors', value: String(ipSummary.musicCount) },
+      { label: 'Lyrics Share', value: `${ipSummary.lyricsShare.toFixed(2)}%` },
+      { label: 'Music Share', value: `${ipSummary.musicShare.toFixed(2)}%` },
+      { label: 'Combined IP Total', value: `${ipSummary.combinedShare.toFixed(2)}%` },
+      { label: 'Split Status', value: ipSummary.statusLabel },
+    ]);
+
+    drawContributorTable(
+      'Intellectual Property Contributors',
+      this.buildIPRows(ipSplits),
+      ipSummary.combinedShare,
+      'No intellectual property contributors recorded.',
+      sectionStyles.ip
+    );
+
+    if (ipSummary.isIncomplete) {
+      drawParagraph('⚠️ Temporary split: Lyrics and/or music allocations are below 100%. Final shares pending.');
+    }
+
+    const neighbouringSummary = this.buildNeighbouringSummary(neighboringSplits);
+    drawSectionTitle('Neighbouring Rights Summary', sectionStyles.neighbouring);
+    drawKeyValueGrid([
+      { label: 'Contributors', value: String(neighbouringSummary.count) },
+      { label: 'Total Share', value: `${neighbouringSummary.totalShare.toFixed(2)}%` },
+      { label: 'Split Status', value: neighbouringSummary.statusLabel },
+    ]);
+
+    drawContributorTable(
+      'Neighbouring Rights Contributors',
+      this.buildNeighbouringRows(neighboringSplits),
+      neighbouringSummary.totalShare,
+      'No neighbouring rights contributors recorded.',
+      sectionStyles.neighbouring
+    );
+
+    if (neighbouringSummary.isIncomplete) {
+      drawParagraph('⚠️ Temporary split: Neighbouring rights allocations are below 100%. Final shares pending.');
+    }
+
+    const uniqueHolders = this.collectUniqueHolders([...ipSplits, ...neighboringSplits]);
+    drawSignatures(uniqueHolders);
+
+    doc.setFontSize(9);
+    doc.setTextColor('#777777');
+    doc.text(
+      `Generated by Music Rights Platform · ${new Date().toLocaleDateString()}`,
+      margin,
+      pageHeight - margin / 2
+    );
+    const protocolId = `Protocol Reference: ${work.id}`;
+    const protocolWidth = doc.getTextWidth(protocolId);
+    doc.text(protocolId, pageWidth - margin - protocolWidth, pageHeight - margin / 2);
+
+    return doc.output('blob');
+  }
+
+  /**
+   * Backwards compatible entry point for legacy split-sheet calls
+   */
+  async generateSplitSheetPDF(
+    work: Work,
+    ipSplits: WorkSplitRow[],
+    neighboringSplits: WorkSplitRow[]
+  ): Promise<Blob> {
+    return this.generateProtocolPDF(work, ipSplits, neighboringSplits);
+  }
+
+  /**
+   * Download the generated protocol PDF
+   */
+  async downloadProtocol(
+    work: Work,
+    ipSplits: WorkSplitRow[],
+    neighboringSplits: WorkSplitRow[],
+    filename?: string
+  ): Promise<void> {
+    const pdfBlob = await this.generateProtocolPDF(work, ipSplits, neighboringSplits);
+    const url = URL.createObjectURL(pdfBlob);
+
+    try {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename || this.createProtocolFilename(work);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } finally {
+      URL.revokeObjectURL(url);
     }
   }
 
   /**
-   * Download PDF as file
+   * Backwards compatible download API
    */
   async downloadSplitSheet(
     filename: string,
@@ -203,30 +455,301 @@ export class PdfGeneratorService {
     ipSplits: WorkSplitRow[],
     neighboringSplits: WorkSplitRow[]
   ): Promise<void> {
-    try {
-      const pdfBlob = await this.generateSplitSheetPDF(work, ipSplits, neighboringSplits);
-
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename || `split-sheet-${work.work_title}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error downloading split sheet:', error);
-      throw error;
-    }
+    await this.downloadProtocol(work, ipSplits, neighboringSplits, filename);
   }
 
-  /**
-   * Helper: Get rights holder display name
-   */
+  private buildIPSummary(ipSplits: WorkSplitRow[]) {
+    const lyricSplits = ipSplits.filter(split => split.split_type === 'lyrics');
+    const musicSplits = ipSplits.filter(split => split.split_type === 'music');
+
+    const lyricsShare = lyricSplits.reduce((sum, split) => sum + this.toNumber(split), 0);
+    const musicShare = musicSplits.reduce((sum, split) => sum + this.toNumber(split), 0);
+    const combinedShare = Math.min(this.normalizeShare(lyricsShare) + this.normalizeShare(musicShare), 100);
+
+    const tolerance = 0.01;
+    const lyricsState = lyricsShare > 100 + tolerance ? 'over' : lyricsShare >= 100 - tolerance ? 'complete' : 'under';
+    const musicState = musicShare > 100 + tolerance ? 'over' : musicShare >= 100 - tolerance ? 'complete' : 'under';
+    const states = [lyricsState, musicState];
+    const hasOver = states.includes('over');
+    const hasUnder = states.includes('under');
+    const hasEntries = lyricSplits.length > 0 || musicSplits.length > 0;
+
+    const statusLabel = hasOver
+      ? 'Overallocated – revise immediately'
+      : hasUnder && hasEntries
+        ? 'Incomplete – temporary split'
+        : hasEntries
+          ? 'Complete'
+        : 'Complete';
+
+    return {
+      lyricsShare: this.normalizeShare(lyricsShare),
+      musicShare: this.normalizeShare(musicShare),
+      combinedShare,
+      lyricsCount: lyricSplits.length,
+      musicCount: musicSplits.length,
+      statusLabel: hasEntries ? statusLabel : 'No allocations recorded',
+      isIncomplete: hasEntries && hasUnder && !hasOver,
+    };
+  }
+
+  private buildNeighbouringSummary(neighbouringSplits: WorkSplitRow[]) {
+    const totalShare = neighbouringSplits.reduce((sum, split) => sum + this.toNumber(split), 0);
+    const tolerance = 0.01;
+    const state = totalShare > 100 + tolerance ? 'over' : totalShare >= 100 - tolerance ? 'complete' : 'under';
+    const statusLabel = state === 'over'
+      ? 'Overallocated – revise immediately'
+      : state === 'under' && neighbouringSplits.length > 0
+        ? 'Incomplete – temporary split'
+        : neighbouringSplits.length > 0
+          ? 'Complete'
+          : 'No allocations recorded';
+    return {
+      totalShare,
+      count: neighbouringSplits.length,
+      statusLabel,
+      isIncomplete: neighbouringSplits.length > 0 && state === 'under',
+    };
+  }
+
+  private buildIPRows(ipSplits: WorkSplitRow[]): Array<[string, string, string, string, string]> {
+    return ipSplits.map(split => {
+      const holder = split.rights_holder as RightsHolder | null | undefined;
+      const holderName = this.getRightsHolderName(holder);
+      const role = this.formatRightsHolderKind(holder?.kind) || (split.split_type === 'lyrics' ? 'Lyricist' : 'Composer');
+      const splitLabel = split.split_type === 'lyrics' ? 'Lyrics' : 'Music';
+      const share = `${this.toNumber(split).toFixed(2)}%`;
+      const detailParts = [
+        this.buildContributionDetail(split),
+        this.buildContactSummary(holder),
+        this.formatRightsHolderAIDisclosure(holder?.ai_disclosure),
+        split.notes ? `Notes: ${split.notes}` : '',
+      ].filter(Boolean);
+
+      return [holderName, role, splitLabel, share, detailParts.join(' • ') || '—'];
+    });
+  }
+
+  private buildNeighbouringRows(neighbouringSplits: WorkSplitRow[]): Array<[string, string, string, string, string]> {
+    return neighbouringSplits.map(split => {
+      const holder = split.rights_holder as RightsHolder | null | undefined;
+      const holderName = this.getRightsHolderName(holder);
+      const role = this.formatRightsHolderKind(holder?.kind) || 'Performer';
+      const splitLabel = 'Neighbouring';
+      const share = `${this.toNumber(split).toFixed(2)}%`;
+      const detailParts = [
+        split.roles && split.roles.length ? `Roles: ${split.roles.join(', ')}` : '',
+        this.buildContactSummary(holder),
+        this.formatRightsHolderAIDisclosure(holder?.ai_disclosure),
+        split.notes ? `Notes: ${split.notes}` : '',
+      ].filter(Boolean);
+
+      return [holderName, role, splitLabel, share, detailParts.join(' • ') || '—'];
+    });
+  }
+
+  private collectUniqueHolders(rows: WorkSplitRow[]): RightsHolder[] {
+    const map = new Map<string, RightsHolder>();
+
+    rows.forEach(row => {
+      const holder = row.rights_holder as RightsHolder | null | undefined;
+      if (holder?.id && !map.has(holder.id)) {
+        map.set(holder.id, holder);
+      }
+    });
+
+    return Array.from(map.values());
+  }
+
+  private createProtocolFilename(work: Work): string {
+    const title = work.work_title?.trim().toLowerCase() || 'untitled-work';
+    const slug = title
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 80);
+
+    return `protocol-${slug || 'work'}.pdf`;
+  }
+
+  private toNumber(split: WorkSplitRow): number {
+    return Number(split.ownership_percentage ?? split.percentage ?? 0);
+  }
+
+  private normalizeShare(value: number): number {
+    if (!Number.isFinite(value)) {
+      return 0;
+    }
+
+    return Math.max(0, Math.min(value, 100));
+  }
+
+  private safeText(value: string): string {
+    return value?.toString().trim() || '';
+  }
+
+  private formatList(items?: string[]): string {
+    if (!items || !items.length) {
+      return '—';
+    }
+
+    return items.join(', ');
+  }
+
+  private formatDate(value?: string): string {
+    if (!value) {
+      return '—';
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return date.toLocaleDateString();
+  }
+
+  private formatDuration(seconds?: number): string {
+    if (!seconds || seconds <= 0) {
+      return '—';
+    }
+
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}m ${secs.toString().padStart(2, '0')}s`;
+  }
+
+  private formatStatus(status?: Work['status']): string {
+    if (!status) {
+      return '—';
+    }
+
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  }
+
+  private formatSectionLabel(section: string): string {
+    const labels: Record<string, string> = {
+      ip: 'Intellectual Property',
+      mixing: 'Mixing',
+      mastering: 'Mastering',
+      session_musicians: 'Session Musicians',
+      visuals: 'Visuals',
+    };
+
+    return labels[section] || section;
+  }
+
+  private formatCreationType(type: string): string {
+    const map: Record<string, string> = {
+      human: 'Human Generated',
+      ai_assisted: 'AI Assisted',
+      ai_generated: 'AI Generated',
+    };
+
+    return map[type] || type;
+  }
+
+  private buildContactSummary(holder?: RightsHolder | null): string {
+    if (!holder) {
+      return '';
+    }
+
+    const parts: string[] = [];
+
+    if (holder.email) {
+      parts.push(`Email: ${holder.email}`);
+    }
+
+    if (holder.cmo_pro) {
+      parts.push(`PRO: ${holder.cmo_pro}`);
+    }
+
+    if (holder.ipi_number) {
+      parts.push(`IPI: ${holder.ipi_number}`);
+    }
+
+    return parts.join(' • ');
+  }
+
+  private buildContributionDetail(split: WorkSplitRow): string {
+    if (split.split_type !== 'music' || !split.contribution_types) {
+      return '';
+    }
+
+    const flags: string[] = [];
+
+    if (split.contribution_types.melody) {
+      flags.push('Melody');
+    }
+
+    if (split.contribution_types.harmony) {
+      flags.push('Harmony');
+    }
+
+    if (split.contribution_types.arrangement) {
+      flags.push('Arrangement');
+    }
+
+    return flags.length ? `Contributions: ${flags.join(', ')}` : '';
+  }
+
+  private formatRightsHolderKind(kind?: string): string {
+    if (!kind) {
+      return '';
+    }
+
+    const map: Record<string, string> = {
+      author: 'Lyricist',
+      composer: 'Composer',
+      artist: 'Artist',
+      producer: 'Producer',
+      publisher: 'Publisher',
+      label: 'Label',
+      arranger: 'Arranger',
+      translator: 'Translator',
+      engineer: 'Engineer',
+      mastering: 'Mastering Engineer',
+      other: 'Contributor',
+    };
+
+    return map[kind] || kind;
+  }
+
+  private formatRightsHolderAIDisclosure(disclosure?: RightsHolder['ai_disclosure']): string {
+    if (!disclosure) {
+      return '';
+    }
+
+    const label = this.formatCreationType(disclosure.creation_type);
+    const parts = [`AI: ${label}`];
+
+    if (disclosure.ai_tool) {
+      parts.push(`Tool: ${disclosure.ai_tool}`);
+    }
+
+    if (disclosure.notes) {
+      parts.push(disclosure.notes);
+    }
+
+    return parts.join(' – ');
+  }
+
+  private ensureNicknamePrefix(nickname: string): string {
+    if (!nickname) {
+      return nickname;
+    }
+
+    return nickname.startsWith('@') ? nickname : `@${nickname}`;
+  }
+
   private getRightsHolderName(holder: any): string {
-    if (!holder) return 'Unknown';
+    if (!holder) {
+      return 'Unknown';
+    }
+
     const nickname = holder.nickname ? this.ensureNicknamePrefix(holder.nickname) : null;
-    if (nickname) return nickname;
+    if (nickname) {
+      return nickname;
+    }
 
     if (holder.display_name) {
       return holder.display_name;
@@ -234,30 +757,11 @@ export class PdfGeneratorService {
 
     if (holder.type === 'person') {
       const legacy = `${holder.first_name || ''} ${holder.last_name || ''}`.trim();
-      if (legacy) return legacy;
+      if (legacy) {
+        return legacy;
+      }
     }
 
     return holder.organization_name || holder.company_name || 'Unknown rights holder';
-  }
-
-  /**
-   * Helper: Format split type for display
-   */
-  private formatSplitType(type: string): string {
-    const typeMap: { [key: string]: string } = {
-      lyrics: 'Lyrics',
-      music: 'Music',
-      publishing: 'Publishing',
-      performance: 'Performance',
-      master_recording: 'Master Recording',
-      neighboring_rights: 'Neighboring Rights',
-      neighboring: 'Neighboring Rights',
-    };
-    return typeMap[type] || type;
-  }
-
-  private ensureNicknamePrefix(nickname: string): string {
-    if (!nickname) return nickname;
-    return nickname.startsWith('@') ? nickname : `@${nickname}`;
   }
 }

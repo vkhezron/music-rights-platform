@@ -132,20 +132,22 @@
       </div>
 
       <div class="split-section__actions">
-        <button type="button" class="action-btn" (click)="addSelfEntry('lyrics')">
-          {{ 'SPLITS.ADD_ME' | translate }}
-        </button>
         <button
           type="button"
           class="action-btn"
           (click)="startQrFlow('lyrics')"
           [disabled]="!hasCameraSupport()"
         >
-          {{ 'SPLITS.SCAN_QR_CODE' | translate }}
+          {{ 'SPLITS.ADD_NEW_BY_QR' | translate }}
         </button>
         <button type="button" class="action-btn" (click)="addManualEntry('lyrics')">
-          {{ 'SPLITS.ADD_MANUALLY' | translate }}
+          {{ 'SPLITS.ADD_NEW_RIGHTSHOLDER_MANUALLY' | translate }}
         </button>
+        @if (shouldShowAddMe('lyrics')) {
+          <button type="button" class="action-btn" (click)="addSelfEntry('lyrics')">
+            {{ 'SPLITS.ADD_ME' | translate }}
+          </button>
+        }
       </div>
     </section>
 
@@ -174,20 +176,22 @@
       </div>
 
       <div class="split-section__actions">
-        <button type="button" class="action-btn" (click)="addSelfEntry('music')">
-          {{ 'SPLITS.ADD_ME' | translate }}
-        </button>
         <button
           type="button"
           class="action-btn"
           (click)="startQrFlow('music')"
           [disabled]="!hasCameraSupport()"
         >
-          {{ 'SPLITS.SCAN_QR_CODE' | translate }}
+          {{ 'SPLITS.ADD_NEW_BY_QR' | translate }}
         </button>
         <button type="button" class="action-btn" (click)="addManualEntry('music')">
-          {{ 'SPLITS.ADD_MANUALLY' | translate }}
+          {{ 'SPLITS.ADD_NEW_RIGHTSHOLDER_MANUALLY' | translate }}
         </button>
+        @if (shouldShowAddMe('music')) {
+          <button type="button" class="action-btn" (click)="addSelfEntry('music')">
+            {{ 'SPLITS.ADD_ME' | translate }}
+          </button>
+        }
       </div>
     </section>
 
@@ -216,20 +220,22 @@
       </div>
 
       <div class="split-section__actions">
-        <button type="button" class="action-btn" (click)="addSelfEntry('neighbouring')">
-          {{ 'SPLITS.ADD_ME' | translate }}
-        </button>
         <button
           type="button"
           class="action-btn"
           (click)="startQrFlow('neighbouring')"
           [disabled]="!hasCameraSupport()"
         >
-          {{ 'SPLITS.SCAN_QR_CODE' | translate }}
+          {{ 'SPLITS.ADD_NEW_BY_QR' | translate }}
         </button>
         <button type="button" class="action-btn" (click)="addManualEntry('neighbouring')">
-          {{ 'SPLITS.ADD_MANUALLY' | translate }}
+          {{ 'SPLITS.ADD_NEW_RIGHTSHOLDER_MANUALLY' | translate }}
         </button>
+        @if (shouldShowAddMe('neighbouring')) {
+          <button type="button" class="action-btn" (click)="addSelfEntry('neighbouring')">
+            {{ 'SPLITS.ADD_ME' | translate }}
+          </button>
+        }
       </div>
     </section>
   }

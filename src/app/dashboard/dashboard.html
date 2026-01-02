@@ -16,11 +16,6 @@
         </div>
       }
     </div>
-
-    <button (click)="logout()" class="logout-btn">
-      <lucide-icon [img]="LogOut" [size]="18"></lucide-icon>
-      <span>{{ 'DASHBOARD.LOGOUT' | translate }}</span>
-    </button>
   </div>
 
   <!-- Navigation Tabs -->
@@ -268,31 +263,7 @@
               }
             </div>
 
-            @for (platform of socialPlatforms; track platform.key) {
-              @if (getSocialLink(profile, platform.key); as link) {
-                <div class="bento-card social-card" [style.--accent-color]="platform.color">
-                  <div class="social-header">
-                    <lucide-icon [img]="getIconComponent(platform.icon)" [size]="24"></lucide-icon>
-                    <span class="social-name">{{ platform.label }}</span>
-                  </div>
-
-                  <div class="social-content">
-                    <a [href]="link" target="_blank" class="social-link">
-                      {{ link.length > 30 ? (link | slice:0:30) + '...' : link }}
-                    </a>
-                  </div>
-
-                  <div class="social-actions">
-                    <button (click)="copyToClipboard(link, platform.label)" class="copy-btn" title="Copy link">
-                      <lucide-icon [img]="Copy" [size]="18"></lucide-icon>
-                    </button>
-                    <a [href]="link" target="_blank" class="visit-btn" title="Visit">
-                      <lucide-icon [img]="ExternalLink" [size]="18"></lucide-icon>
-                    </a>
-                  </div>
-                </div>
-              }
-            }
+            
 
           </div>
         </div>

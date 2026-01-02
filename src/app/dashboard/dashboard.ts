@@ -19,7 +19,6 @@ import {
   Disc3,
   FolderOpen,
   Plus,
-  LogOut,
   Home,
   Users,
   Edit,
@@ -31,14 +30,6 @@ import {
   ChevronDown,
   ChevronRight,
   Smartphone,
-  Camera,
-  Twitter,
-  Facebook,
-  Video,
-  Globe,
-  Headphones,
-  Copy,
-  ExternalLink,
   Search,
 } from 'lucide-angular';
 
@@ -67,7 +58,6 @@ export class Dashboard implements OnInit {
   readonly Disc3 = Disc3;
   readonly FolderOpen = FolderOpen;
   readonly Plus = Plus;
-  readonly LogOut = LogOut;
   readonly Home = Home;
   readonly Users = Users;
   readonly Edit = Edit;
@@ -79,14 +69,6 @@ export class Dashboard implements OnInit {
   readonly ChevronDown = ChevronDown;
   readonly ChevronRight = ChevronRight;
   readonly Smartphone = Smartphone;
-  readonly Camera = Camera;
-  readonly Twitter = Twitter;
-  readonly Facebook = Facebook;
-  readonly Video = Video;
-  readonly Globe = Globe;
-  readonly Headphones = Headphones;
-  readonly Copy = Copy;
-  readonly ExternalLink = ExternalLink;
   readonly Search = Search;
 
   // Public properties for template
@@ -120,17 +102,6 @@ export class Dashboard implements OnInit {
       return name.includes(query) || desc.includes(query) || type.includes(query);
     });
   });
-
-  // Social platforms with icons
-  socialPlatforms = [
-    { key: 'instagram', label: 'Instagram', icon: 'Camera', color: '#E4405F' },
-    { key: 'twitter', label: 'Twitter/X', icon: 'Twitter', color: '#000000' },
-    { key: 'facebook', label: 'Facebook', icon: 'Facebook', color: '#1877F2' },
-    { key: 'tiktok', label: 'TikTok', icon: 'Music', color: '#000000' },
-    { key: 'youtube', label: 'YouTube', icon: 'Video', color: '#FF0000' },
-    { key: 'website', label: 'Website', icon: 'Globe', color: '#667eea' },
-    { key: 'spotify', label: 'Spotify', icon: 'Headphones', color: '#1DB954' }
-  ];
 
   async ngOnInit() {
     if (!this.user) {
@@ -381,33 +352,6 @@ export class Dashboard implements OnInit {
     this.router.navigate(['/profile/qr-code']);
   }
 
-  async copyToClipboard(text: string, platform: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      this.successMessage.set(`${platform} link copied!`);
-      setTimeout(() => this.successMessage.set(''), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
-
-  getSocialLink(profile: any, key: string): string | null {
-    const value = profile.social_links?.[key];
-    return value || null;
-  }
-
-  getIconComponent(iconName: string): any {
-    const iconMap: { [key: string]: any } = {
-      'Camera': this.Camera,
-      'Twitter': this.Twitter,
-      'Facebook': this.Facebook,
-      'Music': this.Music,
-      'Video': this.Video,
-      'Globe': this.Globe,
-      'Headphones': this.Headphones
-    };
-    return iconMap[iconName];
-  }
 
   switchWorkspace(workspaceId: string) {
     this.workspaces$.subscribe(ws => {
@@ -441,7 +385,4 @@ export class Dashboard implements OnInit {
     }
   }
 
-  async logout() {
-    this.router.navigate(['/login']);
-  }
 }

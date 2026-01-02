@@ -4,6 +4,17 @@
   "WELCOME": "¡Bienvenido a la Plataforma de la Industria Musical!",
   "DESCRIPTION": "Gestiona tus derechos, conéctate con artistas y amplía tu red.",
   "LANGUAGE": "Idioma",
+  "NAV": {
+    "BRAND": "Plataforma de Derechos Musicales",
+    "DASHBOARD": "Panel",
+    "WORKS": "Obras",
+    "PROTOCOLS": "Protocolos",
+    "RIGHTS_HOLDERS": "Titulares de derechos",
+    "PROFILE": "Perfil",
+    "CURRENT_WORKSPACE": "Espacio de trabajo",
+    "MANAGE_WORKSPACES": "Gestionar espacios de trabajo",
+    "ADD_FIRST_WORKSPACE": "Crea tu primer espacio de trabajo"
+  },
   "BUTTONS": {
     "SAVE": "Guardar",
     "CANCEL": "Cancelar",
@@ -54,29 +65,6 @@
     "ALREADY_HAVE_ACCOUNT": "¿Ya tienes cuenta?",
     "TERMS_AGREEMENT": "Al crear una cuenta, aceptas nuestros Términos de Servicio y Política de Privacidad",
     "WEAK": "Débil",
-    "PROFILE_HUB": {
-      "LOADING": "Cargando tu perfil…",
-      "SHOW_QR": "Mostrar código QR",
-      "ERROR_ACTION": "Completar mi perfil",
-      "ERROR_SKIP": "Ir al panel",
-      "WELCOME": "Bienvenido/a de nuevo",
-      "PROFILE_COMPLETE": "Perfil completado al {{value}}%",
-      "EDIT_CARD_TITLE": "Editar mi perfil",
-      "EDIT_CARD_DESCRIPTION": "Actualiza tus roles, biografía y preferencias de visibilidad.",
-      "EDIT_CARD_BADGE": "Acción necesaria",
-      "PUBLIC_CARD_TITLE": "Ver perfil público",
-      "PUBLIC_CARD_DESCRIPTION": "Previsualiza lo que ven tus colaboradores al escanear tu código QR.",
-      "PUBLIC_CARD_BADGE": "Vista previa",
-      "DASHBOARD_CARD_TITLE": "Ir al panel",
-      "DASHBOARD_CARD_DESCRIPTION": "Gestiona obras, repartos, protocolos y colaboradores.",
-      "DASHBOARD_CARD_BADGE": "App principal",
-      "STATS_WORKS": "Obras",
-      "STATS_COLLABORATORS": "Colaboradores",
-      "STATS_PROTOCOLS": "Protocolos",
-      "FOOTER_SKIP": "Ir al panel",
-      "ERROR_PROFILE_MISSING": "El perfil aún no está disponible. Completa tu perfil para habilitar la colaboración.",
-      "ERROR_GENERIC": "No se pudo cargar tu perfil en este momento."
-    },
     "MEDIUM": "Media",
     "STRONG": "Fuerte",
     "REGISTRATION_SUCCESS": "¡Cuenta creada exitosamente! Redirigiendo a la configuración del perfil...",
@@ -137,6 +125,29 @@
     "DANGER_ZONE": "Zona de peligro",
     "DANGER_ZONE_DESC": "Acciones permanentes que no se pueden deshacer",
     "EXPORT_ERROR": "Error al exportar los datos. Por favor, inténtalo de nuevo."
+  },
+  "PROFILE_HUB": {
+    "LOADING": "Cargando tu perfil…",
+    "SHOW_QR": "Mostrar código QR",
+    "ERROR_ACTION": "Completar mi perfil",
+    "ERROR_SKIP": "Ir al panel",
+    "WELCOME": "Bienvenido/a de nuevo",
+    "PROFILE_COMPLETE": "Perfil completado al {{value}}%",
+    "EDIT_CARD_TITLE": "Editar mi perfil",
+    "EDIT_CARD_DESCRIPTION": "Actualiza tus roles, biografía y preferencias de visibilidad.",
+    "EDIT_CARD_BADGE": "Acción necesaria",
+    "PUBLIC_CARD_TITLE": "Ver perfil público",
+    "PUBLIC_CARD_DESCRIPTION": "Previsualiza lo que ven tus colaboradores al escanear tu código QR.",
+    "PUBLIC_CARD_BADGE": "Vista previa",
+    "DASHBOARD_CARD_TITLE": "Ir al panel",
+    "DASHBOARD_CARD_DESCRIPTION": "Gestiona obras, repartos, protocolos y colaboradores.",
+    "DASHBOARD_CARD_BADGE": "App principal",
+    "STATS_WORKS": "Obras",
+    "STATS_COLLABORATORS": "Colaboradores",
+    "STATS_PROTOCOLS": "Protocolos",
+    "FOOTER_SKIP": "Ir al panel",
+    "ERROR_PROFILE_MISSING": "El perfil aún no está disponible. Completa tu perfil para habilitar la colaboración.",
+    "ERROR_GENERIC": "No se pudo cargar tu perfil en este momento."
   },
   "WORKSPACE": {
     "CREATE_TITLE": "Crear espacio de trabajo",
@@ -259,7 +270,62 @@
     "ORIGINAL_WORK_INFO_HINT": "Añade detalles si ISRC/ISWC no está disponible",
     "ADDITIONAL_NOTES": "Notas adicionales",
     "NOTES": "Notas",
-    "MANAGE_SPLITS": "Gestionar divisiones"
+    "MANAGE_SPLITS": "Gestionar divisiones",
+    "REVIEW_AND_SUBMIT": "Revisar y enviar",
+    "REVIEW_AND_SAVE": "Revisar y guardar",
+    "REVIEW_MODAL": {
+      "TITLE": "Revisar detalles de la obra",
+      "DESCRIPTION": "Confirma que toda la información es correcta antes de enviarla.",
+      "SECTIONS": {
+        "BASIC": "Datos principales",
+        "IDENTIFIERS": "Identificadores",
+        "TIMING": "Fechas y duración",
+        "COVER": "Información de cover",
+        "AI": "Resumen de divulgación de IA"
+      },
+      "FIELDS": {
+        "TITLE": "Título de la obra",
+        "STATUS": "Estado",
+        "GENRE": "Género",
+        "LANGUAGES": "Idiomas",
+        "ALTERNATIVE_TITLES": "Títulos alternativos",
+        "NOTES": "Notas",
+        "ISRC": "ISRC",
+        "ISWC": "ISWC",
+        "RECORDING_DATE": "Fecha de grabación",
+        "RELEASE_DATE": "Fecha de lanzamiento",
+        "DURATION": "Duración",
+        "COVER": "Versión cover",
+        "ORIGINAL_TITLE": "Título de la obra original"
+      },
+      "ACTIONS": {
+        "BACK": "Seguir editando",
+        "CONFIRM": "Confirmar y enviar"
+      },
+      "EMPTY": {
+        "NOT_SET": "No especificado",
+        "NO_LANGUAGES": "Sin idiomas seleccionados",
+        "NO_ALTERNATIVE_TITLES": "Sin títulos alternativos",
+        "NO_NOTES": "Sin notas adicionales"
+      }
+    },
+    "SUBMISSION_SUCCESS": {
+      "CREATED_TITLE": "“{{ title }}” se creó",
+      "UPDATED_TITLE": "“{{ title }}” se actualizó",
+      "CREATED_BODY": "Asigna los splits ahora o registra otra obra.",
+      "UPDATED_BODY": "Cambios guardados. Continúa gestionando los derechos o regresa a la lista de obras.",
+      "PRIMARY_CREATE": "Ir a la distribución de derechos",
+      "PRIMARY_UPDATE": "Volver a la lista de obras",
+      "SECONDARY_CREATE": "Registrar otra obra",
+      "SECONDARY_UPDATE": "Editar derechohabientes",
+      "TERTIARY": "Volver al panel"
+    },
+    "ALERTS": {
+      "CREATE_SUCCESS": "Obra guardada correctamente.",
+      "UPDATE_SUCCESS": "Cambios guardados correctamente.",
+      "SUBMIT_FAILED": "No pudimos guardar la obra. Inténtalo de nuevo.",
+      "MISSING_WORK_ID": "La obra se creó pero no se devolvió ninguna ID."
+    }
   },
   "AI_DISCLOSURE_FORM": {
     "TITLE": "Divulgación de IA (Requisito legal)",
@@ -495,6 +561,8 @@
     "SCAN_QR_CODE": "Escanear código QR",
     "SCAN_QR": "Escanear QR",
     "ADD_MANUALLY": "Añadir manualmente",
+    "ADD_NEW_BY_QR": "Agregar nuevo por QR",
+    "ADD_NEW_RIGHTSHOLDER_MANUALLY": "Agregar nuevo titular de derechos manualmente",
     "SELECT_RIGHTS_HOLDER": "Selecciona titular de derechos...",
     "NO_RIGHTS_HOLDERS_AVAILABLE": "Todos los titulares de derechos han sido añadidos. Crea nuevos para continuar.",
     "SCAN_INSTRUCTION": "Posiciona el código QR dentro del marco",

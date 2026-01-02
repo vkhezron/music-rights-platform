@@ -14,7 +14,6 @@ import {
   QrCode,
 } from 'lucide-angular';
 import { ProfileService } from '../../services/profile.service';
-import { SupabaseService } from '../../services/supabase.service';
 import { WorkspaceService } from '../../services/workspace.service';
 import { WorksService } from '../../services/works';
 import { RightsHoldersService } from '../../services/rights-holder';
@@ -37,7 +36,6 @@ interface QuickStats {
 })
 export class ProfileHubComponent implements OnInit {
   private readonly profileService = inject(ProfileService);
-  private readonly supabase = inject(SupabaseService);
   private readonly router = inject(Router);
   private readonly workspaceService = inject(WorkspaceService);
   private readonly worksService = inject(WorksService);
@@ -168,7 +166,6 @@ export class ProfileHubComponent implements OnInit {
 
     try {
       const profile = await this.profileService.getCurrentProfile({ refresh: true });
-
       if (!profile) {
         this.profile.set(null);
         this.errorMessage.set('PROFILE_HUB.ERROR_PROFILE_MISSING');

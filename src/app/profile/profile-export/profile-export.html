@@ -1,0 +1,29 @@
+<div class="export-container">
+  <div class="export-card">
+    <button class="back-button" type="button" (click)="goBack()">
+      <lucide-icon [img]="ArrowLeft" [size]="20"></lucide-icon>
+      <span>{{ 'COMMON.BACK' | translate }}</span>
+    </button>
+
+    <h1>{{ 'GDPR.DATA_EXPORT_TITLE' | translate }}</h1>
+    <p class="intro">{{ 'GDPR.DATA_EXPORT_DESCRIPTION' | translate }}</p>
+
+    <div class="status" *ngIf="errorMessage()">
+      <lucide-icon [img]="AlertCircle" [size]="20"></lucide-icon>
+      <span>{{ errorMessage() | translate }}</span>
+    </div>
+
+    <div class="status success" *ngIf="successMessage()">
+      <lucide-icon [img]="CheckCircle" [size]="20"></lucide-icon>
+      <span>{{ successMessage() | translate }}</span>
+    </div>
+
+    <button class="download" type="button" [disabled]="downloadDisabled()" (click)="downloadData()">
+      <lucide-icon [img]="Download" [size]="20"></lucide-icon>
+      <span *ngIf="!isExporting(); else loading">{{ 'GDPR.DATA_EXPORT_DOWNLOAD' | translate }}</span>
+      <ng-template #loading>{{ 'GDPR.DATA_EXPORT_GENERATING' | translate }}...</ng-template>
+    </button>
+
+    <p class="help-text">{{ 'GDPR.DATA_EXPORT_FOOTER' | translate }}</p>
+  </div>
+</div>

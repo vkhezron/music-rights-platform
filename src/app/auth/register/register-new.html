@@ -1,0 +1,468 @@
+<!-- 
+  📝 REGISTRATION PAGE - NEW FLOW
+  Multi-step registration with security questions & backup codes
+-->
+
+<div class="register-container">
+  <!-- Left side: Registration form -->
+  <div class="register-form-section">
+    
+    <!-- Header -->
+    <div class="register-header">
+      <h1 class="logo">
+        <lucide-icon [img]="Music" [size]="32" [strokeWidth]="2"></lucide-icon>
+        {{ 'APP_NAME' | translate }}
+      </h1>
+      <h2 class="title">{{ 'AUTH.CREATE_ACCOUNT' | translate }}</h2>
+      <p class="subtitle">{{ 'AUTH.PRIVACY_FIRST_SIGNUP' | translate }}</p>
+    </div>
+
+    <!-- Step Progress -->
+    <div class="step-progress">
+      <div [class.active]="currentStep() === 'account'" class="progress-step">
+        <span class="step-num">1</span>
+        <span class="step-label">{{ 'AUTH.ACCOUNT' | translate }}</span>
+      </div>
+      <div class="progress-line" [class.active]="['password', 'recovery', 'backup-codes', 'success'].includes(currentStep())"></div>
+      <div [class.active]="currentStep() === 'password'" class="progress-step">
+        <span class="step-num">2</span>
+        <span class="step-label">{{ 'AUTH.PASSWORD' | translate }}</span>
+      </div>
+      <div class="progress-line" [class.active]="['recovery', 'backup-codes', 'success'].includes(currentStep())"></div>
+      <div [class.active]="currentStep() === 'recovery'" class="progress-step">
+        <span class="step-num">3</span>
+        <span class="step-label">{{ 'AUTH.RECOVERY' | translate }}</span>
+      </div>
+      <div class="progress-line" [class.active]="['backup-codes', 'success'].includes(currentStep())"></div>
+      <div [class.active]="['backup-codes', 'success'].includes(currentStep())" class="progress-step">
+        <span class="step-num">4</span>
+        <span class="step-label">{{ 'AUTH.BACKUP_CODES' | translate }}</span>
+      </div>
+    </div>
+
+    <!-- Form Container -->
+    <div class="form-container">
+      
+      <!-- Error Alert -->
+      @if (errorMessage()) {
+        <div class="error-alert">
+          <lucide-icon [img]="AlertCircle" [size]="20" class="error-icon"></lucide-icon>
+          <span>{{ errorMessage() | translate }}</span>
+        </div>
+      }
+
+      <!-- Step 1: Account Details -->
+      @if (currentStep() === 'account') {
+        <form [formGroup]="accountForm" (ngSubmit)="submitAccountForm()" class="register-form">
+          
+          <!-- Username Input -->
+          <div class="form-group">
+            <label for="username">{{ 'AUTH.USERNAME' | translate }}</label>
+            <div class="input-with-status">
+              <input
+                id="username"
+                type="text"
+                formControlName="username"
+                class="form-input"
+                [class.error]="hasError(accountForm, 'username', 'required') || hasError(accountForm, 'username', 'minlength')"
+                [class.available]="usernameAvailable() === true"
+                [class.taken]="usernameAvailable() === false"
+                placeholder="john_musician"
+              />
+              @if (checkingUsername()) {
+                <span class="status-icon checking">⏳</span>
+              }
+              @if (usernameAvailable() === true && accountForm.get('username')?.value) {
+                <span class="status-icon available">✓</span>
+              }
+              @if (usernameAvailable() === false) {
+                <span class="status-icon taken">✗</span>
+              }
+            </div>
+            <small class="help-text">{{ 'AUTH.USERNAME_FORMAT_HINT' | translate }}</small>
+            @if (hasError(accountForm, 'username', 'required')) {
+              <div class="error-message">{{ 'AUTH.USERNAME_REQUIRED' | translate }}</div>
+            }
+            @if (hasError(accountForm, 'username', 'minlength')) {
+              <div class="error-message">{{ 'AUTH.USERNAME_MIN_LENGTH' | translate }}</div>
+            }
+            @if (usernameAvailable() === false && !hasError(accountForm, 'username', 'required')) {
+              <div class="error-message">{{ 'AUTH.USERNAME_TAKEN' | translate }}</div>
+            }
+          </div>
+
+          <!-- Display Name Input -->
+          <div class="form-group">
+            <label for="displayName">{{ 'AUTH.DISPLAY_NAME' | translate }}</label>
+            <input
+              id="displayName"
+              type="text"
+              formControlName="displayName"
+              class="form-input"
+              [class.error]="hasError(accountForm, 'displayName', 'required') || hasError(accountForm, 'displayName', 'minlength') || hasError(accountForm, 'displayName', 'displayNameTaken')"
+              placeholder="John Musician"
+            />
+            <small class="help-text">{{ 'AUTH.DISPLAY_NAME_OPTIONAL' | translate }}</small>
+            @if (hasError(accountForm, 'displayName', 'required')) {
+              <div class="error-message">{{ 'AUTH.DISPLAY_NAME_REQUIRED' | translate }}</div>
+            }
+            @if (hasError(accountForm, 'displayName', 'minlength')) {
+              <div class="error-message">{{ 'AUTH.DISPLAY_NAME_MIN_LENGTH' | translate }}</div>
+            }
+            @if (hasError(accountForm, 'displayName', 'displayNameTaken')) {
+              <div class="error-message">{{ 'AUTH.DISPLAY_NAME_TAKEN' | translate }}</div>
+            }
+          </div>
+
+          <button 
+            type="submit" 
+            class="btn btn-primary btn-block"
+            [disabled]="accountForm.invalid || usernameAvailable() !== true || displayNameAvailable() !== true || checkingUsername() || checkingDisplayName() || isLoading()"
+          >
+            {{ 'AUTH.CONTINUE' | translate }}
+          </button>
+
+          <div class="login-link">
+            <p>{{ 'AUTH.ALREADY_HAVE_ACCOUNT' | translate }} <a routerLink="/auth/login">{{ 'AUTH.LOGIN' | translate }}</a></p>
+          </div>
+        </form>
+      }
+
+      <!-- Step 2: Password -->
+      @if (currentStep() === 'password') {
+        <form [formGroup]="passwordForm" (ngSubmit)="submitPasswordForm()" class="register-form">
+          
+          <div class="step-title">{{ 'AUTH.CREATE_SECURE_PASSWORD' | translate }}</div>
+
+          <!-- Password Input -->
+          <div class="form-group">
+            <label for="password">{{ 'AUTH.PASSWORD' | translate }}</label>
+            <div class="password-wrapper">
+              <input
+                id="password"
+                [type]="showPassword() ? 'text' : 'password'"
+                formControlName="password"
+                class="form-input"
+                [class.error]="hasError(passwordForm, 'password', 'required') || hasError(passwordForm, 'password', 'minlength')"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="togglePassword()"
+                [disabled]="isLoading()"
+              >
+                <lucide-icon [img]="showPassword() ? EyeOff : Eye" [size]="20"></lucide-icon>
+              </button>
+            </div>
+
+            <!-- Password Strength -->
+            @if (passwordForm.get('password')?.value) {
+              <div class="password-strength">
+                <div class="strength-bar">
+                  <div 
+                    class="strength-fill" 
+                    [style.width.%]="passwordStrength().strength"
+                    [style.background-color]="passwordStrength().color"
+                  ></div>
+                </div>
+                <span class="strength-label" [style.color]="passwordStrength().color">
+                  {{ passwordStrength().label | translate }}
+                </span>
+              </div>
+            }
+
+            <small class="help-text">{{ 'AUTH.PASSWORD_MIN_8_CHARS' | translate }}</small>
+            @if (hasError(passwordForm, 'password', 'required')) {
+              <div class="error-message">{{ 'AUTH.REQUIRED_FIELD' | translate }}</div>
+            }
+            @if (hasError(passwordForm, 'password', 'minlength')) {
+              <div class="error-message">{{ 'AUTH.PASSWORD_MIN_LENGTH' | translate }}</div>
+            }
+          </div>
+
+          <!-- Confirm Password Input -->
+          <div class="form-group">
+            <label for="confirmPassword">{{ 'AUTH.CONFIRM_PASSWORD' | translate }}</label>
+            <div class="password-wrapper">
+              <input
+                id="confirmPassword"
+                [type]="showConfirmPassword() ? 'text' : 'password'"
+                formControlName="confirmPassword"
+                class="form-input"
+                [class.error]="hasError(passwordForm, 'confirmPassword', 'required')"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="toggleConfirmPassword()"
+                [disabled]="isLoading()"
+              >
+                <lucide-icon [img]="showConfirmPassword() ? EyeOff : Eye" [size]="20"></lucide-icon>
+              </button>
+            </div>
+            @if (hasError(passwordForm, 'confirmPassword', 'required')) {
+              <div class="error-message">{{ 'AUTH.REQUIRED_FIELD' | translate }}</div>
+            }
+          </div>
+
+          <button 
+            type="submit" 
+            class="btn btn-primary btn-block"
+            [disabled]="passwordForm.invalid || isLoading()"
+          >
+            {{ 'AUTH.CONTINUE' | translate }}
+          </button>
+
+          <button 
+            type="button" 
+            class="btn btn-secondary btn-block"
+            (click)="goBack()"
+            [disabled]="isLoading()"
+          >
+            {{ 'AUTH.BACK' | translate }}
+          </button>
+        </form>
+      }
+
+      <!-- Step 3: Security Recovery -->
+      @if (currentStep() === 'recovery') {
+        <form [formGroup]="recoveryForm" (ngSubmit)="submitRecoveryForm()" class="register-form">
+          
+          <div class="step-title">{{ 'AUTH.SETUP_RECOVERY_OPTIONS' | translate }}</div>
+          <p class="step-description">{{ 'AUTH.RECOVERY_HELP_TEXT' | translate }}</p>
+
+          <!-- Question 1 -->
+          <div class="form-group">
+            <label for="question1">{{ 'AUTH.SECURITY_QUESTION_1' | translate }}</label>
+            <select
+              id="question1"
+              formControlName="question1"
+              class="form-select"
+            >
+              <option value="">{{ 'AUTH.SELECT_QUESTION' | translate }}</option>
+              @for (q of securityQuestions(); track q.id) {
+                <option [value]="q.id">{{ q.question_text }}</option>
+              }
+            </select>
+            @if (hasError(recoveryForm, 'question1', 'required')) {
+              <div class="error-message">{{ 'AUTH.REQUIRED_FIELD' | translate }}</div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="answer1">{{ 'AUTH.YOUR_ANSWER' | translate }}</label>
+            <input
+              id="answer1"
+              type="text"
+              formControlName="answer1"
+              class="form-input"
+              [class.error]="hasError(recoveryForm, 'answer1', 'required')"
+              placeholder="{{ 'AUTH.ENTER_ANSWER' | translate }}"
+            />
+            @if (hasError(recoveryForm, 'answer1', 'required')) {
+              <div class="error-message">{{ 'AUTH.REQUIRED_FIELD' | translate }}</div>
+            }
+          </div>
+
+          <!-- Question 2 -->
+          <div class="form-group">
+            <label for="question2">{{ 'AUTH.SECURITY_QUESTION_2' | translate }}</label>
+            <select
+              id="question2"
+              formControlName="question2"
+              class="form-select"
+            >
+              <option value="">{{ 'AUTH.SELECT_QUESTION' | translate }}</option>
+              @for (q of securityQuestions(); track q.id) {
+                <option [value]="q.id">{{ q.question_text }}</option>
+              }
+            </select>
+            @if (hasError(recoveryForm, 'question2', 'required')) {
+              <div class="error-message">{{ 'AUTH.REQUIRED_FIELD' | translate }}</div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="answer2">{{ 'AUTH.YOUR_ANSWER' | translate }}</label>
+            <input
+              id="answer2"
+              type="text"
+              formControlName="answer2"
+              class="form-input"
+              [class.error]="hasError(recoveryForm, 'answer2', 'required')"
+              placeholder="{{ 'AUTH.ENTER_ANSWER' | translate }}"
+            />
+            @if (hasError(recoveryForm, 'answer2', 'required')) {
+              <div class="error-message">{{ 'AUTH.REQUIRED_FIELD' | translate }}</div>
+            }
+          </div>
+
+          <!-- Optional Recovery Email -->
+          <div class="form-group">
+            <label for="recoveryEmail">{{ 'AUTH.RECOVERY_EMAIL_OPTIONAL' | translate }}</label>
+            <input
+              id="recoveryEmail"
+              type="email"
+              formControlName="recoveryEmail"
+              class="form-input"
+              placeholder="your@email.com"
+            />
+            <small class="help-text">{{ 'AUTH.RECOVERY_EMAIL_HELP' | translate }}</small>
+            @if (hasError(recoveryForm, 'recoveryEmail', 'email')) {
+              <div class="error-message">{{ 'AUTH.INVALID_EMAIL' | translate }}</div>
+            }
+            @if (hasError(recoveryForm, 'recoveryEmail', 'emailTaken')) {
+              <div class="error-message">{{ 'AUTH.RECOVERY_EMAIL_IN_USE' | translate }}</div>
+            }
+          </div>
+
+          <button 
+            type="submit" 
+            class="btn btn-primary btn-block"
+            [disabled]="recoveryForm.invalid || isLoading() || checkingRecoveryEmail()"
+          >
+            {{ 'AUTH.CONTINUE' | translate }}
+          </button>
+
+          <button 
+            type="button" 
+            class="btn btn-secondary btn-block"
+            (click)="goBack()"
+            [disabled]="isLoading() || checkingRecoveryEmail()"
+          >
+            {{ 'AUTH.BACK' | translate }}
+          </button>
+        </form>
+      }
+
+      <!-- Step 4: Backup Codes -->
+      @if (currentStep() === 'backup-codes') {
+        <form [formGroup]="confirmCodesForm" (ngSubmit)="submitBackupCodesForm()" class="register-form">
+          
+          <div class="step-title">{{ 'AUTH.SAVE_BACKUP_CODES' | translate }}</div>
+          <p class="step-description">{{ 'AUTH.BACKUP_CODES_HELP_TEXT' | translate }}</p>
+
+          <!-- Backup Codes Display -->
+          <div class="backup-codes-container">
+            <div class="codes-list">
+              @for (code of backupCodes(); track $index) {
+                <div class="code-item">
+                  <span class="code-text">{{ code }}</span>
+                  <button
+                    type="button"
+                    class="copy-btn"
+                    (click)="copyCode(code)"
+                    [class.copied]="copiedCode() === code"
+                    title="{{ 'AUTH.COPY_CODE' | translate }}"
+                  >
+                    <lucide-icon [img]="Copy" [size]="16"></lucide-icon>
+                    @if (copiedCode() !== code) {
+                      <span>{{ 'COMMON.COPY' | translate }}</span>
+                    } @else {
+                      <span>{{ 'COMMON.COPIED' | translate }}</span>
+                    }
+                  </button>
+                </div>
+              }
+            </div>
+
+            <div class="codes-actions">
+              <button
+                type="button"
+                class="btn btn-secondary btn-small"
+                (click)="downloadCodes()"
+              >
+                <lucide-icon [img]="Download" [size]="16"></lucide-icon>
+                {{ 'AUTH.DOWNLOAD_CODES' | translate }}
+              </button>
+            </div>
+          </div>
+
+          <div class="warning-box">
+            <p>⚠️ {{ 'AUTH.CODES_SHOWN_ONCE' | translate }}</p>
+          </div>
+
+          <!-- Verification -->
+          <div class="form-group">
+            <label for="codeConfirm">{{ 'AUTH.CONFIRM_ONE_CODE' | translate }}</label>
+            <p class="verification-hint">{{ 'AUTH.ENTER_ONE_CODE_FROM_LIST' | translate }}</p>
+            <input
+              id="codeConfirm"
+              type="text"
+              formControlName="codeConfirm"
+              class="form-input"
+              [class.error]="hasError(confirmCodesForm, 'codeConfirm', 'required')"
+              placeholder="ABC-DEF"
+            />
+            @if (hasError(confirmCodesForm, 'codeConfirm', 'required')) {
+              <div class="error-message">{{ 'AUTH.REQUIRED_FIELD' | translate }}</div>
+            }
+          </div>
+
+          <button 
+            type="submit" 
+            class="btn btn-primary btn-block"
+            [disabled]="confirmCodesForm.invalid || isLoading()"
+          >
+            @if (isLoading()) {
+              <span class="loading">{{ 'AUTH.CREATING_ACCOUNT' | translate }}...</span>
+            } @else {
+              {{ 'AUTH.COMPLETE_REGISTRATION' | translate }}
+            }
+          </button>
+
+          <button 
+            type="button" 
+            class="btn btn-secondary btn-block"
+            (click)="goBack()"
+            [disabled]="isLoading()"
+          >
+            {{ 'AUTH.BACK' | translate }}
+          </button>
+        </form>
+      }
+
+      <!-- Step 5: Success -->
+      @if (currentStep() === 'success') {
+        <div class="success-container">
+          <lucide-icon [img]="CheckCircle" [size]="48" class="success-icon"></lucide-icon>
+          <h3>{{ 'AUTH.ACCOUNT_CREATED' | translate }}</h3>
+          <p>{{ 'AUTH.REDIRECTING_TO_DASHBOARD' | translate }}</p>
+          <div class="loading-dots">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+
+  <!-- Right side: Branding -->
+  <div class="register-branding">
+    <div class="branding-content">
+      <h2>{{ 'AUTH.PRIVACY_FIRST' | translate }}</h2>
+      <p>{{ 'AUTH.NO_EMAIL_COLLECTION' | translate }}</p>
+      
+      <div class="feature-list">
+        <div class="feature">
+          <lucide-icon [img]="Check" [size]="24" class="feature-icon"></lucide-icon>
+          <span>{{ 'AUTH.FEATURE_USERNAME_AUTH' | translate }}</span>
+        </div>
+        <div class="feature">
+          <lucide-icon [img]="Check" [size]="24" class="feature-icon"></lucide-icon>
+          <span>{{ 'AUTH.FEATURE_SECURITY_QUESTIONS' | translate }}</span>
+        </div>
+        <div class="feature">
+          <lucide-icon [img]="Check" [size]="24" class="feature-icon"></lucide-icon>
+          <span>{{ 'AUTH.FEATURE_BACKUP_CODES' | translate }}</span>
+        </div>
+        <div class="feature">
+          <lucide-icon [img]="Check" [size]="24" class="feature-icon"></lucide-icon>
+          <span>{{ 'AUTH.FEATURE_OPTIONAL_EMAIL' | translate }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

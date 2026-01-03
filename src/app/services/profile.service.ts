@@ -73,15 +73,15 @@ export class ProfileService {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
-        // Profile doesn't exist yet
-        if (error.code === 'PGRST116') {
-          this.currentProfile$.next(null);
-          return null;
-        }
         throw error;
+      }
+
+      if (!data) {
+        this.currentProfile$.next(null);
+        return null;
       }
 
       this.currentProfile$.next(data);
@@ -101,9 +101,13 @@ export class ProfileService {
         .from('profiles')
         .select('id')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
-      return !error && !!data;
+      if (error) {
+        throw error;
+      }
+
+      return !!data;
     } catch {
       return false;
     }

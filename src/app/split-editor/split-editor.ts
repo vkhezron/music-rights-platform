@@ -88,7 +88,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   protected readonly totalStatuses = computed(() => [this.lyricsStatus(), this.musicStatus(), this.neighbouringStatus()]);
   protected readonly hasAnyEntries = computed(() => this.entries().length > 0);
   protected readonly totalsBalanced = computed(() =>
-    this.totalStatuses().every(status => !status.hasEntries || status.state !== 'over')
+    this.totalStatuses().every(status => !status.hasEntries || status.state === 'complete')
   );
   protected readonly canSubmit = computed(() => this.hasAnyEntries() && this.totalsBalanced());
   protected readonly saveDisabled = computed(() => this.isSaving() || this.isLoading() || !this.canSubmit());

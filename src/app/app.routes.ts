@@ -3,7 +3,9 @@ import { AuthGuard } from '../guards/auth.guard';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/auth/login', pathMatch: 'full' },
-    {path: 'auth/login', loadComponent: () => import('./auth/login/login').then(m => m.Login)},
+    { path: 'auth/login', loadComponent: () => import('./auth/login/login').then(m => m.Login) },
+    { path: 'auth/register', loadComponent: () => import('./auth/register/register-new').then(m => m.RegisterNewComponent) },
+    { path: 'auth/forgot-password', loadComponent: () => import('./auth/password-recovery/password-recovery').then(m => m.PasswordRecoveryComponent) },
    //Protected routes
     {
         path: 'dashboard'
@@ -54,6 +56,11 @@ export const routes: Routes = [
         path: 'profile/qr-code'
         ,loadComponent: () => import('./profile/qr-code-display/qr-code-display').then(m => m.QrCodeDisplayComponent)
         , canActivate: [AuthGuard]  
+    },
+    {
+        path: 'profile/export-data'
+        , loadComponent: () => import('./profile/profile-export/profile-export').then(m => m.ProfileExportComponent)
+        , canActivate: [AuthGuard]
     },
     {
         path: 'profile/delete-account'

@@ -6,7 +6,7 @@ import { RightsHoldersService, RightsHolder } from '../../services/rights-holder
 import { WorkspaceService } from '../../services/workspace.service';
 
 // Lucide Icons
-import { LucideAngularModule, User, Building2, Plus, Edit, Trash2, Search, ArrowLeft, Mail, Phone, Award, Hash } from 'lucide-angular';
+import { LucideAngularModule, User, Building2, Plus, Edit, Trash2, Search, ArrowLeft, Mail, Phone, Award, Hash, Music, Home, FileText, FolderOpen, Recycle, Users } from 'lucide-angular';
 
 @Component({
   selector: 'app-rights-holder-list',
@@ -36,6 +36,12 @@ export class RightsHolderListComponent implements OnInit {
   readonly Phone = Phone;
   readonly Award = Award;
   readonly Hash = Hash;
+  readonly Music = Music;
+  readonly Home = Home;
+  readonly FileText = FileText;
+  readonly FolderOpen = FolderOpen;
+  readonly ArchiveIcon = Recycle;
+  readonly Users = Users;
 
   // State
   rightsHolders = signal<RightsHolder[]>([]);
@@ -121,6 +127,18 @@ export class RightsHolderListComponent implements OnInit {
 
   createRightsHolder() {
     this.router.navigate(['/rights-holders/create']);
+  }
+
+  navigateTo(route: string) {
+    if (route === 'dashboard') {
+      this.router.navigate(['/dashboard']);
+    } else if (route === 'works') {
+      this.router.navigate(['/works']);
+    } else if (route === 'protocols') {
+      this.router.navigate(['/protocols']);
+    } else if (route === 'archive') {
+      this.router.navigate(['/works/archived']);
+    }
   }
 
   editRightsHolder(rh: RightsHolder) {

@@ -75,6 +75,11 @@ export const routes: Routes = [
         , loadComponent: () => import('./works/work-form/work-form').then(m => m.WorkFormComponent)
         , canActivate: [AuthGuard]
     },
+    {
+        path: 'works/archived'
+        , loadComponent: () => import('./works/archived-works/archived-works').then(m => m.ArchivedWorksComponent)
+        , canActivate: [AuthGuard]
+    },
     { 
         path: 'rights-holders'
         , loadComponent: () => import('./rights-holder/rights-holder-list/rights-holder-list').then(m => m.RightsHolderListComponent)

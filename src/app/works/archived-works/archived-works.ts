@@ -3,7 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { LucideAngularModule, Archive, ArrowLeft, RefreshCcw, RotateCcw } from 'lucide-angular';
+import { LucideAngularModule, Archive, ArrowLeft, RefreshCcw, RotateCcw, Music, Home, Users, FileText, FolderOpen, Recycle } from 'lucide-angular';
 import { WorksService } from '../../services/works';
 import { WorkspaceService } from '../../services/workspace.service';
 import { Work } from '../../../models/work.model';
@@ -30,12 +30,19 @@ export class ArchivedWorksComponent {
   readonly ArrowLeft = ArrowLeft;
   readonly RefreshCcw = RefreshCcw;
   readonly RotateCcw = RotateCcw;
+  readonly Music = Music;
+  readonly Home = Home;
+  readonly Users = Users;
+  readonly FileText = FileText;
+  readonly FolderOpen = FolderOpen;
+  readonly ArchiveIcon = Recycle;
 
   allArchivedWorks = signal<Work[]>([]);
   filteredArchivedWorks = signal<Work[]>([]);
   isLoading = signal(true);
   errorMessage = signal('');
   searchQuery = signal('');
+  currentWorkspace = signal<any>(null);
   private lastWorkspaceId: string | null = null;
 
   constructor() {
@@ -50,6 +57,7 @@ export class ArchivedWorksComponent {
     this.workspaceService.currentWorkspace$
       .pipe(takeUntilDestroyed())
       .subscribe(workspace => {
+        this.currentWorkspace.set(workspace);
         const workspaceId = workspace?.id ?? null;
         if (!workspaceId) {
           this.lastWorkspaceId = null;
@@ -132,6 +140,18 @@ export class ArchivedWorksComponent {
   clearSearch(): void {
     this.searchQuery.set('');
     this.applySearch();
+  }
+
+  navigateTo(route: string) {
+    if (route === 'dashboard') {
+      this.router.navigate(['/dashboard']);
+    } else if (route === 'works') {
+      this.router.navigate(['/works']);
+    } else if (route === 'rights-holders') {
+      this.router.navigate(['/rights-holders']);
+    } else if (route === 'protocols') {
+      this.router.navigate(['/protocols']);
+    }
   }
 
   goBack(): void {

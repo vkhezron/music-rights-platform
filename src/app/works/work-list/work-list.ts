@@ -8,8 +8,8 @@ import { Work } from '../../../models/work.model';
 import { WorkSplit } from '../../../models/work-split.model';
 
 // Lucide Icons
-import { LucideAngularModule, Music,
-  Plus, Edit, Archive, Search, Calendar, Clock, Globe, ArrowLeft } from 'lucide-angular';
+import { LucideAngularModule, Music, FileText,
+  Plus, Edit, Archive, Search, Calendar, Clock, Globe, ArrowLeft, Users, Home, FolderOpen, Recycle } from 'lucide-angular';
 
 @Component({
   selector: 'app-works-list',
@@ -38,6 +38,11 @@ export class WorksListComponent implements OnInit {
   readonly Clock = Clock;
   readonly Globe = Globe;
   readonly ArrowLeft = ArrowLeft;
+  readonly Users = Users;
+  readonly Home = Home;
+  readonly FileText = FileText;
+  readonly FolderOpen = FolderOpen;
+  readonly ArchiveIcon = Recycle;
 
   works = signal<Work[]>([]);
   filteredWorks = signal<Work[]>([]);
@@ -132,6 +137,18 @@ export class WorksListComponent implements OnInit {
       //event.preventDefault();
     }
     this.router.navigate(['/works', work.id, 'splits']);
+  }
+
+  navigateTo(route: string) {
+    if (route === 'dashboard') {
+      this.router.navigate(['/dashboard']);
+    } else if (route === 'rights-holders') {
+      this.router.navigate(['/rights-holders']);
+    } else if (route === 'protocols') {
+      this.router.navigate(['/protocols']);
+    } else if (route === 'archive') {
+      this.router.navigate(['/works/archived']);
+    }
   }
 
   goBack() {

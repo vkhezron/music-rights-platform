@@ -1,22 +1,48 @@
 <div class="rights-holders-container">
   
-  <!-- Header -->
-  <div class="header">
-    <div class="header-left">
-      <button class="back-btn" (click)="goBack()">
-        <lucide-icon [img]="ArrowLeft" [size]="20"></lucide-icon>
+  <!-- Fixed Top Bar -->
+  <div class="fixed-top-bar">
+    <div class="left-section">
+      <button class="new-project-btn" (click)="createRightsHolder()">
+        <lucide-icon [img]="Plus" [size]="20"></lucide-icon>
+        <span>{{ 'RIGHTS_HOLDERS.ADD_RIGHTS_HOLDER' | translate }}</span>
       </button>
-      <div class="header-info">
-        <h1>{{ 'RIGHTS_HOLDERS.TITLE' | translate }}</h1>
-        @if (currentWorkspace$ | async; as workspace) {
-          <p class="workspace-name">{{ workspace.name }}</p>
-        }
-      </div>
+
+      @if (currentWorkspace$ | async; as currentWorkspace) {
+        <div class="current-project-display">
+          <span class="label-text">{{ 'WORKSPACE.CURRENT' | translate }}:</span>
+          <lucide-icon [img]="FolderOpen" [size]="20"></lucide-icon>
+          <span class="workspace-name">{{ currentWorkspace.name }}</span>
+        </div>
+      }
     </div>
-    
-    <button class="add-btn" (click)="createRightsHolder()">
-      <lucide-icon [img]="Plus" [size]="20"></lucide-icon>
-      <span>{{ 'RIGHTS_HOLDERS.ADD_RIGHTS_HOLDER' | translate }}</span>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="navigation-tabs">
+    <button class="nav-tab" (click)="navigateTo('dashboard')">
+      <lucide-icon [img]="Home" [size]="20"></lucide-icon>
+      <span class="tab-label">{{ 'DASHBOARD.DASHBOARD' | translate }}</span>
+    </button>
+
+    <button class="nav-tab" (click)="navigateTo('works')">
+      <lucide-icon [img]="Music" [size]="20"></lucide-icon>
+      <span class="tab-label">{{ 'WORKS.WORKS' | translate }}</span>
+    </button>
+
+    <button class="nav-tab active">
+      <lucide-icon [img]="Users" [size]="20"></lucide-icon>
+      <span class="tab-label">{{ 'RIGHTS_HOLDERS.TITLE' | translate }}</span>
+    </button>
+
+    <button class="nav-tab" (click)="navigateTo('protocols')">
+      <lucide-icon [img]="FileText" [size]="20"></lucide-icon>
+      <span class="tab-label">{{ 'DASHBOARD.PROTOCOLS' | translate }}</span>
+    </button>
+
+    <button class="nav-tab" (click)="navigateTo('archive')">
+      <lucide-icon [img]="ArchiveIcon" [size]="20"></lucide-icon>
+      <span class="tab-label">{{ 'DASHBOARD.ARCHIVE' | translate }}</span>
     </button>
   </div>
 

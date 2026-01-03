@@ -1,4 +1,50 @@
 <div class="protocols-page">
+  <!-- Fixed Top Bar -->
+  <div class="fixed-top-bar">
+    <div class="left-section">
+      <button class="new-project-btn" (click)="createWorkToStart()">
+        <lucide-icon [img]="Plus" [size]="20"></lucide-icon>
+        <span>{{ 'PROTOCOL_LIST.CREATE' | translate }}</span>
+      </button>
+
+      @if (currentWorkspace(); as currentWorkspace) {
+        <div class="current-project-display">
+          <span class="label-text">{{ 'WORKSPACE.CURRENT' | translate }}:</span>
+          <lucide-icon [img]="FolderOpen" [size]="20"></lucide-icon>
+          <span class="workspace-name">{{ currentWorkspace.name }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="navigation-tabs">
+    <button class="nav-tab" (click)="navigateTo('dashboard')">
+      <lucide-icon [img]="Home" [size]="20"></lucide-icon>
+      <span class="tab-label">{{ 'DASHBOARD.DASHBOARD' | translate }}</span>
+    </button>
+
+    <button class="nav-tab" (click)="navigateTo('works')">
+      <lucide-icon [img]="Music" [size]="20"></lucide-icon>
+      <span class="tab-label">{{ 'WORKS.WORKS' | translate }}</span>
+    </button>
+
+    <button class="nav-tab" (click)="navigateTo('rights-holders')">
+      <lucide-icon [img]="Users" [size]="20"></lucide-icon>
+      <span class="tab-label">{{ 'RIGHTS_HOLDERS.TITLE' | translate }}</span>
+    </button>
+
+    <button class="nav-tab active">
+      <lucide-icon [img]="FileText" [size]="20"></lucide-icon>
+      <span class="tab-label">{{ 'DASHBOARD.PROTOCOLS' | translate }}</span>
+    </button>
+
+    <button class="nav-tab" (click)="navigateTo('archive')">
+      <lucide-icon [img]="ArchiveIcon" [size]="20"></lucide-icon>
+      <span class="tab-label">{{ 'DASHBOARD.ARCHIVE' | translate }}</span>
+    </button>
+  </div>
+
   <header class="page-header">
     <button class="back-btn" type="button" (click)="goBack()">
       <lucide-icon [img]="ArrowLeft" [size]="18"></lucide-icon>

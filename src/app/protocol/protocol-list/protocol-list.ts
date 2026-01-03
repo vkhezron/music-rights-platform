@@ -3,7 +3,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { LucideAngularModule, ArrowLeft, FileText, Plus, RefreshCcw, CopyPlus } from 'lucide-angular';
+import { LucideAngularModule, ArrowLeft, FileText, Plus, RefreshCcw, CopyPlus, Music, Home, Users, FolderOpen, Recycle } from 'lucide-angular';
 import { ProtocolService } from '../../services/protocol.service';
 import { Workspace, WorkspaceService } from '../../services/workspace.service';
 import { Protocol } from '../../models/protocol.model';
@@ -33,6 +33,11 @@ export class ProtocolListComponent implements OnInit {
   readonly Plus = Plus;
   readonly RefreshCcw = RefreshCcw;
   readonly CopyPlus = CopyPlus;
+  readonly Music = Music;
+  readonly Home = Home;
+  readonly Users = Users;
+  readonly FolderOpen = FolderOpen;
+  readonly ArchiveIcon = Recycle;
 
   readonly protocols = toSignal(this.protocolService.protocols$, { initialValue: [] as Protocol[] });
   readonly works = toSignal(this.worksService.works$, { initialValue: [] as Work[] });
@@ -84,6 +89,18 @@ export class ProtocolListComponent implements OnInit {
       this.errorMessage.set('PROTOCOL_LIST.ERROR_LOADING');
     } finally {
       this.isLoading.set(false);
+    }
+  }
+
+  navigateTo(route: string) {
+    if (route === 'dashboard') {
+      this.router.navigate(['/dashboard']);
+    } else if (route === 'works') {
+      this.router.navigate(['/works']);
+    } else if (route === 'rights-holders') {
+      this.router.navigate(['/rights-holders']);
+    } else if (route === 'archive') {
+      this.router.navigate(['/works/archived']);
     }
   }
 

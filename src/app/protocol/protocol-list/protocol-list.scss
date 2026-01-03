@@ -1,15 +1,131 @@
 .protocols-page {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 24px;
+  min-height: 100vh;
+  background: #f7fafc;
 }
+
+// =====================================================
+// FIXED TOP BAR
+// =====================================================
+
+.fixed-top-bar {
+  position: sticky;
+  top: var(--app-header-height);
+  z-index: 100;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1rem 2rem;
+  min-height: var(--dashboard-topbar-height);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.left-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.new-project-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+}
+
+.current-project-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f7fafc;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+
+  .label-text {
+    font-size: 0.75rem;
+    color: #718096;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .workspace-name {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.95rem;
+  }
+}
+
+.navigation-tabs {
+  background: #ffffff;
+  border-bottom: 2px solid #e2e8f0;
+  padding: 0 2rem;
+  display: flex;
+  gap: 0.5rem;
+  position: sticky;
+  top: calc(var(--app-header-height) + var(--dashboard-topbar-height));
+  z-index: 99;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #718096;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: -2px;
+
+  .tab-icon {
+    font-size: 1.25rem;
+  }
+
+  &:hover {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+  }
+
+  &.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+  }
+}
+
+// =====================================================
+// PAGE HEADER
+// =====================================================
 
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  padding: 24px 24px 0;
 }
 
 .back-btn,
@@ -357,5 +473,58 @@
 
   .protocol-actions {
     flex-direction: column;
+  }
+}
+
+// =====================================================
+// RESPONSIVE: MOBILE
+// =====================================================
+
+@media (max-width: 768px) {
+  .fixed-top-bar {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .left-section {
+    flex-direction: column;
+  }
+
+  .new-project-btn,
+  .current-project-display {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .navigation-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    
+    .tab-label {
+      display: none;
+    }
+
+    .nav-tab {
+      flex: 1;
+      justify-content: center;
+      min-width: 60px;
+    }
+  }
+
+  .page-header {
+    padding: 1rem 1rem 0;
+  }
+
+  .workspace-info {
+    padding: 0 1rem;
+  }
+
+  .protocol-actions {
+    padding: 0 1rem;
+  }
+
+  .protocol-list {
+    padding: 0 1rem;
   }
 }

@@ -11,6 +11,20 @@
         <p>{{ (isEditMode() ? 'WORKS.EDIT_WORK_SUBTITLE' : 'WORKS.CREATE_WORK_SUBTITLE') | translate }}</p>
       </div>
     </div>
+
+    @if (isEditMode()) {
+      <div class="header-actions">
+        <button
+          type="button"
+          class="history-button"
+          (click)="openChangeHistory()"
+          [disabled]="changeHistoryLoading()"
+        >
+          <lucide-icon [img]="History" [size]="18"></lucide-icon>
+          <span>{{ 'WORKS.VIEW_CHANGES' | translate }}</span>
+        </button>
+      </div>
+    }
   </div>
 
   <!-- Form -->
@@ -171,33 +185,87 @@
 
       <!-- Duration -->
       <div class="form-group">
-        <label>{{ 'WORKS.DURATION' | translate }}</label>
-        <div class="duration-inputs">
-          <div class="duration-input-group">
+        <label class="group-label">{{ 'WORKS.DURATION' | translate }}</label>
+
+        <div
+          class="duration-mode"
+          role="radiogroup"
+          [attr.aria-label]="('WORKS.DURATION_MODE.LABEL' | translate)"
+        >
+          <label class="duration-mode-option">
             <input
-              type="number"
-              [value]="getDurationMinutes()"
-              (input)="onDurationChange($any($event.target).value || 0, getDurationSeconds())"
-              class="form-input duration-input"
-              placeholder="0"
-              min="0"
+              type="radio"
+              name="durationMode"
+              value="hms"
+              [checked]="durationMode() === 'hms'"
+              (change)="onDurationModeChange('hms')"
             />
-            <span class="duration-label">{{ 'WORKS.MINUTES' | translate }}</span>
-          </div>
-          <span class="duration-separator">:</span>
-          <div class="duration-input-group">
+            <span>{{ 'WORKS.DURATION_MODE.HMS' | translate }}</span>
+          </label>
+
+          <label class="duration-mode-option">
             <input
-              type="number"
-              [value]="getDurationSeconds()"
-              (input)="onDurationChange(getDurationMinutes(), $any($event.target).value || 0)"
-              class="form-input duration-input"
-              placeholder="0"
-              min="0"
-              max="59"
+              type="radio"
+              name="durationMode"
+              value="seconds"
+              [checked]="durationMode() === 'seconds'"
+              (change)="onDurationModeChange('seconds')"
             />
-            <span class="duration-label">{{ 'WORKS.SECONDS' | translate }}</span>
-          </div>
+            <span>{{ 'WORKS.DURATION_MODE.SECONDS' | translate }}</span>
+          </label>
         </div>
+
+        @if (durationMode() === 'hms') {
+          <div class="duration-inputs duration-inputs--hms">
+            <div class="duration-input-group">
+              <input
+                type="number"
+                min="0"
+                [value]="getDurationHours()"
+                (input)="onDurationHMSChange('hours', $any($event.target).value)"
+                class="form-input duration-input"
+              />
+              <span class="duration-label">{{ 'WORKS.HOURS' | translate }}</span>
+            </div>
+            <span class="duration-separator">:</span>
+            <div class="duration-input-group">
+              <input
+                type="number"
+                min="0"
+                max="59"
+                [value]="getDurationMinutes()"
+                (input)="onDurationHMSChange('minutes', $any($event.target).value)"
+                class="form-input duration-input"
+              />
+              <span class="duration-label">{{ 'WORKS.MINUTES' | translate }}</span>
+            </div>
+            <span class="duration-separator">:</span>
+            <div class="duration-input-group">
+              <input
+                type="number"
+                min="0"
+                max="59"
+                [value]="getDurationSeconds()"
+                (input)="onDurationHMSChange('seconds', $any($event.target).value)"
+                class="form-input duration-input"
+              />
+              <span class="duration-label">{{ 'WORKS.SECONDS' | translate }}</span>
+            </div>
+          </div>
+        } @else {
+          <div class="duration-inputs duration-inputs--seconds">
+            <div class="duration-input-group">
+              <input
+                type="number"
+                min="0"
+                [value]="getTotalDurationSeconds()"
+                (input)="onDurationSecondsOnlyChange($any($event.target).value)"
+                class="form-input duration-input"
+              />
+              <span class="duration-label">{{ 'WORKS.SECONDS' | translate }}</span>
+            </div>
+          </div>
+        }
       </div>
 
       <div class="form-row">
@@ -255,7 +323,7 @@
       <!-- Languages -->
       <div class="form-group">
         <label class="group-label">{{ 'WORKS.LANGUAGES' | translate }}</label>
-        <p class="field-hint">{{ 'WORKS.LANGUAGES_HINT' | translate }}</p>
+
         <div class="checkbox-grid">
           @for (language of languageOptions; track language) {
             <label class="checkbox-label">
@@ -269,13 +337,7 @@
           }
         </div>
       </div>
-    </div>
 
-    <!-- Cover Version Section -->
-    <div class="form-section">
-      <h2 class="section-title">{{ 'WORKS.COVER_VERSION_INFO' | translate }}</h2>
-
-      <!-- Is Cover Version -->
       <div class="form-group">
         <label class="checkbox-label cover-checkbox">
           <input
@@ -557,6 +619,85 @@
               } @else {
                 <span>{{ 'WORKS.REVIEW_MODAL.ACTIONS.CONFIRM' | translate }}</span>
               }
+            </button>
+          </footer>
+        </div>
+      </div>
+    }
+
+    @if (showChangeHistory()) {
+      <div class="submission-overlay" role="dialog" aria-modal="true">
+        <div class="history-dialog">
+          <header class="history-header">
+            <h3>{{ 'WORKS.CHANGE_HISTORY.TITLE' | translate }}</h3>
+            <p>{{ 'WORKS.CHANGE_HISTORY.DESCRIPTION' | translate }}</p>
+          </header>
+
+          <div class="history-content">
+            @if (changeHistoryLoading()) {
+              <div class="history-loading">
+                <span class="spinner"></span>
+                <span>{{ 'COMMON.LOADING' | translate }}</span>
+              </div>
+            } @else if (changeHistoryError()) {
+              <div class="history-error">{{ changeHistoryError() }}</div>
+            } @else {
+              @if (changeHistory().length) {
+                <ul class="history-list">
+                  @for (entry of changeHistory(); track entry.id) {
+                    <li class="history-entry">
+                      <div class="history-entry-header">
+                        <div class="history-entry-meta">
+                          <span class="history-entry-type">
+                            {{ getChangeTypeTranslationKey(entry.change_type) | translate }}
+                          </span>
+                          @if (describeChangedField(entry.field_changed); as field) {
+                            <span class="history-entry-field">• {{ field }}</span>
+                          }
+                        </div>
+                        <time class="history-entry-date">{{ entry.changed_at | date:'medium' }}</time>
+                      </div>
+
+                      <div class="history-entry-body">
+                        <div class="history-entry-values">
+                          <div class="history-entry-value">
+                            <strong>{{ 'WORKS.CHANGE_HISTORY.OLD_VALUE' | translate }}</strong>
+                            <pre>{{ formatChangeValue(entry.old_value) || ('WORKS.CHANGE_HISTORY.EMPTY' | translate) }}</pre>
+                          </div>
+                          <div class="history-entry-value">
+                            <strong>{{ 'WORKS.CHANGE_HISTORY.NEW_VALUE' | translate }}</strong>
+                            <pre>{{ formatChangeValue(entry.new_value) || ('WORKS.CHANGE_HISTORY.EMPTY' | translate) }}</pre>
+                          </div>
+                        </div>
+
+                        @if (entry.notes) {
+                          <div class="history-entry-notes">
+                            <strong>{{ 'WORKS.CHANGE_HISTORY.NOTES' | translate }}</strong>
+                            <p>{{ entry.notes }}</p>
+                          </div>
+                        }
+
+                        @if (entry.change_summary) {
+                          <div class="history-entry-summary">
+                            <strong>{{ 'WORKS.CHANGE_HISTORY.SUMMARY' | translate }}</strong>
+                            <p>{{ entry.change_summary }}</p>
+                          </div>
+                        }
+                      </div>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <div class="history-empty">
+                  {{ 'WORKS.CHANGE_HISTORY.EMPTY_STATE' | translate }}
+                </div>
+              }
+            }
+          </div>
+
+          <footer class="history-actions">
+            <button type="button" class="primary-button" (click)="closeChangeHistory()">
+              {{ 'COMMON.CLOSE' | translate }}
             </button>
           </footer>
         </div>

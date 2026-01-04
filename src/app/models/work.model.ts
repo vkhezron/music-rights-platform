@@ -98,3 +98,20 @@ export interface WorkSplit {
   created_at: string;
   updated_at: string;
 }
+
+export interface WorkChangeRecord {
+  id: string;
+  work_id: string;
+  split_id?: string | null;
+  entity_type: 'work' | 'split';
+  change_type: string;
+  field_changed?: string | null;
+  old_value?: string | null;
+  new_value?: string | null;
+  notes?: string | null;
+  change_summary?: string | null;
+  changed_by?: string | null;
+  changed_at: string;
+  changed_by_nickname?: string | null;
+  changed_by_display_name?: string | null;
+}

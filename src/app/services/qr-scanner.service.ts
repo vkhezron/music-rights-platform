@@ -60,11 +60,8 @@ export class QRScannerService {
           }
 
           // Ignore the common "not found" noise (no QR in frame)
-          if (error) {
-            const err = error as { name?: string; message?: string };
-            if (err?.name !== 'NotFoundException') {
-              onError(error);
-            }
+          if (error && !this.isNonCriticalDecodeError(error)) {
+            onError(error);
           }
         }
       );
@@ -119,5 +116,28 @@ export class QRScannerService {
     } catch {
       return false;
     }
+  }
+
+  private isNonCriticalDecodeError(error: unknown): boolean {
+    if (!error) return false;
+    const err = error as { name?: string; message?: string };
+    const name = (err?.name ?? '').toLowerCase();
+    const message = (err?.message ?? '').toLowerCase();
+
+    if (!name && !message) {
+      return false;
+    }
+
+    if (name.includes('notfound')) {
+      return true;
+    }
+
+    return (
+      message.includes('no multiformat readers') ||
+      message.includes('not find code') ||
+      message.includes('qr code not found') ||
+      message.includes('no code found') ||
+      message.includes('checksumexception')
+    );
   }
 }

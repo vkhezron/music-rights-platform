@@ -133,10 +133,16 @@ export class ProfileService {
   /**
    * Generate QR code as base64 string
    */
-  private async generateQRCode(userNumber: number): Promise<string> {
+  private async generateQRCode(userNumber: number | string): Promise<string> {
+    const normalizedUserNumber = typeof userNumber === 'string' ? Number(userNumber) : userNumber;
+
+    if (typeof normalizedUserNumber !== 'number' || Number.isNaN(normalizedUserNumber)) {
+      throw new Error('Invalid user number for QR code');
+    }
+
     const qrData: QRConnectionData = {
       platform: 'music-rights-platform',
-      user_number: userNumber,
+      user_number: normalizedUserNumber,
       type: 'connect'
     };
 
@@ -346,5 +352,25 @@ export class ProfileService {
     return null;
   }
 
-  
+  async getProfilesByIds(ids: readonly string[]): Promise<Array<Pick<UserProfile, 'id' | 'nickname' | 'display_name'>>> {
+    if (!ids.length) {
+      return [];
+    }
+
+    try {
+      const { data, error } = await this.supabase.client
+        .from('profiles')
+        .select('id, nickname, display_name')
+        .in('id', [...ids]);
+
+      if (error) {
+        throw error;
+      }
+
+      return (data ?? []) as Array<Pick<UserProfile, 'id' | 'nickname' | 'display_name'>>;
+    } catch (error) {
+      console.error('Error fetching profiles by ids:', error);
+      return [];
+    }
+  }
 }

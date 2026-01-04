@@ -5,7 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { WorksService } from '../../services/works';
 import { FeedbackService } from '../../services/feedback.service';
-import { WorkFormData } from '../../models/work.model';
+import { WorkFormData, WorkChangeRecord } from '../../models/work.model';
 import {
   WorkCreationDeclaration,
   WorkCreationDeclarationDraft,
@@ -28,7 +28,8 @@ import {
   Globe,
   Tag,
   Edit,
-  CheckCircle
+  CheckCircle,
+  History
 } from 'lucide-angular';
 
 interface ReviewDisclosureMeta {
@@ -74,6 +75,7 @@ export class WorkFormComponent implements OnInit {
   readonly Tag = Tag;
   readonly Edit = Edit;
   readonly CheckCircle = CheckCircle;
+  readonly History = History;
 
   workForm!: FormGroup;
   isLoading = signal(false);
@@ -88,6 +90,11 @@ export class WorkFormComponent implements OnInit {
   protected submittedWorkId = signal<string | null>(null);
   protected submittedWorkTitle = signal<string>('');
   protected isCreateSubmission = signal(true);
+  protected durationMode = signal<'hms' | 'seconds'>('hms');
+  protected showChangeHistory = signal(false);
+  protected changeHistoryLoading = signal(false);
+  protected changeHistory = signal<WorkChangeRecord[]>([]);
+  protected changeHistoryError = signal<string | null>(null);
 
   protected readonly disclosureSections: ReviewDisclosureMeta[] = [
     { key: 'ip', labelKey: 'AI_DISCLOSURE_FORM.SECTIONS.IP' },
@@ -227,23 +234,68 @@ export class WorkFormComponent implements OnInit {
     }
   }
 
-  convertDurationToSeconds(minutes: number, seconds: number): number {
-    return (minutes * 60) + seconds;
+  convertDurationToSeconds(hours: number, minutes: number, seconds: number): number {
+    return (hours * 3600) + (minutes * 60) + seconds;
+  }
+
+  getDurationHours(): number {
+    const totalSeconds = this.getTotalDurationSeconds();
+    return Math.floor(totalSeconds / 3600);
   }
 
   getDurationMinutes(): number {
-    const totalSeconds = this.workForm.get('duration_seconds')?.value || 0;
-    return Math.floor(totalSeconds / 60);
+    const totalSeconds = this.getTotalDurationSeconds();
+    return Math.floor((totalSeconds % 3600) / 60);
   }
 
   getDurationSeconds(): number {
-    const totalSeconds = this.workForm.get('duration_seconds')?.value || 0;
+    const totalSeconds = this.getTotalDurationSeconds();
     return totalSeconds % 60;
   }
 
-  onDurationChange(minutes: number, seconds: number) {
-    const totalSeconds = this.convertDurationToSeconds(minutes, seconds);
+  getTotalDurationSeconds(): number {
+    return this.workForm.get('duration_seconds')?.value || 0;
+  }
+
+  onDurationModeChange(mode: 'hms' | 'seconds') {
+    this.durationMode.set(mode);
+  }
+
+  onDurationHMSChange(part: 'hours' | 'minutes' | 'seconds', value: string | number) {
+    const hours = part === 'hours'
+      ? this.sanitizeDurationPart(value)
+      : this.getDurationHours();
+    const minutes = part === 'minutes'
+      ? this.sanitizeDurationPart(value, 59)
+      : this.getDurationMinutes();
+    const seconds = part === 'seconds'
+      ? this.sanitizeDurationPart(value, 59)
+      : this.getDurationSeconds();
+
+    this.updateDurationFromParts(hours, minutes, seconds);
+  }
+
+  onDurationSecondsOnlyChange(value: string | number) {
+    const sanitized = this.sanitizeDurationPart(value);
+    this.workForm.patchValue({ duration_seconds: sanitized });
+  }
+
+  private updateDurationFromParts(hours: number, minutes: number, seconds: number) {
+    const totalSeconds = this.convertDurationToSeconds(hours, minutes, seconds);
     this.workForm.patchValue({ duration_seconds: totalSeconds });
+  }
+
+  private sanitizeDurationPart(value: string | number, max?: number): number {
+    let parsed = parseInt(String(value), 10);
+    if (Number.isNaN(parsed) || parsed < 0) {
+      parsed = 0;
+    }
+
+    if (max !== undefined && parsed > max) {
+      parsed = max;
+    }
+
+    return parsed;
   }
 
   onLanguageToggle(language: string) {
@@ -439,10 +491,13 @@ export class WorkFormComponent implements OnInit {
       return null;
     }
 
-    const mins = Math.floor((seconds ?? 0) / 60);
-    const secs = Math.abs((seconds ?? 0) % 60);
+    const safeSeconds = Math.max(0, seconds ?? 0);
+    const hrs = Math.floor(safeSeconds / 3600);
+    const mins = Math.floor((safeSeconds % 3600) / 60);
+    const secs = safeSeconds % 60;
+    const paddedMins = hrs > 0 ? mins.toString().padStart(2, '0') : mins.toString();
     const paddedSecs = secs.toString().padStart(2, '0');
-    return `${mins}:${paddedSecs}`;
+    return hrs > 0 ? `${hrs}:${paddedMins}:${paddedSecs}` : `${paddedMins}:${paddedSecs}`;
   }
 
   protected formatDate(value?: string | null): string | null {
@@ -461,7 +516,7 @@ export class WorkFormComponent implements OnInit {
       alternative_titles: this.alternativeTitles.value.filter((t: string) => t.trim()),
       isrc: formValue.isrc || undefined,
       iswc: formValue.iswc || undefined,
-      duration_seconds: formValue.duration_seconds || undefined,
+      duration_seconds: formValue.duration_seconds ?? undefined,
       recording_date: formValue.recording_date || undefined,
       release_date: formValue.release_date || undefined,
       languages: formValue.languages.length > 0 ? formValue.languages : undefined,
@@ -526,5 +581,81 @@ export class WorkFormComponent implements OnInit {
     this.submittedWorkId.set(null);
     this.submittedWorkTitle.set('');
     this.isCreateSubmission.set(true);
+    this.durationMode.set('hms');
+    this.changeHistory.set([]);
+    this.showChangeHistory.set(false);
+    this.changeHistoryError.set(null);
+    this.changeHistoryLoading.set(false);
+  }
+
+  protected getChangeTypeTranslationKey(changeType: string): string {
+    const mapping: Record<string, string> = {
+      work_create: 'WORKS.CHANGE_HISTORY.TYPE.WORK_CREATE',
+      work_update: 'WORKS.CHANGE_HISTORY.TYPE.WORK_UPDATE',
+      work_delete: 'WORKS.CHANGE_HISTORY.TYPE.WORK_DELETE',
+      split_create: 'WORKS.CHANGE_HISTORY.TYPE.SPLIT_CREATE',
+      split_update: 'WORKS.CHANGE_HISTORY.TYPE.SPLIT_UPDATE',
+      split_delete: 'WORKS.CHANGE_HISTORY.TYPE.SPLIT_DELETE'
+    };
+
+    return mapping[changeType] ?? 'WORKS.CHANGE_HISTORY.TYPE.UNKNOWN';
+  }
+
+  protected describeChangedField(field?: string | null): string | null {
+    if (!field) {
+      return null;
+    }
+
+    if (field.startsWith('split.')) {
+      const parts = field.split('.');
+      const key = parts[parts.length - 1];
+      return key;
+    }
+
+    return field;
+  }
+
+  protected formatChangeValue(value?: string | null): string | null {
+    if (!value) {
+      return null;
+    }
+
+    const trimmed = value.trim();
+    if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+      try {
+        return JSON.stringify(JSON.parse(trimmed), null, 2);
+      } catch {
+        // Fall back to raw value when parsing fails
+      }
+    }
+
+    return value;
+  }
+
+  async openChangeHistory(): Promise<void> {
+    const id = this.workId();
+    if (!id) {
+      return;
+    }
+
+    this.showChangeHistory.set(true);
+    this.changeHistoryLoading.set(true);
+    this.changeHistoryError.set(null);
+    this.changeHistory.set([]);
+
+    try {
+      const entries = await this.worksService.getWorkChangeHistory(id);
+      this.changeHistory.set(entries);
+    } catch (error) {
+      console.error('Error fetching change history:', error);
+      const fallback = this.translate.instant('WORKS.CHANGE_HISTORY.ERROR');
+      this.changeHistoryError.set(fallback);
+    } finally {
+      this.changeHistoryLoading.set(false);
+    }
+  }
+
+  closeChangeHistory(): void {
+    this.showChangeHistory.set(false);
   }
 }

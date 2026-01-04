@@ -3,11 +3,11 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { vi } from 'vitest';
 
-import { QR_CODE, QrCodeDisplayComponent } from './qr-code-display';
+import { QrCodeDisplayComponent } from './qr-code-display';
 import { ProfileService } from '../../services/profile.service';
 import { TranslateMockLoader } from '../../../testing/translate-mock.loader';
 
-const toDataUrlMock = vi.fn().mockResolvedValue('data:image/png;base64,stub');
+const getQrCodeMock = vi.fn().mockResolvedValue('data:image/png;base64,stub');
 
 describe('QrCodeDisplay', () => {
   let component: QrCodeDisplayComponent;
@@ -30,13 +30,8 @@ describe('QrCodeDisplay', () => {
               user_number: '123',
               nickname: 'tester',
             },
+            getQRCode: getQrCodeMock,
           } as unknown as ProfileService,
-        },
-        {
-          provide: QR_CODE,
-          useValue: {
-            toDataURL: toDataUrlMock,
-          },
         },
       ],
     })
@@ -53,22 +48,22 @@ describe('QrCodeDisplay', () => {
   });
 
   it('should generate a QR code data url for the active profile', async () => {
-    toDataUrlMock.mockClear();
+    getQrCodeMock.mockClear();
     component.qrCodeDataUrl.set('');
 
     await component.generateQRCode();
 
-    expect(toDataUrlMock).toHaveBeenCalledTimes(1);
+    expect(getQrCodeMock).toHaveBeenCalledTimes(1);
     expect(component.qrCodeDataUrl()).toBe('data:image/png;base64,stub');
   });
 
   it('should skip QR generation when profile is missing', async () => {
-    toDataUrlMock.mockClear();
+    getQrCodeMock.mockClear();
     (component as any).profile = null;
 
     await component.generateQRCode();
 
-    expect(toDataUrlMock).not.toHaveBeenCalled();
+    expect(getQrCodeMock).not.toHaveBeenCalled();
     expect(component.qrCodeDataUrl()).toBe('data:image/png;base64,stub');
   });
 

@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { WorkspaceService } from './workspace.service';
-import { Work, WorkFormData, WorkSplit, SplitType } from '../../models/work.model';
+import { Work, WorkFormData, WorkSplit, SplitType, WorkChangeRecord } from '../../models/work.model';
 import {
   WorkCreationDeclaration,
   WorkCreationDeclarationDraft,
@@ -256,6 +256,23 @@ export class WorksService {
     } catch (error) {
       console.error('Error getting work:', error);
       return null;
+    }
+  }
+
+  async getWorkChangeHistory(workId: string): Promise<WorkChangeRecord[]> {
+    try {
+      const { data, error } = await this.supabase.client
+        .from('work_change_data')
+        .select('id, work_id, split_id, entity_type, change_type, field_changed, old_value, new_value, notes, change_summary, changed_by, changed_at')
+        .eq('work_id', workId)
+        .order('changed_at', { ascending: false });
+
+      if (error) throw error;
+
+      return (data ?? []) as WorkChangeRecord[];
+    } catch (error) {
+      console.error('Error loading work change history:', error);
+      throw error;
     }
   }
 

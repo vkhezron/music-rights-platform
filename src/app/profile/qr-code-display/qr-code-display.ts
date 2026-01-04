@@ -1,14 +1,8 @@
-import { Component, InjectionToken, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ProfileService } from '../../services/profile.service';
-import * as QRCode from 'qrcode';
-
-export const QR_CODE = new InjectionToken<typeof QRCode>('QR_CODE', {
-  providedIn: 'root',
-  factory: () => QRCode,
-});
 
 @Component({
   selector: 'app-qr-code-display',
@@ -20,7 +14,6 @@ export const QR_CODE = new InjectionToken<typeof QRCode>('QR_CODE', {
 export class QrCodeDisplayComponent implements OnInit {
   private router = inject(Router);
   private profileService = inject(ProfileService);
-  private qrCode = inject(QR_CODE);
 
   // Signals for state
   qrCodeDataUrl = signal<string>('');
@@ -50,25 +43,8 @@ export class QrCodeDisplayComponent implements OnInit {
   async generateQRCode() {
     if (!this.profile) return;
 
-    // Create QR code data with user profile info
-    const qrData = {
-      platform: 'music-rights-platform',
-      user_number: this.profile.user_number,
-      nickname: this.profile.nickname,
-      type: 'profile'
-    };
-
     try {
-      // Generate QR code as data URL
-      const dataUrl = await this.qrCode.toDataURL(JSON.stringify(qrData), {
-        width: 300,
-        margin: 2,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF'
-        }
-      });
-
+      const dataUrl = await this.profileService.getQRCode();
       this.qrCodeDataUrl.set(dataUrl);
     } catch (error) {
       console.error('QR Code generation error:', error);

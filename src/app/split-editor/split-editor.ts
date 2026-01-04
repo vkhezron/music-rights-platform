@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LucideAngularModule, History } from 'lucide-angular';
 
 import { SplitEntryCardComponent } from './components/split-entry-card.component';
 import { SplitCalculatorService } from './services/split-calculator.service';
@@ -15,7 +16,7 @@ import { QRScannerService } from '../services/qr-scanner.service';
 import { PdfGeneratorService } from '../services/pdf-generator.service';
 import { SupabaseService } from '../services/supabase.service';
 
-import type { Work } from '../models/work.model';
+import type { Work, WorkChangeRecord } from '../models/work.model';
 import type { RightsHolder, RightsHolderFormData, RightsHolderKind } from '../../models/rights-holder.model';
 
 type SplitCategory = 'lyrics' | 'music' | 'neighbouring';
@@ -24,7 +25,7 @@ type EntryMethod = SplitEntry['entryMethod'];
 @Component({
   selector: 'app-split-editor',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, SplitEntryCardComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, SplitEntryCardComponent, LucideAngularModule],
   templateUrl: './split-editor.html',
   styleUrls: ['./split-editor.scss'],
 })
@@ -43,6 +44,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   @ViewChild('qrVideo') qrVideo?: ElementRef<HTMLVideoElement>;
 
   protected readonly Math = Math;
+  protected readonly History = History;
 
   private workId = '';
   private readonly totalTolerance = 0.01;
@@ -60,6 +62,13 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   protected isQrModalOpen = signal(false);
   protected qrTargetSplitType = signal<SplitCategory | null>(null);
   protected qrError = signal<string | null>(null);
+
+  private qrDecodeHintTimer: ReturnType<typeof setTimeout> | null = null;
+
+  protected showChangeHistory = signal(false);
+  protected changeHistoryLoading = signal(false);
+  protected changeHistory = signal<WorkChangeRecord[]>([]);
+  protected changeHistoryError = signal<string | null>(null);
 
   protected lyricsEntries = computed(() =>
     this.entries().filter(entry => entry.splitType === 'lyrics')
@@ -196,6 +205,371 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
     return this.translate.instant(key, { value: diff, category: categoryLabel });
   }
 
+  protected getChangeTypeTranslationKey(changeType: string): string {
+    const mapping: Record<string, string> = {
+      work_create: 'WORKS.CHANGE_HISTORY.TYPE.WORK_CREATE',
+      work_update: 'WORKS.CHANGE_HISTORY.TYPE.WORK_UPDATE',
+      work_delete: 'WORKS.CHANGE_HISTORY.TYPE.WORK_DELETE',
+      split_create: 'WORKS.CHANGE_HISTORY.TYPE.SPLIT_CREATE',
+      split_update: 'WORKS.CHANGE_HISTORY.TYPE.SPLIT_UPDATE',
+      split_delete: 'WORKS.CHANGE_HISTORY.TYPE.SPLIT_DELETE',
+    };
+
+    return mapping[changeType] ?? 'WORKS.CHANGE_HISTORY.TYPE.UNKNOWN';
+  }
+
+  protected describeChangedField(entry: WorkChangeRecord): string | null {
+    const field = entry.field_changed;
+    if (!field) {
+      return null;
+    }
+
+    const base = field.includes('.') ? field.split('.').pop() ?? field : field;
+    const trimmed = base.trim();
+
+    if (!trimmed) {
+      return null;
+    }
+
+    if (/^(isrc|iswc)$/i.test(trimmed)) {
+      return trimmed.toUpperCase();
+    }
+
+    if (trimmed === 'split_id' && entry.split_id) {
+      return this.translate.instant('SPLITS.CHANGE_HISTORY.SPLIT_LABEL', { value: entry.split_id });
+    }
+
+    const spaced = trimmed.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ');
+    return this.toTitleCase(spaced);
+  }
+
+  protected formatChangeValue(value?: string | null): string | null {
+    if (!value) {
+      return null;
+    }
+
+    const trimmed = value.trim();
+    const looksLikeJson =
+      (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+      (trimmed.startsWith('[') && trimmed.endsWith(']'));
+
+    if (looksLikeJson) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.map(item => this.describeValue(item)).join(', ');
+        }
+
+        if (parsed && typeof parsed === 'object') {
+          return this.describeObject(parsed as Record<string, unknown>);
+        }
+      } catch {
+        // Ignore parse failure and fall through to raw value.
+      }
+    }
+
+    return this.describeValue(value);
+  }
+
+  protected async openChangeHistory(): Promise<void> {
+    if (!this.workId) {
+      return;
+    }
+
+    this.showChangeHistory.set(true);
+    this.changeHistoryLoading.set(true);
+    this.changeHistoryError.set(null);
+    this.changeHistory.set([]);
+
+    try {
+      const entries = await this.worksService.getWorkChangeHistory(this.workId);
+      const splitEntries = entries.filter(entry => entry.entity_type === 'split');
+      const enrichedEntries = await this.attachChangeActorProfiles(splitEntries);
+      this.changeHistory.set(enrichedEntries);
+    } catch (error) {
+      console.error('Failed to load split change history', error);
+      const fallback = this.translate.instant('SPLITS.CHANGE_HISTORY.ERROR');
+      this.changeHistoryError.set(fallback);
+    } finally {
+      this.changeHistoryLoading.set(false);
+    }
+  }
+
+  protected closeChangeHistory(): void {
+    this.showChangeHistory.set(false);
+  }
+
+  private async attachChangeActorProfiles(entries: WorkChangeRecord[]): Promise<WorkChangeRecord[]> {
+    const actorIds = Array.from(
+      new Set(entries.map(entry => entry.changed_by).filter((value): value is string => !!value))
+    );
+
+    if (!actorIds.length) {
+      return entries;
+    }
+
+    try {
+      const profiles = await this.profileService.getProfilesByIds(actorIds);
+      if (!profiles.length) {
+        return entries;
+      }
+
+      const profileMap = new Map(profiles.map(profile => [profile.id, profile]));
+      return entries.map(entry => {
+        const actorId = entry.changed_by;
+        if (!actorId) {
+          return entry;
+        }
+
+        const profile = profileMap.get(actorId);
+        if (!profile) {
+          return entry;
+        }
+
+        return {
+          ...entry,
+          changed_by_nickname: profile.nickname ?? null,
+          changed_by_display_name: profile.display_name ?? null,
+        } satisfies WorkChangeRecord;
+      });
+    } catch (error) {
+      console.error('Failed to load change actor profiles', error);
+      return entries;
+    }
+  }
+
+  private async ensureCameraAccess(): Promise<boolean> {
+    if (this.hasCameraSupport()) {
+      return true;
+    }
+
+    const permissionGranted = await this.qrScannerService.requestCameraPermission();
+    if (!permissionGranted) {
+      this.errorMessage.set(this.translate.instant('SPLITS.QR_CAMERA_PERMISSION_DENIED'));
+      return false;
+    }
+
+    const supported = await this.qrScannerService.hasCameraSupport();
+    this.hasCameraSupport.set(supported);
+
+    if (!supported) {
+      this.errorMessage.set(this.translate.instant('SPLITS.QR_CAMERA_UNAVAILABLE'));
+    }
+
+    return supported;
+  }
+
+  private toTitleCase(input: string): string {
+    return input
+      .split(' ')
+      .filter(Boolean)
+      .map(segment => {
+        if (segment.length <= 3) {
+          return segment.toUpperCase();
+        }
+        return segment.charAt(0).toUpperCase() + segment.slice(1).toLowerCase();
+      })
+      .join(' ');
+  }
+
+  private describeValue(value: unknown): string {
+    if (value === null || value === undefined) {
+      return this.translate.instant('SPLITS.CHANGE_HISTORY.EMPTY');
+    }
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+
+      if (!trimmed.length) {
+        return this.translate.instant('SPLITS.CHANGE_HISTORY.EMPTY');
+      }
+
+      const lowered = trimmed.toLowerCase();
+      if (lowered === 'true' || lowered === 'false') {
+        return this.translate.instant(lowered === 'true' ? 'COMMON.YES' : 'COMMON.NO');
+      }
+
+      if (!Number.isNaN(Number(trimmed))) {
+        return Number(trimmed).toLocaleString();
+      }
+
+      return trimmed;
+    }
+
+    if (typeof value === 'number') {
+      return value.toLocaleString();
+    }
+
+    if (typeof value === 'boolean') {
+      return this.translate.instant(value ? 'COMMON.YES' : 'COMMON.NO');
+    }
+
+    if (Array.isArray(value)) {
+      if (!value.length) {
+        return this.translate.instant('SPLITS.CHANGE_HISTORY.EMPTY');
+      }
+
+      return value.map(item => this.describeValue(item)).join(', ');
+    }
+
+    if (value && typeof value === 'object') {
+      return this.describeObject(value as Record<string, unknown>);
+    }
+
+    return String(value);
+  }
+
+  private describeObject(value: Record<string, unknown>): string {
+    const readString = (key: string): string | null => {
+      const raw = value[key];
+      if (typeof raw === 'string') {
+        const trimmed = raw.trim();
+        return trimmed.length ? raw : trimmed;
+      }
+      return null;
+    };
+
+    const pickFirstString = (...keys: readonly string[]): string | null => {
+      for (const key of keys) {
+        const candidate = readString(key);
+        if (candidate) {
+          return candidate;
+        }
+      }
+      return null;
+    };
+    const addSummary = (text?: string | null) => {
+      if (!text) {
+        return;
+      }
+
+      const trimmed = text.trim();
+      if (!trimmed.length) {
+        return;
+      }
+
+      if (!summaryParts.includes(trimmed)) {
+        summaryParts.push(trimmed);
+      }
+    };
+
+    const summaryParts: string[] = [];
+
+    const rightsHolderId = value['rights_holder_id'] ?? value['rightsHolderId'];
+    if (typeof rightsHolderId === 'string') {
+      addSummary(this.resolveRightsHolderName(rightsHolderId));
+    }
+
+    const titleCandidate = pickFirstString('title', 'name', 'display_name');
+    addSummary(titleCandidate);
+
+    if (typeof value['nickname'] === 'string') {
+      const normalized = value['nickname'].replace(/^@/, '').trim();
+      addSummary(normalized ? `@${normalized}` : null);
+    }
+
+    const percentageRaw = value['ownership_percentage'] ?? value['percentage'];
+    const percentage =
+      typeof percentageRaw === 'number'
+        ? percentageRaw
+        : typeof percentageRaw === 'string' && percentageRaw.trim().length && !Number.isNaN(Number(percentageRaw))
+        ? Number(percentageRaw)
+        : null;
+    if (typeof percentage === 'number') {
+      addSummary(`${percentage.toFixed(2)}%`);
+    }
+
+    const splitTypeRaw = value['split_type'] ?? value['splitType'];
+    if (typeof splitTypeRaw === 'string') {
+      let normalized = splitTypeRaw.toLowerCase();
+      if (normalized === 'neighboring') {
+        normalized = 'neighbouring';
+      }
+
+      if (normalized === 'lyrics' || normalized === 'music' || normalized === 'neighbouring') {
+        addSummary(this.translate.instant(this.categoryTranslationKey(normalized as SplitCategory)));
+      }
+    }
+
+    const hiddenKeys = new Set([
+      'id',
+      'work_id',
+      'rights_holder_id',
+      'rightsHolderId',
+      'rights_holder_profile_id',
+      'created_at',
+      'updated_at',
+      'version',
+      'split_id',
+      'splitId',
+    ]);
+
+    const summaryKeys = new Set([
+      'title',
+      'name',
+      'display_name',
+      'nickname',
+      'ownership_percentage',
+      'percentage',
+      'split_type',
+      'splitType',
+    ]);
+
+    const detailLines: string[] = [];
+    for (const [key, val] of Object.entries(value)) {
+      if (hiddenKeys.has(key) || summaryKeys.has(key)) {
+        continue;
+      }
+
+      if (val === undefined) {
+        continue;
+      }
+
+      const label = this.toTitleCase(key.replace(/[_-]+/g, ' '));
+      detailLines.push(`${label}: ${this.describeValue(val)}`);
+    }
+
+    const summary = summaryParts.join(' • ');
+
+    if (summary && detailLines.length) {
+      return `${summary}\n${detailLines.join('\n')}`;
+    }
+
+    if (summary) {
+      return summary;
+    }
+
+    if (detailLines.length) {
+      return detailLines.join('\n');
+    }
+
+    return this.translate.instant('SPLITS.CHANGE_HISTORY.EMPTY');
+  }
+
+  private resolveRightsHolderName(id: string): string | null {
+    const holder = this.rightsHolders().find(item => item.id === id);
+    if (!holder) {
+      return null;
+    }
+
+    const displayName = holder.display_name?.trim() ?? `${holder.first_name ?? ''} ${holder.last_name ?? ''}`.trim();
+    const nickname = holder.nickname ? holder.nickname.replace(/^@/, '').trim() : '';
+
+    if (displayName && nickname) {
+      return `${displayName} (@${nickname})`;
+    }
+
+    if (displayName) {
+      return displayName;
+    }
+
+    if (nickname) {
+      return `@${nickname}`;
+    }
+
+    return null;
+  }
+
   private categoryTranslationKey(category: SplitCategory): string {
     switch (category) {
       case 'lyrics':
@@ -286,8 +660,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   protected async startQrFlow(splitType: SplitCategory): Promise<void> {
     this.clearMessages();
 
-    if (!this.hasCameraSupport()) {
-      this.errorMessage.set('Camera scanning is not available on this device.');
+    if (!(await this.ensureCameraAccess())) {
       return;
     }
 
@@ -315,6 +688,10 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
     this.isQrModalOpen.set(false);
     this.qrTargetSplitType.set(null);
     this.qrError.set(null);
+    if (this.qrDecodeHintTimer) {
+      clearTimeout(this.qrDecodeHintTimer);
+      this.qrDecodeHintTimer = null;
+    }
   }
 
   protected onEntryUpdated(updated: SplitEntry): void {
@@ -721,14 +1098,22 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
 
   private async handleQrPayload(raw: string): Promise<void> {
     try {
-      const data = JSON.parse(raw) as { user_number?: number; type?: string; platform?: string };
-      if (!data || data.type !== 'connect' || typeof data.user_number !== 'number') {
-        throw new Error('Invalid QR code');
+      const data = JSON.parse(raw) as { user_number?: number | string; type?: string; platform?: string };
+
+      const userNumber =
+        typeof data?.user_number === 'string'
+          ? Number(data.user_number)
+          : data?.user_number;
+
+      if (!data || data.type !== 'connect' || typeof userNumber !== 'number' || Number.isNaN(userNumber)) {
+        this.qrError.set('This QR code is not recognized. Scan a profile QR from the Music Rights Platform app.');
+        return;
       }
 
-      const profile = await this.profileService.getProfileByUserNumber(data.user_number);
+      const profile = await this.profileService.getProfileByUserNumber(userNumber);
       if (!profile) {
-        throw new Error('Profile not found');
+        this.qrError.set('We could not find that profile. Ask your collaborator to refresh and share their QR code again.');
+        return;
       }
 
       const splitType = this.qrTargetSplitType();
@@ -758,13 +1143,59 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
       this.stopQrFlow();
     } catch (error) {
       console.error('QR payload error', error);
-      this.qrError.set('Unable to read this QR code.');
+      this.qrError.set('We could not process this QR code. Please try again with a profile QR generated in Music Rights Platform.');
     }
   }
 
   private handleQrError(error: unknown): void {
+    const classification = this.classifyQrError(error);
+
+    if (classification === 'decode') {
+      if (!this.qrDecodeHintTimer) {
+        this.qrDecodeHintTimer = setTimeout(() => {
+          if (this.isQrModalOpen()) {
+            this.qrError.set('We could not detect a QR code yet. Try adjusting the camera or lighting.');
+          }
+          this.qrDecodeHintTimer = null;
+        }, 1200);
+      }
+      return;
+    }
+
     console.error('QR scanning error', error);
-    this.qrError.set('Unable to access the camera.');
+    const message = this.resolveCameraErrorMessage(error);
+    this.qrError.set(message);
+  }
+
+  private classifyQrError(error: unknown): 'decode' | 'camera' {
+    const err = error as { name?: string; message?: string } | undefined;
+    const name = (err?.name ?? '').toLowerCase();
+    const message = (err?.message ?? '').toLowerCase();
+
+    if (name.includes('notfound') || message.includes('no multiformat readers')) {
+      return 'decode';
+    }
+
+    if (message.includes('qr code not found') || message.includes('no code found')) {
+      return 'decode';
+    }
+
+    return 'camera';
+  }
+
+  private resolveCameraErrorMessage(error: unknown): string {
+    const err = error as { message?: string } | undefined;
+    const message = (err?.message ?? '').toLowerCase();
+
+    if (message.includes('not allowed') || message.includes('permission')) {
+      return 'Camera access is blocked. Enable permissions and try again.';
+    }
+
+    if (message.includes('no camera') || message.includes('not found on this device')) {
+      return 'No camera was detected on this device.';
+    }
+
+    return 'Unable to access the camera.';
   }
 
   private createEntryFromRightsHolder(holder: RightsHolder, splitType: SplitCategory, method: EntryMethod): SplitEntry {

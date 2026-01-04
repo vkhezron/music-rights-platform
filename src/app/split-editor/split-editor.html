@@ -12,6 +12,15 @@
     <div class="header-actions">
       <button
         type="button"
+        class="secondary-btn history-btn"
+        (click)="openChangeHistory()"
+        [disabled]="isSaving() || isLoading() || changeHistoryLoading()"
+      >
+        <lucide-icon [img]="History" [size]="18"></lucide-icon>
+        <span>{{ 'SPLITS.VIEW_CHANGES' | translate }}</span>
+      </button>
+      <button
+        type="button"
         class="secondary-btn"
         (click)="downloadPdf()"
         [disabled]="isSaving() || isLoading()"
@@ -136,7 +145,7 @@
           type="button"
           class="action-btn"
           (click)="startQrFlow('lyrics')"
-          [disabled]="!hasCameraSupport()"
+          [disabled]="isLoading() || isSaving()"
         >
           {{ 'SPLITS.ADD_NEW_BY_QR' | translate }}
         </button>
@@ -180,7 +189,7 @@
           type="button"
           class="action-btn"
           (click)="startQrFlow('music')"
-          [disabled]="!hasCameraSupport()"
+          [disabled]="isLoading() || isSaving()"
         >
           {{ 'SPLITS.ADD_NEW_BY_QR' | translate }}
         </button>
@@ -224,7 +233,7 @@
           type="button"
           class="action-btn"
           (click)="startQrFlow('neighbouring')"
-          [disabled]="!hasCameraSupport()"
+          [disabled]="isLoading() || isSaving()"
         >
           {{ 'SPLITS.ADD_NEW_BY_QR' | translate }}
         </button>
@@ -257,28 +266,109 @@
       </div>
     </div>
   }
-  <div class="header-actions">
-      <button
-        type="button"
-        class="secondary-btn"
-        (click)="downloadPdf()"
-        [disabled]="isSaving() || isLoading()"
-      >
-        {{ 'COMMON.DOWNLOAD' | translate }}
-      </button>
-      <button
-        type="button"
-        class="primary-btn"
-        (click)="saveSplits()"
-        [disabled]="saveDisabled()"
-        [attr.title]="saveBlockedReason() || null"
-      >
-        @if (!isSaving()) {
-          {{ 'COMMON.SAVE' | translate }}
-        } @else {
-          {{ 'COMMON.SAVING' | translate }}...
-        }
-      </button>
+
+  @if (showChangeHistory()) {
+    <div class="history-overlay" role="dialog" aria-modal="true">
+      <div class="history-dialog">
+        <header class="history-header">
+          <h3>{{ 'SPLITS.CHANGE_HISTORY.TITLE' | translate }}</h3>
+          <p>{{ 'SPLITS.CHANGE_HISTORY.DESCRIPTION' | translate }}</p>
+        </header>
+
+        <div class="history-content">
+          @if (changeHistoryLoading()) {
+            <div class="history-loading">
+              <span class="spinner"></span>
+              <span>{{ 'COMMON.LOADING' | translate }}</span>
+            </div>
+          } @else if (changeHistoryError()) {
+            <div class="history-error">{{ changeHistoryError() }}</div>
+          } @else {
+            @if (changeHistory().length) {
+              <div class="history-grid">
+                <div class="history-grid__headers">
+                  <span class="history-grid__header">{{ 'SPLITS.CHANGE_HISTORY.CHANGED_FIELD' | translate }}</span>
+                  <span class="history-grid__header">{{ 'SPLITS.CHANGE_HISTORY.OLD_VALUE' | translate }}</span>
+                  <span class="history-grid__header">{{ 'SPLITS.CHANGE_HISTORY.NEW_VALUE' | translate }}</span>
+                  <span class="history-grid__header">{{ 'SPLITS.CHANGE_HISTORY.CHANGED_BY' | translate }}</span>
+                  <span class="history-grid__header">{{ 'SPLITS.CHANGE_HISTORY.CHANGED_AT' | translate }}</span>
+                </div>
+
+                @for (entry of changeHistory(); track entry.id) {
+                  <div class="history-grid__row">
+                    <div class="history-grid__cell history-grid__cell--field">
+                      <span class="history-grid__field-name">
+                        {{ describeChangedField(entry) || ('SPLITS.CHANGE_HISTORY.UNKNOWN_FIELD' | translate) }}
+                      </span>
+                      <div class="history-grid__field-meta">
+                        <span class="history-grid__pill">
+                          {{ getChangeTypeTranslationKey(entry.change_type) | translate }}
+                        </span>
+                        @if (entry.split_id && entry.field_changed !== 'split_id') {
+                          <span class="history-grid__meta">
+                            {{ 'SPLITS.CHANGE_HISTORY.SPLIT_LABEL' | translate:{ value: entry.split_id } }}
+                          </span>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="history-grid__cell history-grid__cell--value">
+                      <div class="history-grid__value">
+                        {{ formatChangeValue(entry.old_value) || ('SPLITS.CHANGE_HISTORY.EMPTY' | translate) }}
+                      </div>
+                    </div>
+
+                    <div class="history-grid__cell history-grid__cell--value">
+                      <div class="history-grid__value">
+                        {{ formatChangeValue(entry.new_value) || ('SPLITS.CHANGE_HISTORY.EMPTY' | translate) }}
+                      </div>
+                    </div>
+
+                    <div class="history-grid__cell history-grid__cell--by">
+                      <span [title]="entry.changed_by || null">
+                        {{ entry.changed_by_nickname || entry.changed_by_display_name || ('SPLITS.CHANGE_HISTORY.UNKNOWN_USER' | translate) }}
+                      </span>
+                    </div>
+
+                    <div class="history-grid__cell history-grid__cell--date">
+                      <time>{{ entry.changed_at | date:'medium' }}</time>
+                    </div>
+
+                    @if (entry.change_summary || entry.notes) {
+                      <div class="history-grid__detail">
+                        @if (entry.change_summary) {
+                          <div class="history-grid__detail-item">
+                            <span class="history-grid__detail-label">{{ 'SPLITS.CHANGE_HISTORY.SUMMARY' | translate }}</span>
+                            <p class="history-grid__detail-text">{{ entry.change_summary }}</p>
+                          </div>
+                        }
+                        @if (entry.notes) {
+                          <div class="history-grid__detail-item">
+                            <span class="history-grid__detail-label">{{ 'SPLITS.CHANGE_HISTORY.NOTES' | translate }}</span>
+                            <p class="history-grid__detail-text">{{ entry.notes }}</p>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="history-empty">
+                {{ 'SPLITS.CHANGE_HISTORY.EMPTY_STATE' | translate }}
+              </div>
+            }
+          }
+        </div>
+
+        <footer class="history-actions">
+          <button type="button" class="history-close-btn" (click)="closeChangeHistory()">
+            {{ 'COMMON.CLOSE' | translate }}
+          </button>
+        </footer>
+      </div>
     </div>
-  </div>
+  }
+
+</div>
 

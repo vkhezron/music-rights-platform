@@ -242,7 +242,7 @@ export const SECONDARY_ROLE_GROUPS: readonly RoleGroupDefinition[] = [
   }
 ] as const;
 
-const ROLE_ALIAS_ENTRIES: ReadonlyArray<[string, string]> = [
+const ROLE_ALIAS_ENTRIES: readonly [string, string][] = [
   ['recording', 'recording_engineer'],
   ['recording professional', 'recording_engineer'],
   ['label', 'label_rep'],
@@ -304,7 +304,7 @@ export function normalizeRoleKey(value: string | null | undefined): string | nul
   return sanitized || trimmed.toLowerCase();
 }
 
-export function normalizeRoleList(values: ReadonlyArray<string> | null | undefined): string[] {
+export function normalizeRoleList(values: readonly string[] | null | undefined): string[] {
   if (!values || values.length === 0) {
     return [];
   }

@@ -243,7 +243,7 @@
             >
               <option value="">{{ 'AUTH.SELECT_QUESTION' | translate }}</option>
               @for (q of securityQuestions(); track q.id) {
-                <option [value]="q.id">{{ q.question_text }}</option>
+                supabase secrets set SUPABASE_URL=your-url SUPABASE_SERVICE_ROLE_KEY=your-key                <option [value]="q.id">{{ q.question_key | translate }}</option>
               }
             </select>
             @if (hasError(recoveryForm, 'question1', 'required')) {
@@ -276,7 +276,7 @@
             >
               <option value="">{{ 'AUTH.SELECT_QUESTION' | translate }}</option>
               @for (q of securityQuestions(); track q.id) {
-                <option [value]="q.id">{{ q.question_text }}</option>
+                <option [value]="q.id">{{ q.question_key | translate }}</option>
               }
             </select>
             @if (hasError(recoveryForm, 'question2', 'required')) {
@@ -299,29 +299,10 @@
             }
           </div>
 
-          <!-- Optional Recovery Email -->
-          <div class="form-group">
-            <label for="recoveryEmail">{{ 'AUTH.RECOVERY_EMAIL_OPTIONAL' | translate }}</label>
-            <input
-              id="recoveryEmail"
-              type="email"
-              formControlName="recoveryEmail"
-              class="form-input"
-              placeholder="your@email.com"
-            />
-            <small class="help-text">{{ 'AUTH.RECOVERY_EMAIL_HELP' | translate }}</small>
-            @if (hasError(recoveryForm, 'recoveryEmail', 'email')) {
-              <div class="error-message">{{ 'AUTH.INVALID_EMAIL' | translate }}</div>
-            }
-            @if (hasError(recoveryForm, 'recoveryEmail', 'emailTaken')) {
-              <div class="error-message">{{ 'AUTH.RECOVERY_EMAIL_IN_USE' | translate }}</div>
-            }
-          </div>
-
           <button 
             type="submit" 
             class="btn btn-primary btn-block"
-            [disabled]="recoveryForm.invalid || isLoading() || checkingRecoveryEmail()"
+            [disabled]="recoveryForm.invalid || isLoading()"
           >
             {{ 'AUTH.CONTINUE' | translate }}
           </button>
@@ -330,7 +311,7 @@
             type="button" 
             class="btn btn-secondary btn-block"
             (click)="goBack()"
-            [disabled]="isLoading() || checkingRecoveryEmail()"
+            [disabled]="isLoading()"
           >
             {{ 'AUTH.BACK' | translate }}
           </button>
@@ -457,10 +438,6 @@
         <div class="feature">
           <lucide-icon [img]="Check" [size]="24" class="feature-icon"></lucide-icon>
           <span>{{ 'AUTH.FEATURE_BACKUP_CODES' | translate }}</span>
-        </div>
-        <div class="feature">
-          <lucide-icon [img]="Check" [size]="24" class="feature-icon"></lucide-icon>
-          <span>{{ 'AUTH.FEATURE_OPTIONAL_EMAIL' | translate }}</span>
         </div>
       </div>
     </div>

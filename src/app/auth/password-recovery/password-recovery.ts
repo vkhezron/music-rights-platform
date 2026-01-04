@@ -3,7 +3,7 @@ import { Component, inject, signal, computed, effect, DestroyRef } from '@angula
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AuthRecoveryService } from '../../services/auth-recovery.service';
+import { AuthRecoveryService, type SecurityQuestion } from '../../services/auth-recovery.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // Lucide Icons
@@ -15,7 +15,6 @@ import {
   Lock,
   Key,
   MessageSquare,
-  Mail,
   ArrowLeft
 } from 'lucide-angular';
 
@@ -46,7 +45,6 @@ export class PasswordRecoveryComponent {
   readonly Lock = Lock;
   readonly Key = Key;
   readonly MessageSquare = MessageSquare;
-  readonly Mail = Mail;
   readonly ArrowLeft = ArrowLeft;
 
   // Form Groups
@@ -58,26 +56,20 @@ export class PasswordRecoveryComponent {
 
   // State Management
   currentStep = signal<'username' | 'method' | 'verify' | 'password' | 'success'>('username');
-  recoveryMethod = signal<'questions' | 'code' | 'email' | null>(null);
+  recoveryMethod = signal<'questions' | 'code' | null>(null);
   username = signal('');
   isLoading = signal(false);
   errorMessage = signal('');
   successMessage = signal('');
-  emailToken = signal<string | null>(null);
 
   // Security Questions
-  availableQuestions = signal<any[]>([]);
+  availableQuestions = signal<SecurityQuestion[]>([]);
   selectedQuestion1 = signal('');
   selectedQuestion2 = signal('');
 
   // Questions for display
-  selectedQuestion1Text = computed(() => {
-    return this.availableQuestions().find(q => q.id === Number(this.selectedQuestion1()))?.question_text || '';
-  });
-
-  selectedQuestion2Text = computed(() => {
-    return this.availableQuestions().find(q => q.id === Number(this.selectedQuestion2()))?.question_text || '';
-  });
+  selectedQuestion1Key = computed(() => this.resolveQuestionKey(this.selectedQuestion1()));
+  selectedQuestion2Key = computed(() => this.resolveQuestionKey(this.selectedQuestion2()));
 
   constructor() {
     this.usernameForm = this.fb.group({
@@ -94,8 +86,20 @@ export class PasswordRecoveryComponent {
     });
 
     this.codeForm = this.fb.group({
-      recoveryCode: ['', [Validators.required, Validators.minLength(7)]]
+      recoveryCode: ['', [Validators.required, Validators.minLength(7), Validators.pattern(/^[A-Z0-9-]{7,}$/)]]
     });
+    this.codeForm.get('recoveryCode')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
+        if (typeof value !== 'string') {
+          return;
+        }
+
+        const sanitized = value.toUpperCase().replace(/\s+/g, '');
+        if (sanitized !== value) {
+          this.codeForm.get('recoveryCode')?.setValue(sanitized, { emitEvent: false });
+        }
+      });
 
     this.passwordForm = this.fb.group({
       password: ['', [Validators.required, Validators.minLength(8)]],
@@ -120,29 +124,6 @@ export class PasswordRecoveryComponent {
       }
     });
 
-    this.route.queryParamMap
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(params => {
-        const mode = params.get('mode');
-        if (mode !== 'email') {
-          return;
-        }
-  
-        const token = (params.get('token') || '').trim();
-        const usernameFromLink = (params.get('username') || '').trim();
-  
-        if (!token || !usernameFromLink) {
-          this.errorMessage.set('AUTH.RECOVERY_EMAIL_INVALID_LINK');
-          return;
-        }
-  
-        if (this.emailToken()) {
-          return;
-        }
-  
-        this.bootstrapEmailRecovery(usernameFromLink, token);
-      });
-  
     this.loadSecurityQuestions();
   }
 
@@ -154,19 +135,30 @@ export class PasswordRecoveryComponent {
 
     this.isLoading.set(true);
     this.errorMessage.set('');
+    this.selectedQuestion1.set('');
+    this.selectedQuestion2.set('');
+    this.recoveryMethod.set(null);
 
     try {
       const usernameValue = (this.usernameForm.get('username')?.value || '').toString().trim();
       const normalizedUsername = usernameValue.toLowerCase();
 
-      await this.recoveryService.startRecovery(normalizedUsername);
+      const recoveryDetails = await this.recoveryService.startRecovery(normalizedUsername);
       this.username.set(normalizedUsername);
       this.usernameForm.get('username')?.setValue(normalizedUsername, { emitEvent: false });
+      this.recoveryMethodForm.get('method')?.setValue('questions', { emitEvent: false });
+      this.selectedQuestion1.set(recoveryDetails.securityQuestion1Id ?? '');
+      this.selectedQuestion2.set(recoveryDetails.securityQuestion2Id ?? '');
+
       this.currentStep.set('method');
     } catch (error: any) {
-      this.errorMessage.set(error.message === 'USERNAME_NOT_FOUND' 
-        ? 'AUTH.USERNAME_NOT_FOUND' 
-        : 'AUTH.RECOVERY_ERROR');
+      if (error?.message === 'USERNAME_NOT_FOUND') {
+        this.errorMessage.set('AUTH.USERNAME_NOT_FOUND');
+      } else if (error?.message === 'RECOVERY_NOT_SETUP') {
+        this.errorMessage.set('AUTH.RECOVERY_NOT_SETUP');
+      } else {
+        this.errorMessage.set('AUTH.RECOVERY_ERROR');
+      }
     } finally {
       this.isLoading.set(false);
     }
@@ -178,37 +170,11 @@ export class PasswordRecoveryComponent {
   async submitRecoveryMethod() {
     if (this.recoveryMethodForm.invalid) return;
 
-    const method = this.recoveryMethodForm.get('method')?.value as 'questions' | 'code' | 'email';
+    const method = this.recoveryMethodForm.get('method')?.value as 'questions' | 'code';
     this.errorMessage.set('');
 
-    if (method === 'email') {
-      this.isLoading.set(true);
-
-      try {
-        await this.recoveryService.initiateEmailRecovery(this.username());
-        this.recoveryMethod.set(method);
-        this.currentStep.set('verify');
-      } catch (error: any) {
-        const message = error?.message;
-        let translationKey = 'AUTH.RECOVERY_EMAIL_FAILED';
-
-        if (message === 'NO_RECOVERY_EMAIL') {
-          translationKey = 'AUTH.RECOVERY_EMAIL_NOT_AVAILABLE';
-        } else if (message === 'RECOVERY_EMAIL_THROTTLED') {
-          translationKey = 'AUTH.RECOVERY_EMAIL_THROTTLED';
-        } else if (message === 'USERNAME_NOT_FOUND') {
-          translationKey = 'AUTH.USERNAME_NOT_FOUND';
-        }
-
-        this.errorMessage.set(translationKey);
-        return;
-      } finally {
-        this.isLoading.set(false);
-      }
-    } else {
-      this.recoveryMethod.set(method);
-      this.currentStep.set('verify');
-    }
+    this.recoveryMethod.set(method);
+    this.currentStep.set('verify');
   }
 
   /**
@@ -247,18 +213,29 @@ export class PasswordRecoveryComponent {
     this.errorMessage.set('');
 
     try {
-      const { recoveryCode } = this.codeForm.value;
+      const control = this.codeForm.get('recoveryCode');
+      const rawCode = (control?.value ?? '').toString();
+      const normalizedCode = rawCode.trim().toUpperCase();
+      control?.setValue(normalizedCode, { emitEvent: false });
+
       await this.recoveryService.verifyWithRecoveryCode(
         this.username(),
-        recoveryCode
+        normalizedCode
       );
       this.currentStep.set('password');
     } catch (error: any) {
-      this.errorMessage.set(error.message === 'INVALID_RECOVERY_CODE'
-        ? 'AUTH.INVALID_RECOVERY_CODE'
-        : error.message === 'RECOVERY_CODE_ALREADY_USED'
-        ? 'AUTH.RECOVERY_CODE_ALREADY_USED'
-        : 'AUTH.RECOVERY_VERIFICATION_FAILED');
+      const message = error?.message;
+      if (message === 'INVALID_RECOVERY_CODE') {
+        this.errorMessage.set('AUTH.INVALID_RECOVERY_CODE');
+      } else if (message === 'RECOVERY_CODE_ALREADY_USED') {
+        this.errorMessage.set('AUTH.RECOVERY_CODE_ALREADY_USED');
+      } else if (message === 'USER_NOT_FOUND' || message === 'USERNAME_NOT_FOUND') {
+        this.errorMessage.set('AUTH.USERNAME_NOT_FOUND');
+      } else if (message === 'RECOVERY_NOT_SETUP') {
+        this.errorMessage.set('AUTH.RECOVERY_NOT_SETUP');
+      } else {
+        this.errorMessage.set('AUTH.RECOVERY_VERIFICATION_FAILED');
+      }
     } finally {
       this.isLoading.set(false);
     }
@@ -280,66 +257,25 @@ export class PasswordRecoveryComponent {
     this.errorMessage.set('');
 
     try {
-      if (this.recoveryMethod() === 'email' && this.emailToken()) {
-        await this.recoveryService.completeEmailRecovery(this.username(), this.emailToken()!, password);
-        this.emailToken.set(null);
-      } else {
-        await this.recoveryService.updatePasswordWithSession(password);
-        await this.recoveryService.resetPassword(this.username(), password);
-      }
+      await this.recoveryService.completeVerifiedRecovery(password);
 
       this.currentStep.set('success');
       this.successMessage.set('AUTH.PASSWORD_RESET_SUCCESS');
     } catch (error: any) {
       const message = error?.message;
-      if (message === 'RECOVERY_TOKEN_EXPIRED') {
-        this.errorMessage.set('AUTH.RECOVERY_EMAIL_EXPIRED');
-      } else if (message === 'RECOVERY_TOKEN_INVALID') {
-        this.errorMessage.set('AUTH.RECOVERY_EMAIL_INVALID_LINK');
-      } else if (message === 'PASSWORD_TOO_SHORT') {
+      if (message === 'PASSWORD_TOO_SHORT') {
         this.errorMessage.set('AUTH.PASSWORD_MIN_LENGTH');
       } else if (message === 'PASSWORD_UPDATE_FAILED') {
         this.errorMessage.set('AUTH.PASSWORD_RESET_FAILED');
+      } else if (message === 'RECOVERY_CODE_ALREADY_USED') {
+        this.errorMessage.set('AUTH.RECOVERY_CODE_ALREADY_USED');
+      } else if (message === 'INVALID_RECOVERY_CODE') {
+        this.errorMessage.set('AUTH.INVALID_RECOVERY_CODE');
+      } else if (message === 'INCORRECT_ANSWERS') {
+        this.errorMessage.set('AUTH.INCORRECT_ANSWERS');
       } else {
         this.errorMessage.set('AUTH.PASSWORD_RESET_FAILED');
       }
-    } finally {
-      this.isLoading.set(false);
-    }
-  }
-
-  /**
-   * Handle email recovery links
-   */
-  private async bootstrapEmailRecovery(usernameFromLink: string, token: string) {
-    this.isLoading.set(true);
-    this.errorMessage.set('');
-
-    const normalizedUsername = usernameFromLink.toLowerCase();
-
-    try {
-      await this.recoveryService.validateEmailRecoveryToken(normalizedUsername, token);
-
-      this.username.set(normalizedUsername);
-      this.emailToken.set(token);
-      this.recoveryMethod.set('email');
-      this.currentStep.set('password');
-      this.successMessage.set('AUTH.RECOVERY_EMAIL_VERIFIED');
-
-      this.usernameForm.get('username')?.setValue(normalizedUsername, { emitEvent: false });
-      this.recoveryMethodForm.get('method')?.setValue('email', { emitEvent: false });
-    } catch (error: any) {
-      const message = error?.message;
-      if (message === 'RECOVERY_TOKEN_EXPIRED') {
-        this.errorMessage.set('AUTH.RECOVERY_EMAIL_EXPIRED');
-      } else if (message === 'RECOVERY_TOKEN_INVALID' || message === 'USERNAME_NOT_FOUND') {
-        this.errorMessage.set('AUTH.RECOVERY_EMAIL_INVALID_LINK');
-      } else if (message === 'RECOVERY_TOKEN_REQUIRED') {
-        this.errorMessage.set('AUTH.RECOVERY_EMAIL_INVALID_LINK');
-      } else {
-        this.errorMessage.set('AUTH.RECOVERY_EMAIL_FAILED');
-      }
-      this.recoveryService.resetRecoveryState();
     } finally {
       this.isLoading.set(false);
     }
@@ -386,5 +322,15 @@ export class PasswordRecoveryComponent {
   hasError(form: FormGroup, fieldName: string, errorType: string): boolean {
     const field = form.get(fieldName);
     return field ? field.hasError(errorType) && (field.dirty || field.touched) : false;
+  }
+
+  private resolveQuestionKey(questionId: string): string {
+    const parsed = Number(questionId);
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+      return '';
+    }
+
+    const match = this.availableQuestions().find(question => question.id === parsed);
+    return match?.question_key || '';
   }
 }

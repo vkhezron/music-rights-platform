@@ -21,6 +21,13 @@ const hashToken = async (token: string) => {
   return toHex(hashBuffer);
 };
 
+const hashString = async (value: string) => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(value);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return toHex(hashBuffer);
+};
+
 const logAttempt = async (
   client: ReturnType<typeof createClient>,
   username: string,
@@ -59,7 +66,11 @@ serve(async (req) => {
   }
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
-  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  const serviceRoleKey =
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ??
+    Deno.env.get('SUPABASE_SERVICE_KEY') ??
+    Deno.env.get('SERVICE_ROLE_KEY') ??
+    null;
 
   if (!supabaseUrl || !serviceRoleKey) {
     console.error('Missing Supabase configuration');
@@ -80,8 +91,11 @@ serve(async (req) => {
   }
 
   const rawUsername = (body?.username ?? '').toString().trim().toLowerCase();
-  const token = (body?.token ?? '').toString().trim();
   const newPassword = (body?.newPassword ?? '').toString();
+  const recoveryMethod = (body?.method ?? 'questions').toString();
+  const answer1 = (body?.answer1 ?? '').toString();
+  const answer2 = (body?.answer2 ?? '').toString();
+  const recoveryCode = (body?.recoveryCode ?? '').toString();
 
   if (!rawUsername) {
     return new Response(JSON.stringify({ error: 'USERNAME_REQUIRED' }), {
@@ -90,11 +104,25 @@ serve(async (req) => {
     });
   }
 
-  if (!token) {
-    return new Response(JSON.stringify({ error: 'RECOVERY_TOKEN_REQUIRED' }), {
-      status: 400,
-      headers
-    });
+  const normalizedMethod = recoveryMethod.toLowerCase();
+  const method = ['questions', 'code'].includes(normalizedMethod) ? normalizedMethod : 'questions';
+
+  if (method === 'questions') {
+    if (!answer1.trim() || !answer2.trim()) {
+      return new Response(JSON.stringify({ error: 'RECOVERY_ANSWERS_REQUIRED' }), {
+        status: 400,
+        headers
+      });
+    }
+  }
+
+  if (method === 'code') {
+    if (!recoveryCode.trim()) {
+      return new Response(JSON.stringify({ error: 'RECOVERY_CODE_REQUIRED' }), {
+        status: 400,
+        headers
+      });
+    }
   }
 
   if (!newPassword || newPassword.length < MIN_PASSWORD_LENGTH) {
@@ -119,10 +147,17 @@ serve(async (req) => {
 
   if (profileError) {
     console.error('Profile lookup failed', profileError);
-    return new Response(JSON.stringify({ error: 'SERVER_LOOKUP_FAILED' }), {
+    return new Response(
+      JSON.stringify({
+        error: 'SERVER_LOOKUP_FAILED',
+        source: 'profile',
+        details: typeof profileError === 'object' ? profileError : String(profileError)
+      }),
+      {
       status: 500,
       headers
-    });
+      }
+    );
   }
 
   if (!profile) {
@@ -135,45 +170,91 @@ serve(async (req) => {
   const { data: credentials, error: credentialsError } = await serviceClient
     .from('user_recovery_credentials')
     .select(
-      'email_recovery_token_hash, email_recovery_token_expires_at, recovery_codes_hash, used_recovery_codes'
+      'recovery_codes_hash, used_recovery_codes, security_answer_1_hash, security_answer_2_hash'
     )
     .eq('user_id', profile.id)
     .maybeSingle();
 
   if (credentialsError) {
     console.error('Recovery credential lookup failed', credentialsError);
-    return new Response(JSON.stringify({ error: 'SERVER_LOOKUP_FAILED' }), {
+    return new Response(
+      JSON.stringify({
+        error: 'SERVER_LOOKUP_FAILED',
+        source: 'credentials',
+        details: typeof credentialsError === 'object' ? credentialsError : String(credentialsError)
+      }),
+      {
       status: 500,
       headers
-    });
+      }
+    );
   }
 
-  if (!credentials?.email_recovery_token_hash) {
-    await logAttempt(serviceClient, rawUsername, false, 'RECOVERY_TOKEN_INVALID');
-    return new Response(JSON.stringify({ error: 'RECOVERY_TOKEN_INVALID' }), {
-      status: 400,
-      headers
-    });
-  }
-
-  const tokenHash = await hashToken(token);
-
-  if (tokenHash !== credentials.email_recovery_token_hash) {
-    await logAttempt(serviceClient, rawUsername, false, 'RECOVERY_TOKEN_INVALID');
-    return new Response(JSON.stringify({ error: 'RECOVERY_TOKEN_INVALID' }), {
-      status: 400,
-      headers
-    });
-  }
-
-  if (credentials.email_recovery_token_expires_at) {
-    const expiresAt = new Date(credentials.email_recovery_token_expires_at).getTime();
-    if (!Number.isNaN(expiresAt) && Date.now() > expiresAt) {
-      await logAttempt(serviceClient, rawUsername, false, 'RECOVERY_TOKEN_EXPIRED');
-      return new Response(JSON.stringify({ error: 'RECOVERY_TOKEN_EXPIRED' }), {
+  if (method === 'questions') {
+    const expected1 = (credentials as any)?.security_answer_1_hash;
+    const expected2 = (credentials as any)?.security_answer_2_hash;
+    if (!expected1 || !expected2) {
+      await logAttempt(serviceClient, rawUsername, false, 'RECOVERY_NOT_SETUP');
+      return new Response(JSON.stringify({ error: 'RECOVERY_NOT_SETUP' }), {
         status: 400,
         headers
       });
+    }
+
+    const a1 = await hashString(answer1.toLowerCase().trim());
+    const a2 = await hashString(answer2.toLowerCase().trim());
+
+    if (a1 !== expected1 || a2 !== expected2) {
+      await logAttempt(serviceClient, rawUsername, false, 'INVALID_ANSWERS');
+      return new Response(JSON.stringify({ error: 'INCORRECT_ANSWERS' }), {
+        status: 400,
+        headers
+      });
+    }
+  }
+
+  if (method === 'code') {
+    const hashes: string[] = Array.isArray((credentials as any)?.recovery_codes_hash)
+      ? (credentials as any).recovery_codes_hash
+      : [];
+    const used: string[] = Array.isArray((credentials as any)?.used_recovery_codes)
+      ? (credentials as any).used_recovery_codes
+      : [];
+    if (!Array.isArray(hashes)) {
+      await logAttempt(serviceClient, rawUsername, false, 'RECOVERY_NOT_SETUP');
+      return new Response(JSON.stringify({ error: 'RECOVERY_NOT_SETUP' }), {
+        status: 400,
+        headers
+      });
+    }
+
+    const normalizedCode = recoveryCode.trim().toUpperCase();
+    const codeHash = await hashString(normalizedCode);
+    const isValid = hashes.includes(codeHash);
+    if (!isValid) {
+      await logAttempt(serviceClient, rawUsername, false, 'INVALID_CODE');
+      return new Response(JSON.stringify({ error: 'INVALID_RECOVERY_CODE' }), {
+        status: 400,
+        headers
+      });
+    }
+
+    if (used.includes(codeHash)) {
+      await logAttempt(serviceClient, rawUsername, false, 'CODE_ALREADY_USED');
+      return new Response(JSON.stringify({ error: 'RECOVERY_CODE_ALREADY_USED' }), {
+        status: 400,
+        headers
+      });
+    }
+
+    const updatedUsed = [...used, codeHash];
+    const { error: markUsedError } = await serviceClient
+      .from('user_recovery_credentials')
+      .update({ used_recovery_codes: updatedUsed })
+      .eq('user_id', profile.id);
+
+    if (markUsedError) {
+      console.error('Failed to mark recovery code as used', markUsedError);
     }
   }
 
@@ -183,28 +264,24 @@ serve(async (req) => {
 
   if (updateAuthError) {
     console.error('Failed to update auth password', updateAuthError);
+    const failureDetail =
+      typeof updateAuthError === 'object' && updateAuthError !== null
+        ? (updateAuthError as any).message || (updateAuthError as any).error_description || null
+        : null;
     await logAttempt(serviceClient, rawUsername, false, 'PASSWORD_UPDATE_FAILED');
-    return new Response(JSON.stringify({ error: 'PASSWORD_UPDATE_FAILED' }), {
+    return new Response(
+      JSON.stringify({
+        error: 'PASSWORD_UPDATE_FAILED',
+        details: failureDetail ?? undefined
+      }),
+      {
       status: 500,
       headers
-    });
+      }
+    );
   }
 
   const nowIso = new Date().toISOString();
-
-  const { error: updateCredentialsError } = await serviceClient
-    .from('user_recovery_credentials')
-    .update({
-      email_recovery_token_hash: null,
-      email_recovery_token_expires_at: null,
-      email_recovery_token_sent_at: null,
-      email_recovery_attempts: 0
-    })
-    .eq('user_id', profile.id);
-
-  if (updateCredentialsError) {
-    console.error('Failed to clear recovery token', updateCredentialsError);
-  }
 
   const { error: updateProfileError } = await serviceClient
     .from('profiles')

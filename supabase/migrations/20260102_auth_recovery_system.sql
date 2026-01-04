@@ -6,14 +6,14 @@ BEGIN;
 -- Enhanced profiles table for username-based auth
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS username TEXT UNIQUE NOT NULL DEFAULT gen_random_uuid()::text,
-  ADD COLUMN IF NOT EXISTS recovery_email TEXT,
+  -- removed: recovery_email TEXT,
   ADD COLUMN IF NOT EXISTS has_completed_recovery_setup BOOLEAN DEFAULT false,
   ADD COLUMN IF NOT EXISTS last_password_change_at timestamptz DEFAULT now(),
   ADD COLUMN IF NOT EXISTS failed_login_attempts INTEGER DEFAULT 0,
   ADD COLUMN IF NOT EXISTS locked_until timestamptz;
 
 COMMENT ON COLUMN public.profiles.username IS 'Unique username for authentication (no email required).';
-COMMENT ON COLUMN public.profiles.recovery_email IS 'Optional email for account recovery (user-provided).';
+-- removed: COMMENT ON COLUMN public.profiles.recovery_email IS 'Optional email for account recovery (user-provided).';
 COMMENT ON COLUMN public.profiles.has_completed_recovery_setup IS 'Flag indicating user has set up security questions.';
 COMMENT ON COLUMN public.profiles.failed_login_attempts IS 'Counter for failed login attempts (for rate limiting).';
 COMMENT ON COLUMN public.profiles.locked_until IS 'Timestamp until account is locked due to failed attempts.';
@@ -38,8 +38,8 @@ CREATE TABLE IF NOT EXISTS public.user_recovery_credentials (
   used_recovery_codes TEXT[] DEFAULT ARRAY[]::text[],
   
   -- Recovery email verification
-  recovery_email_verified BOOLEAN DEFAULT false,
-  recovery_email_verified_at timestamptz,
+  -- removed: recovery_email_verified BOOLEAN DEFAULT false,
+  -- removed: recovery_email_verified_at timestamptz,
   
   -- Audit
   created_at timestamptz NOT NULL DEFAULT now(),
@@ -53,7 +53,7 @@ COMMENT ON COLUMN public.user_recovery_credentials.recovery_codes_hash IS 'Array
 COMMENT ON COLUMN public.user_recovery_credentials.used_recovery_codes IS 'Array of hashed codes that have been used (prevents reuse).';
 
 CREATE INDEX IF NOT EXISTS idx_recovery_credentials_user ON public.user_recovery_credentials(user_id);
-CREATE INDEX IF NOT EXISTS idx_recovery_credentials_verified ON public.user_recovery_credentials(recovery_email_verified);
+-- removed: CREATE INDEX IF NOT EXISTS idx_recovery_credentials_verified ON public.user_recovery_credentials(recovery_email_verified);
 
 -- Authentication attempts log (for rate limiting & security monitoring)
 CREATE TABLE IF NOT EXISTS public.auth_attempt_log (

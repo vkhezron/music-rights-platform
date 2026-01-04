@@ -21,10 +21,6 @@ export class SupabaseService {
     this.supabase.auth.getSession().then(({ data: { session } }) => {
       this.currentUser$.next(session?.user ?? null);
     });
-
-    this.supabase.auth.onAuthStateChange((_event, session) => {
-      this.currentUser$.next(session?.user ?? null);
-    });
   }
 
   get client(): SupabaseClient {
@@ -55,6 +51,7 @@ export class SupabaseService {
       email: tempEmail,
       password,
       options: {
+        emailRedirectTo: undefined,
         data: {
           username: normalizedUsername,
           display_name: normalizedDisplayName
@@ -70,15 +67,23 @@ export class SupabaseService {
       throw error;
     }
 
-    if (data.user) {
-      await this.insertProfileRecord({
-        id: data.user.id,
-        username: normalizedUsername,
-        displayName: normalizedDisplayName,
-        displayNameKey: normalizedDisplayNameKey,
-        emailInternal: tempEmail
-      });
+    if (!data.user) {
+      throw new Error('AUTH.SIGNUP_FAILED');
     }
+
+    // Update current user observable
+    this.currentUser$.next(data.user);
+
+    // Wait for user to be committed to database
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    await this.insertProfileRecord({
+      id: data.user.id,
+      username: normalizedUsername,
+      displayName: normalizedDisplayName,
+      displayNameKey: normalizedDisplayNameKey,
+      emailInternal: tempEmail
+    });
   }
 
   async signIn(email: string, password: string) {
@@ -106,6 +111,46 @@ export class SupabaseService {
     if (error) {
       throw error;
     }
+  }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    const user = this.currentUser;
+    if (!user) {
+      throw new Error('AUTH.NOT_AUTHENTICATED');
+    }
+
+    const email = user.email || this.buildSyntheticEmail(user);
+    if (!email) {
+      throw new Error('AUTH.EMAIL_NOT_AVAILABLE');
+    }
+
+    const { error: verifyError } = await this.supabase.auth.signInWithPassword({
+      email,
+      password: currentPassword
+    });
+
+    if (verifyError) {
+      if (typeof verifyError.message === 'string' && verifyError.message.toLowerCase().includes('invalid')) {
+        throw new Error('AUTH.INVALID_CURRENT_PASSWORD');
+      }
+      throw verifyError;
+    }
+
+    const { error: updateError } = await this.supabase.auth.updateUser({ password: newPassword });
+    if (updateError) {
+      throw updateError;
+    }
+
+    const { data } = await this.supabase.auth.getUser();
+    this.currentUser$.next(data?.user ?? null);
+  }
+
+  private buildSyntheticEmail(user: User): string | null {
+    const username = (user.user_metadata as Record<string, unknown> | null)?.['username'];
+    if (typeof username === 'string' && username.trim().length > 0) {
+      return `user-${username.toLowerCase()}@music-rights.local`;
+    }
+    return null;
   }
 
   private async ensureUsernameAvailable(username: string): Promise<void> {
@@ -212,11 +257,29 @@ export class SupabaseService {
       baseProfile['nickname'] = username;
     }
 
-    if (emailInternal && this.supportsEmailInternalColumn !== false) {
-      baseProfile['email_internal'] = emailInternal;
-    }
+    // Skip email_internal - not needed for username-based auth
+    // if (emailInternal && this.supportsEmailInternalColumn !== false) {
+    //   baseProfile['email_internal'] = emailInternal;
+    // }
 
     const attempts: Array<Record<string, any>> = [];
+
+    let profileExists = false;
+    try {
+      const { data: existing, error: existingError } = await this.client
+        .from('profiles')
+        .select('id')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (existingError && existingError.code !== 'PGRST116') {
+        throw existingError;
+      }
+
+      profileExists = Boolean(existing);
+    } catch (lookupError) {
+      console.warn('Profile existence lookup failed; continuing with insert attempts.', lookupError);
+    }
 
     if (displayName) {
       if (this.supportsDisplayNameColumn !== false) {
@@ -237,10 +300,6 @@ export class SupabaseService {
 
     attempts.push({ ...baseProfile });
 
-    if (emailInternal) {
-      attempts.push({ id, username, nickname: username });
-    }
-
     let lastError: any = null;
 
     for (const payload of attempts) {
@@ -259,11 +318,26 @@ export class SupabaseService {
         delete sanitizedPayload['email_internal'];
       }
 
-      if (this.supportsNicknameColumn === false) {
-        delete sanitizedPayload['nickname'];
+      const insertPayload = { ...sanitizedPayload };
+      const updatePayload: Record<string, any> = {};
+
+      for (const [key, value] of Object.entries(sanitizedPayload)) {
+        if (key === 'id') {
+          continue;
+        }
+
+        // Only include columns we know are supported.
+        const supported = this.isColumnSupported(key);
+        if (supported !== false) {
+          updatePayload[key] = value;
+        }
       }
 
-      const { error } = await this.client.from('profiles').insert(sanitizedPayload);
+      const mutation = profileExists
+        ? this.client.from('profiles').update(updatePayload).eq('id', id)
+        : this.client.from('profiles').insert(insertPayload);
+
+      const { error } = await mutation;
 
       if (!error) {
         if ('display_name' in sanitizedPayload || 'display_name_normalized' in sanitizedPayload) {
@@ -278,16 +352,28 @@ export class SupabaseService {
           this.supportsEmailInternalColumn = true;
         }
 
-        if ('nickname' in sanitizedPayload) {
-          this.supportsNicknameColumn = true;
-        }
-
         return;
       }
 
       lastError = error;
+      const errorDetails = (error as any)?.details || (error as any)?.message || null;
+      console.error('Profile mutation failed:', {
+        payload: sanitizedPayload,
+        error,
+        details: errorDetails
+      });
 
       let handled = false;
+
+      if (!profileExists && (error?.code === '23505' || error?.details?.includes('already exists'))) {
+        profileExists = true;
+        handled = true;
+      }
+
+      if (profileExists && (error?.code === 'PGRST116' || error?.message?.includes('Results contain 0 rows'))) {
+        profileExists = false;
+        handled = true;
+      }
 
       if (this.isColumnMissingError(error, 'display_name') || this.isColumnMissingError(error, 'display_name_normalized')) {
         this.supportsDisplayNameColumn = false;
@@ -304,11 +390,6 @@ export class SupabaseService {
         handled = true;
       }
 
-      if (this.isColumnMissingError(error, 'nickname')) {
-        this.supportsNicknameColumn = false;
-        handled = true;
-      }
-
       if (handled) {
         continue;
       }
@@ -318,6 +399,22 @@ export class SupabaseService {
 
     if (lastError) {
       throw lastError;
+    }
+  }
+
+  private isColumnSupported(column: string): boolean | null {
+    switch (column) {
+      case 'display_name':
+      case 'display_name_normalized':
+        return this.supportsDisplayNameColumn;
+      case 'full_name':
+        return this.supportsFullNameColumn;
+      case 'email_internal':
+        return this.supportsEmailInternalColumn;
+      case 'nickname':
+        return this.supportsNicknameColumn;
+      default:
+        return true;
     }
   }
 }

@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { TranslateModule } from '@ngx-translate/core';
 import { Router, RouterLink } from '@angular/router';
 import { SupabaseService } from '../../services/supabase.service';
-import { AuthRecoveryService } from '../../services/auth-recovery.service';
+import { AuthRecoveryService, type SecurityQuestion } from '../../services/auth-recovery.service';
 
 // Import Lucide Icons
 import { 
@@ -65,7 +65,6 @@ export class RegisterNewComponent {
   showConfirmPassword = signal(false);
   usernameAvailable = signal<boolean | null>(null);
   checkingUsername = signal(false);
-  checkingRecoveryEmail = signal(false);
   displayNameAvailable = signal<boolean | null>(null);
   checkingDisplayName = signal(false);
   private lastNormalizedDisplayNameChecked = '';
@@ -73,7 +72,7 @@ export class RegisterNewComponent {
   private fullNameColumnSupported: boolean | null = null;
 
   // Recovery
-  securityQuestions = signal<any[]>([]);
+  securityQuestions = signal<SecurityQuestion[]>([]);
   selectedQuestion1 = signal('');
   selectedQuestion2 = signal('');
   backupCodes = signal<string[]>([]);
@@ -129,8 +128,7 @@ export class RegisterNewComponent {
       question1: ['', Validators.required],
       answer1: ['', Validators.required],
       question2: ['', Validators.required],
-      answer2: ['', Validators.required],
-      recoveryEmail: ['', [Validators.email]]
+      answer2: ['', Validators.required]
     });
 
     this.confirmCodesForm = this.fb.group({
@@ -186,24 +184,6 @@ export class RegisterNewComponent {
       this.checkDisplayNameAvailability(normalized).catch(error => {
         console.error('Display name availability check failed:', error);
       });
-    });
-
-    // Clear recovery email taken errors when user edits the field
-    this.recoveryForm.get('recoveryEmail')?.valueChanges.subscribe(() => {
-      const control = this.recoveryForm.get('recoveryEmail');
-      if (!control) {
-        return;
-      }
-
-      const errors = control.errors;
-      if (errors?.['emailTaken']) {
-        const { emailTaken, ...others } = errors;
-        control.setErrors(Object.keys(others).length ? others : null);
-      }
-
-      if (this.errorMessage() === 'AUTH.RECOVERY_EMAIL_IN_USE') {
-        this.errorMessage.set('');
-      }
     });
 
     this.loadSecurityQuestions();
@@ -279,33 +259,6 @@ export class RegisterNewComponent {
 
     this.errorMessage.set('');
 
-    const recoveryEmailControl = this.recoveryForm.get('recoveryEmail');
-    const recoveryEmailRaw = (recoveryEmailControl?.value as string | null) ?? '';
-    const normalizedRecoveryEmail = recoveryEmailRaw.trim().toLowerCase();
-
-    if (normalizedRecoveryEmail) {
-      this.checkingRecoveryEmail.set(true);
-      try {
-        const emailAvailable = await this.isRecoveryEmailAvailable(normalizedRecoveryEmail);
-        if (!emailAvailable) {
-          this.errorMessage.set('AUTH.RECOVERY_EMAIL_IN_USE');
-          const control = this.recoveryForm.get('recoveryEmail');
-          const existingErrors = control?.errors || {};
-          control?.setErrors({ ...existingErrors, emailTaken: true });
-          control?.markAsTouched();
-          return;
-        }
-
-        recoveryEmailControl?.setValue(normalizedRecoveryEmail, { emitEvent: false });
-      } catch (error) {
-        console.error('Recovery email lookup failed:', error);
-        this.errorMessage.set('AUTH.REGISTRATION_ERROR');
-        return;
-      } finally {
-        this.checkingRecoveryEmail.set(false);
-      }
-    }
-
     const question1 = this.recoveryForm.get('question1')?.value;
     const question2 = this.recoveryForm.get('question2')?.value;
 
@@ -356,10 +309,8 @@ export class RegisterNewComponent {
         question1,
         answer1,
         question2,
-        answer2,
-        recoveryEmail: recoveryEmailValue
+        answer2
       } = this.recoveryForm.value;
-      const normalizedRecoveryEmail = (recoveryEmailValue as string | null)?.trim().toLowerCase() || null;
 
       // Sign up user
       await this.supabase.signUp(username, password, normalizedDisplayName);
@@ -376,15 +327,14 @@ export class RegisterNewComponent {
             security_question_2: question2,
             security_answer_2: answer2
           },
-          this.backupCodes(),
-          normalizedRecoveryEmail || null
+          this.backupCodes()
         );
       }
 
       this.successMessage.set('AUTH.REGISTRATION_SUCCESS');
       setTimeout(() => {
         sessionStorage.setItem('displayName', normalizedDisplayName);
-        this.router.navigate(['/profile-hub']);
+        this.router.navigate(['/profile/edit']);
       }, 2000);
     } catch (error: any) {
       console.error('Registration error:', error);
@@ -525,20 +475,6 @@ export class RegisterNewComponent {
     } finally {
       this.checkingDisplayName.set(false);
     }
-  }
-
-  private async isRecoveryEmailAvailable(email: string): Promise<boolean> {
-    const { data, error } = await this.supabase.client
-      .from('profiles')
-      .select('id')
-      .ilike('recovery_email', email)
-      .limit(1);
-
-    if (error) {
-      throw error;
-    }
-
-    return !data || data.length === 0;
   }
 
   /**

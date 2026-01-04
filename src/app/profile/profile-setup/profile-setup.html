@@ -82,17 +82,34 @@
           <label for="primary_role" class="required">
             {{ 'PROFILE.PRIMARY_ROLE' | translate }}
           </label>
+          <input
+            type="text"
+            class="form-input role-search-input"
+            [value]="primaryRoleSearch()"
+            (input)="onPrimaryRoleSearch($any($event.target).value)"
+            [placeholder]="'PROFILE.PRIMARY_ROLE_SEARCH_PLACEHOLDER' | translate"
+          />
           <select
             id="primary_role"
             formControlName="primary_role"
             class="form-select"
             [class.error]="hasError('primary_role', 'required')"
           >
-            <option value="">{{ 'PROFILE.SELECT_ROLE' | translate }}</option>
-            @for (role of primaryRoles; track role.value) {
-              <option [value]="role.value">{{ role.label }}</option>
+            <option value="">{{ 'role.select' | translate }}</option>
+            @for (group of filteredPrimaryRoleGroups(); track group.id) {
+              <optgroup [label]="group.labelKey | translate">
+                @for (role of group.roles; track role) {
+                  <option [value]="role">{{ ('role.' + role) | translate }}</option>
+                }
+              </optgroup>
             }
+            <option value="other">{{ 'role.other' | translate }}</option>
           </select>
+          @if (filteredPrimaryRoleGroups().length === 0 && primaryRoleSearch()) {
+            <div class="no-role-results">
+              {{ 'PROFILE.ROLE_SEARCH_NO_RESULTS' | translate }}
+            </div>
+          }
           @if (hasError('primary_role', 'required')) {
             <div class="error-message">
               {{ 'PROFILE.PRIMARY_ROLE_REQUIRED' | translate }}
@@ -138,10 +155,17 @@
             <!-- Secondary Roles -->
             <div class="form-group">
               <label class="group-label">{{ 'PROFILE.SECONDARY_ROLES' | translate }}</label>
-              
-              @for (group of secondaryRoles; track group.category) {
+              <input
+                type="text"
+                class="form-input role-search-input"
+                [value]="secondaryRoleSearch()"
+                (input)="onSecondaryRoleSearch($any($event.target).value)"
+                [placeholder]="'PROFILE.SECONDARY_ROLE_SEARCH_PLACEHOLDER' | translate"
+              />
+
+              @for (group of filteredSecondaryRoleGroups(); track group.id) {
                 <div class="role-category">
-                  <h3 class="category-title">{{ 'PROFILE.' + group.category | translate }}</h3>
+                  <h3 class="category-title">{{ group.labelKey | translate }}</h3>
                   <div class="checkbox-grid">
                     @for (role of group.roles; track role) {
                       <label class="checkbox-label">
@@ -150,10 +174,16 @@
                           [checked]="isSecondaryRoleSelected(role)"
                           (change)="toggleSecondaryRole(role)"
                         />
-                        <span>{{ role }}</span>
+                        <span>{{ ('role.' + role) | translate }}</span>
                       </label>
                     }
                   </div>
+                </div>
+              }
+
+              @if (filteredSecondaryRoleGroups().length === 0 && secondaryRoleSearch()) {
+                <div class="no-role-results">
+                  {{ 'PROFILE.ROLE_SEARCH_NO_RESULTS' | translate }}
                 </div>
               }
             </div>

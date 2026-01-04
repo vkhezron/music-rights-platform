@@ -128,9 +128,19 @@ export class Register {
       // Success!
       this.successMessage.set('AUTH.REGISTRATION_SUCCESS');
 
-      setTimeout(() => {
+      // Wait for profile to be created and loaded
+      setTimeout(async () => {
+        // Optionally refresh profile here if ProfileService is available
+        try {
+          const profileService = (window as any).ng?.injector?.get?.('ProfileService');
+          if (profileService && profileService.getCurrentProfile) {
+            await profileService.getCurrentProfile({ refresh: true });
+          }
+        } catch (e) {
+          // Ignore if not available
+        }
         sessionStorage.setItem('displayName', this.registerForm.value.displayName);
-        this.router.navigate(['/profile-hub']);
+        this.router.navigate(['/profile/edit']);
       }, 2000);
 
     } catch (error: any) {

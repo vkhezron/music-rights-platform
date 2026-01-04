@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface SecurityQuestion {
   id: number;
@@ -22,23 +23,38 @@ export interface RecoveryCode {
   created_at: string;
 }
 
+export interface RecoveryState {
+  step: 'select-method' | 'verify-identity' | 'set-password' | 'complete';
+  method: 'questions' | 'code' | null;
+  username: string;
+  securityQuestion1Id: string | null;
+  securityQuestion2Id: string | null;
+}
+
+export interface StartRecoveryResult {
+  securityQuestion1Id: string | null;
+  securityQuestion2Id: string | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthRecoveryService {
-  private recoveryState$ = new BehaviorSubject<{
-    step: 'select-method' | 'verify-identity' | 'set-password' | 'complete';
-    method: 'questions' | 'code' | 'email' | null;
-    username: string;
-  }>({
+  private recoveryState$ = new BehaviorSubject<RecoveryState>({
     step: 'select-method',
     method: null,
-    username: ''
+    username: '',
+    securityQuestion1Id: null,
+    securityQuestion2Id: null
   });
+  private pendingVerifiedRecovery:
+    | { method: 'questions'; username: string; answer1: string; answer2: string; verifiedAt: number }
+    | { method: 'code'; username: string; recoveryCode: string; recoveryCodeHash: string; verifiedAt: number }
+    | null = null;
 
   constructor(private supabase: SupabaseService) {}
 
-  getRecoveryState(): Observable<any> {
+  getRecoveryState(): Observable<RecoveryState> {
     return this.recoveryState$.asObservable();
   }
 
@@ -59,28 +75,65 @@ export class AuthRecoveryService {
   /**
    * Start recovery process - Step 1: Verify username exists
    */
-  async startRecovery(username: string): Promise<boolean> {
-    try {
-      // Check if username exists
-      const { data, error } = await this.supabase.client
-        .from('profiles')
-        .select('id')
-        .eq('username', username.toLowerCase())
-        .single();
+  async startRecovery(username: string): Promise<StartRecoveryResult> {
+    const normalizedUsername = username.toLowerCase();
 
-      if (error || !data) {
+    try {
+      // Lookup profile and recovery configuration
+      const { data: profile, error: profileError } = await this.supabase.client
+        .from('profiles')
+        .select('id, username')
+        .eq('username', normalizedUsername)
+        .maybeSingle();
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      if (!profile) {
         throw new Error('USERNAME_NOT_FOUND');
       }
 
+      const { data: credentials, error: credentialsError } = await this.supabase.client
+        .from('user_recovery_credentials')
+        .select('security_question_1, security_question_2')
+        .eq('user_id', profile.id)
+        .maybeSingle();
+
+      if (credentialsError) {
+        throw credentialsError;
+      }
+
+      if (!credentials) {
+        throw new Error('RECOVERY_NOT_SETUP');
+      }
+
+      const securityQuestion1Id = credentials.security_question_1?.toString() ?? null;
+      const securityQuestion2Id = credentials.security_question_2?.toString() ?? null;
+
+      if (!securityQuestion1Id || !securityQuestion2Id) {
+        throw new Error('RECOVERY_NOT_SETUP');
+      }
+      const result: StartRecoveryResult = {
+        securityQuestion1Id,
+        securityQuestion2Id
+      };
+
       this.recoveryState$.next({
         ...this.recoveryState$.value,
-        username: username.toLowerCase(),
-        step: 'select-method'
+        method: null,
+        username: normalizedUsername,
+        step: 'select-method',
+        securityQuestion1Id,
+        securityQuestion2Id
       });
 
-      return true;
+      return result;
     } catch (error) {
-      await this.logAuthAttempt(username, 'recovery', false, 'USERNAME_NOT_FOUND');
+      const failureReason = error instanceof Error && error.message
+        ? error.message
+        : 'RECOVERY_LOOKUP_FAILED';
+      await this.logAuthAttempt(normalizedUsername, 'recovery', false, failureReason);
       throw error;
     }
   }
@@ -117,8 +170,10 @@ export class AuthRecoveryService {
 
       // Note: In production, hash the answers with bcrypt and compare
       // This is a simplified example
-      const hash1 = await this.hashString(answer1.toLowerCase().trim());
-      const hash2 = await this.hashString(answer2.toLowerCase().trim());
+      const normalizedAnswer1 = answer1.toLowerCase().trim();
+      const normalizedAnswer2 = answer2.toLowerCase().trim();
+      const hash1 = await this.hashString(normalizedAnswer1);
+      const hash2 = await this.hashString(normalizedAnswer2);
 
       // Verify answers match (compare hashes)
       const answer1Match = credData.security_answer_1_hash === hash1;
@@ -128,6 +183,14 @@ export class AuthRecoveryService {
         await this.logAuthAttempt(username, 'recovery', false, 'INVALID_ANSWERS');
         throw new Error('INCORRECT_ANSWERS');
       }
+
+      this.pendingVerifiedRecovery = {
+        method: 'questions',
+        username: username.toLowerCase(),
+        answer1: normalizedAnswer1,
+        answer2: normalizedAnswer2,
+        verifiedAt: Date.now()
+      };
 
       await this.logAuthAttempt(username, 'recovery', true);
       this.recoveryState$.next({
@@ -171,7 +234,8 @@ export class AuthRecoveryService {
       }
 
       // Hash the provided code and check if it's in the recovery_codes_hash array
-      const codeHash = await this.hashString(code.trim());
+      const normalizedCode = code.trim().toUpperCase();
+      const codeHash = await this.hashString(normalizedCode);
       const isValidCode = credData.recovery_codes_hash.includes(codeHash);
 
       if (!isValidCode) {
@@ -180,17 +244,19 @@ export class AuthRecoveryService {
       }
 
       // Check if code has already been used
-      if (credData.used_recovery_codes.includes(codeHash)) {
+      const usedCodes = Array.isArray(credData.used_recovery_codes) ? credData.used_recovery_codes : [];
+      if (usedCodes.includes(codeHash)) {
         await this.logAuthAttempt(username, 'recovery', false, 'CODE_ALREADY_USED');
         throw new Error('RECOVERY_CODE_ALREADY_USED');
       }
 
-      // Mark code as used
-      const updatedUsedCodes = [...credData.used_recovery_codes, codeHash];
-      await this.supabase.client
-        .from('user_recovery_credentials')
-        .update({ used_recovery_codes: updatedUsedCodes })
-        .eq('user_id', userData.id);
+      this.pendingVerifiedRecovery = {
+        method: 'code',
+        username: username.toLowerCase(),
+        recoveryCode: normalizedCode,
+        recoveryCodeHash: codeHash,
+        verifiedAt: Date.now()
+      };
 
       await this.logAuthAttempt(username, 'recovery', true);
       this.recoveryState$.next({
@@ -205,73 +271,67 @@ export class AuthRecoveryService {
     }
   }
 
-  /**
-   * Recovery Method 3: Email-based recovery
-   */
-  async initiateEmailRecovery(username: string): Promise<boolean> {
-    const normalizedUsername = username.toLowerCase();
+  async completeVerifiedRecovery(newPassword: string): Promise<void> {
+    const pending = this.pendingVerifiedRecovery;
+    if (!pending) {
+      throw new Error('RECOVERY_VERIFICATION_REQUIRED');
+    }
 
+    // 10 minutes max between verify and reset
+    if (Date.now() - pending.verifiedAt > 10 * 60 * 1000) {
+      this.pendingVerifiedRecovery = null;
+      throw new Error('RECOVERY_VERIFICATION_EXPIRED');
+    }
+
+    const body: Record<string, any> = {
+      username: pending.username,
+      method: pending.method,
+      newPassword
+    };
+
+    if (pending.method === 'questions') {
+      body['answer1'] = pending.answer1;
+      body['answer2'] = pending.answer2;
+      body['recoveryCode'] = null;
+    } else {
+      body['recoveryCode'] = pending.recoveryCode;
+      body['answer1'] = null;
+      body['answer2'] = null;
+    }
+
+    const response = await fetch(`${environment.supabase.url}/functions/v1/complete-recovery`, {
+      method: 'POST',
+      headers: {
+        apikey: environment.supabase.anonKey,
+        Authorization: `Bearer ${environment.supabase.anonKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    const responseText = await response.text();
+    let payload: any = null;
     try {
-      const { data, error } = await this.supabase.client.functions.invoke('send-recovery-email', {
-        body: {
-          username: normalizedUsername,
-          locale: navigator?.language || 'en',
-          redirectUrl: this.buildEmailRedirectUrl()
-        }
+      payload = responseText ? JSON.parse(responseText) : null;
+    } catch {
+      payload = null;
+    }
+
+    if (!response.ok) {
+      console.error('complete-recovery edge call failed', {
+        status: response.status,
+        payload,
+        raw: responseText
       });
-
-      const failureMessage = error?.message || data?.error;
-
-      if (failureMessage) {
-        throw new Error(failureMessage);
-      }
-
-      await this.logAuthAttempt(normalizedUsername, 'recovery', true);
-      return true;
-    } catch (error: any) {
-      const reason = typeof error?.message === 'string' ? error.message : 'EMAIL_RECOVERY_FAILED';
-      await this.logAuthAttempt(normalizedUsername, 'recovery', false, reason);
-      throw error;
-    }
-  }
-
-  async validateEmailRecoveryToken(username: string, token: string): Promise<boolean> {
-    const normalizedUsername = username.toLowerCase();
-
-    const { data, error } = await this.supabase.client.functions.invoke('verify-recovery-token', {
-      body: {
-        username: normalizedUsername,
-        token
-      }
-    });
-
-    const failureMessage = error?.message || data?.error;
-
-    if (failureMessage) {
+      const failureMessage =
+        payload?.error ||
+        payload?.message ||
+        payload?.details ||
+        `RECOVERY_COMPLETE_FAILED:${response.status}`;
       throw new Error(failureMessage);
     }
 
-    return true;
-  }
-
-  async completeEmailRecovery(username: string, token: string, newPassword: string): Promise<boolean> {
-    const normalizedUsername = username.toLowerCase();
-
-    const { data, error } = await this.supabase.client.functions.invoke('complete-recovery', {
-      body: {
-        username: normalizedUsername,
-        token,
-        newPassword
-      }
-    });
-
-    const failureMessage = error?.message || data?.error;
-
-    if (failureMessage) {
-      throw new Error(failureMessage);
-    }
-
-    return true;
+    this.pendingVerifiedRecovery = null;
   }
 
   /**
@@ -306,9 +366,10 @@ export class AuthRecoveryService {
       if (updateError) throw updateError;
 
       await this.logAuthAttempt(username, 'password_reset', true);
+      const currentState = this.recoveryState$.value;
       this.recoveryState$.next({
+        ...currentState,
         step: 'complete',
-        method: this.recoveryState$.value.method,
         username: ''
       });
 
@@ -319,14 +380,67 @@ export class AuthRecoveryService {
     }
   }
 
-  async updatePasswordWithSession(newPassword: string): Promise<void> {
-    const { error } = await this.supabase.client.auth.updateUser({
-      password: newPassword
-    });
+  async getRecoveryUsage(): Promise<{ total: number; used: number; remaining: number }> {
+    const userId = this.supabase.currentUser?.id;
+    if (!userId) {
+      throw new Error('AUTH.NOT_AUTHENTICATED');
+    }
+
+    const { data, error } = await this.supabase.client
+      .from('user_recovery_credentials')
+      .select('recovery_codes_hash, used_recovery_codes')
+      .eq('user_id', userId)
+      .maybeSingle();
 
     if (error) {
       throw error;
     }
+
+    if (!data) {
+      return { total: 0, used: 0, remaining: 0 };
+    }
+
+    const total = Array.isArray((data as any).recovery_codes_hash)
+      ? (data as any).recovery_codes_hash.length
+      : 0;
+    const used = Array.isArray((data as any).used_recovery_codes)
+      ? (data as any).used_recovery_codes.length
+      : 0;
+
+    return {
+      total,
+      used,
+      remaining: Math.max(total - used, 0)
+    };
+  }
+
+  async regenerateRecoveryCodes(): Promise<string[]> {
+    const userId = this.supabase.currentUser?.id;
+    if (!userId) {
+      throw new Error('AUTH.NOT_AUTHENTICATED');
+    }
+
+    const newCodes = this.generateRecoveryCodes();
+    const hashedCodes = await Promise.all(
+      newCodes.map(code => this.hashString(code.trim().toUpperCase()))
+    );
+
+    const payload: Record<string, unknown> = {
+      recovery_codes_hash: hashedCodes,
+      used_recovery_codes: [],
+      recovery_setup_completed_at: new Date().toISOString()
+    };
+
+    const { error } = await this.supabase.client
+      .from('user_recovery_credentials')
+      .update(payload)
+      .eq('user_id', userId);
+
+    if (error) {
+      throw error;
+    }
+
+    return newCodes;
   }
 
   /**
@@ -341,29 +455,25 @@ export class AuthRecoveryService {
     try {
       const hash1 = await this.hashString(credentials.security_answer_1.toLowerCase().trim());
       const hash2 = await this.hashString(credentials.security_answer_2.toLowerCase().trim());
-      const codeHashes = await Promise.all(recoveryCodes.map(code => this.hashString(code.trim())));
+      const codeHashes = await Promise.all(
+        recoveryCodes.map(code => this.hashString(code.trim().toUpperCase()))
+      );
+      
+      const payload: Record<string, any> = {
+        user_id: userId,
+        security_question_1: credentials.security_question_1,
+        security_answer_1_hash: hash1,
+        security_question_2: credentials.security_question_2,
+        security_answer_2_hash: hash2,
+        recovery_codes_hash: codeHashes,
+        recovery_setup_completed_at: new Date().toISOString()
+      };
 
-      const { error } = await this.supabase.client
-        .from('user_recovery_credentials')
-        .insert({
-          user_id: userId,
-          security_question_1: credentials.security_question_1,
-          security_answer_1_hash: hash1,
-          security_question_2: credentials.security_question_2,
-          security_answer_2_hash: hash2,
-          recovery_codes_hash: codeHashes,
-          recovery_setup_completed_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
+      await this.insertRecoveryCredentials(userId, async () => payload);
 
       const profileUpdate: Record<string, unknown> = {
         has_completed_recovery_setup: true
       };
-
-      if (recoveryEmail) {
-        profileUpdate['recovery_email'] = recoveryEmail;
-      }
 
       await this.supabase.client
         .from('profiles')
@@ -374,6 +484,66 @@ export class AuthRecoveryService {
     } catch (error) {
       throw error;
     }
+  }
+
+  private async insertRecoveryCredentials(
+    userId: string,
+    buildPayload: () => Promise<Record<string, unknown>> | Record<string, unknown>
+  ): Promise<void> {
+    const maxAttempts = 8;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const payload = await buildPayload();
+
+      const { error } = await this.supabase.client
+        .from('user_recovery_credentials')
+        .insert(payload);
+
+      if (!error) {
+        return;
+      }
+
+      if (error.code === '23503') {
+        console.warn('Recovery credentials insert blocked by FK constraint, will retry.', {
+          attempt,
+          details: (error as any)?.details || (error as any)?.message || null
+        });
+        await this.delay(400 * attempt);
+        continue;
+      }
+
+      console.warn('Recovery credentials insert failed', {
+        attempt,
+        code: error.code,
+        details: (error as any)?.details || (error as any)?.message || null
+      });
+
+      if (error.code === '23505') {
+        const { error: updateError } = await this.supabase.client
+          .from('user_recovery_credentials')
+          .update(payload)
+          .eq('user_id', userId);
+
+        if (!updateError) {
+          return;
+        }
+
+        if (attempt === maxAttempts) {
+          throw updateError;
+        }
+
+        await this.delay(400 * attempt);
+        continue;
+      }
+
+      throw error;
+    }
+
+    throw new Error('RECOVERY_CREDENTIALS_FAILED');
+  }
+
+  private async delay(ms: number): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -426,21 +596,6 @@ export class AuthRecoveryService {
   }
 
   /**
-   * Build redirect URL for email recovery flow
-   */
-  private buildEmailRedirectUrl(): string {
-    if (typeof window === 'undefined') {
-      return '';
-    }
-
-    const base = window.location.origin;
-    const path = '/auth/password-recovery';
-    const url = new URL(path, base);
-    url.searchParams.set('mode', 'email');
-    return url.toString();
-  }
-
-  /**
    * Get client IP (for logging)
    */
   private async getClientIp(): Promise<string> {
@@ -457,10 +612,13 @@ export class AuthRecoveryService {
    * Reset recovery state (used after successful flows)
    */
   resetRecoveryState(): void {
+    this.pendingVerifiedRecovery = null;
     this.recoveryState$.next({
       step: 'select-method',
       method: null,
-      username: ''
+      username: '',
+      securityQuestion1Id: null,
+      securityQuestion2Id: null
     });
   }
 

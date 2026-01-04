@@ -129,6 +129,16 @@
   gap: 0.5rem;
 }
 
+.role-search-input {
+  margin-top: 0.25rem;
+}
+
+.no-role-results {
+  font-size: 0.85rem;
+  color: #718096;
+  font-style: italic;
+}
+
 label {
   font-weight: 500;
   color: #4a5568;

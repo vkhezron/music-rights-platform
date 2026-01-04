@@ -41,21 +41,68 @@
         }
       </div>
 
+      <!-- Display Name -->
+      <div class="form-group">
+        <label for="display_name" class="required">
+          {{ 'PROFILE.DISPLAY_NAME' | translate }}
+        </label>
+        <input
+          id="display_name"
+          type="text"
+          formControlName="display_name"
+          class="form-input"
+          [class.error]="hasError('display_name', 'required') || hasError('display_name', 'minlength') || hasError('display_name', 'maxlength')"
+          [placeholder]="'AUTH.DISPLAY_NAME_OPTIONAL' | translate"
+        />
+        @if (hasError('display_name', 'required')) {
+          <div class="error-message">
+            {{ 'AUTH.DISPLAY_NAME_REQUIRED' | translate }}
+          </div>
+        }
+        @if (hasError('display_name', 'minlength')) {
+          <div class="error-message">
+            {{ 'AUTH.DISPLAY_NAME_MIN_LENGTH' | translate }}
+          </div>
+        }
+        @if (hasError('display_name', 'maxlength')) {
+          <div class="error-message">
+            {{ 'VALIDATION.MAX_LENGTH' | translate:{ max: 50 } }}
+          </div>
+        }
+      </div>
+
       <!-- Primary Role -->
       <div class="form-group">
         <label for="primary_role" class="required">
           {{ 'PROFILE.PRIMARY_ROLE' | translate }}
         </label>
+        <input
+          type="text"
+          class="form-input role-search-input"
+          [value]="primaryRoleSearch()"
+          (input)="onPrimaryRoleSearch($any($event.target).value)"
+          [placeholder]="'PROFILE.PRIMARY_ROLE_SEARCH_PLACEHOLDER' | translate"
+        />
         <select
           id="primary_role"
           formControlName="primary_role"
           class="form-select"
           [class.error]="hasError('primary_role', 'required')">
           <option value="">{{ 'PROFILE.SELECT_ROLE' | translate }}</option>
-          @for (role of primaryRoles; track role.value) {
-            <option [value]="role.value">{{ role.label }}</option>
+          @for (group of filteredPrimaryRoleGroups(); track group.id) {
+            <optgroup [label]="group.labelKey | translate">
+              @for (role of group.roles; track role) {
+                <option [value]="role">{{ ('role.' + role) | translate }}</option>
+              }
+            </optgroup>
           }
+          <option value="other">{{ 'ROLES.OTHER' | translate }}</option>
         </select>
+        @if (filteredPrimaryRoleGroups().length === 0 && primaryRoleSearch()) {
+          <div class="no-role-results">
+            {{ 'PROFILE.ROLE_SEARCH_NO_RESULTS' | translate }}
+          </div>
+        }
         @if (hasError('primary_role', 'required')) {
           <div class="error-message">
             {{ 'PROFILE.PRIMARY_ROLE_REQUIRED' | translate }}
@@ -98,11 +145,18 @@
           
           <!-- Secondary Roles -->
           <div class="form-group">
-            <label>{{ 'PROFILE.SECONDARY_ROLES' | translate }}</label>
-            
-            @for (group of secondaryRoles; track group.category) {
+            <label class="group-label">{{ 'PROFILE.SECONDARY_ROLES' | translate }}</label>
+            <input
+              type="text"
+              class="form-input role-search-input"
+              [value]="secondaryRoleSearch()"
+              (input)="onSecondaryRoleSearch($any($event.target).value)"
+              [placeholder]="'PROFILE.SECONDARY_ROLE_SEARCH_PLACEHOLDER' | translate"
+            />
+
+            @for (group of filteredSecondaryRoleGroups(); track group.id) {
               <div class="role-category">
-                <h4>{{ 'PROFILE.' + group.category | translate }}</h4>
+                <h4>{{ group.labelKey | translate }}</h4>
                 <div class="role-checkboxes">
                   @for (role of group.roles; track role) {
                     <label class="checkbox-label">
@@ -111,10 +165,16 @@
                         [checked]="isSecondaryRoleSelected(role)"
                         (change)="toggleSecondaryRole(role)"
                       />
-                      <span>{{ role }}</span>
+                      <span>{{ ('role.' + role) | translate }}</span>
                     </label>
                   }
                 </div>
+              </div>
+            }
+
+            @if (filteredSecondaryRoleGroups().length === 0 && secondaryRoleSearch()) {
+              <div class="no-role-results">
+                {{ 'PROFILE.ROLE_SEARCH_NO_RESULTS' | translate }}
               </div>
             }
           </div>
@@ -166,20 +226,195 @@
                   class="form-input"
                   [placeholder]="platform.placeholder"
                 />
-                <button 
+                <button
                   type="button"
                   class="copy-btn"
                   [disabled]="!profileForm.get(getControlName(platform.name))?.value"
                   (click)="copySocialLink(platform.name, profileForm.get(getControlName(platform.name))?.value)"
                   [title]="'Copy ' + platform.name">
-                      <lucide-icon [img]="Copy" [size]="18"></lucide-icon>
-                    </button>
+                  <lucide-icon [img]="Copy" [size]="18"></lucide-icon>
+                </button>
+              </div>
+            }
+          </div>
+
+        </div>
+      }
+
+        <!-- Security & Recovery -->
+        <div class="security-section">
+          <div class="security-header">
+            <h3>{{ 'PROFILE.SECURITY_TITLE' | translate }}</h3>
+            <p>{{ 'PROFILE.SECURITY_SUBTITLE' | translate }}</p>
+          </div>
+
+          <div class="security-grid">
+            <div class="password-section" [formGroup]="passwordForm">
+              <div class="form-group">
+                <label for="current_password" class="required">
+                  {{ 'PROFILE.CURRENT_PASSWORD' | translate }}
+                </label>
+                <div class="password-input" [class.error]="hasPasswordError('current_password', 'required') || hasPasswordError('current_password', 'minlength')">
+                  <lucide-icon [img]="Lock" [size]="18"></lucide-icon>
+                  <input
+                    id="current_password"
+                    type="password"
+                    formControlName="current_password"
+                    class="form-input"
+                    autocomplete="current-password"
+                    (keydown.enter)="$event.preventDefault()"
+                  />
+                </div>
+                @if (hasPasswordError('current_password', 'required')) {
+                  <div class="error-message">
+                    {{ 'VALIDATION.REQUIRED' | translate }}
+                  </div>
+                }
+                @if (hasPasswordError('current_password', 'minlength')) {
+                  <div class="error-message">
+                    {{ 'AUTH.PASSWORD_REQUIREMENTS' | translate }}
                   </div>
                 }
               </div>
 
+              <div class="form-group">
+                <label for="new_password" class="required">
+                  {{ 'PROFILE.NEW_PASSWORD' | translate }}
+                </label>
+                <div class="password-input" [class.error]="hasPasswordError('new_password', 'required') || hasPasswordError('new_password', 'minlength')">
+                  <lucide-icon [img]="Lock" [size]="18"></lucide-icon>
+                  <input
+                    id="new_password"
+                    type="password"
+                    formControlName="new_password"
+                    class="form-input"
+                    autocomplete="new-password"
+                    (keydown.enter)="$event.preventDefault()"
+                  />
+                </div>
+                @if (hasPasswordError('new_password', 'required')) {
+                  <div class="error-message">
+                    {{ 'VALIDATION.REQUIRED' | translate }}
+                  </div>
+                }
+                @if (hasPasswordError('new_password', 'minlength')) {
+                  <div class="error-message">
+                    {{ 'AUTH.PASSWORD_MIN_LENGTH' | translate }}
+                  </div>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="confirm_password" class="required">
+                  {{ 'PROFILE.CONFIRM_PASSWORD' | translate }}
+                </label>
+                <div class="password-input" [class.error]="hasPasswordError('confirm_password', 'required') || hasPasswordError('confirm_password', 'mismatch')">
+                  <lucide-icon [img]="Lock" [size]="18"></lucide-icon>
+                  <input
+                    id="confirm_password"
+                    type="password"
+                    formControlName="confirm_password"
+                    class="form-input"
+                    autocomplete="new-password"
+                    (keydown.enter)="$event.preventDefault()"
+                  />
+                </div>
+                @if (hasPasswordError('confirm_password', 'required')) {
+                  <div class="error-message">
+                    {{ 'AUTH.CONFIRM_PASSWORD_REQUIRED' | translate }}
+                  </div>
+                }
+                @if (hasPasswordError('confirm_password', 'mismatch')) {
+                  <div class="error-message">
+                    {{ 'AUTH.PASSWORDS_DO_NOT_MATCH' | translate }}
+                  </div>
+                }
+              </div>
+
+              <div class="security-actions">
+                <button
+                  type="button"
+                  class="cancel-button"
+                  (click)="resetPasswordForm()"
+                  [disabled]="passwordLoading()">
+                  {{ 'COMMON.RESET' | translate }}
+                </button>
+                <button
+                  type="button"
+                  class="submit-button"
+                  (click)="onChangePassword()"
+                  [disabled]="passwordLoading() || passwordForm.invalid">
+                  @if (!passwordLoading()) {
+                    <span>{{ 'PROFILE.UPDATE_PASSWORD' | translate }}</span>
+                  }
+                  @if (passwordLoading()) {
+                    <span class="loading">
+                      <span class="spinner"></span>
+                      {{ 'COMMON.LOADING' | translate }}
+                    </span>
+                  }
+                </button>
+              </div>
+            </div>
+
+            <div class="recovery-status">
+              @if (recoveryUsage(); as usage) {
+                <div class="stat-pill">
+                  <lucide-icon [img]="Lock" [size]="16"></lucide-icon>
+                  <span>{{ 'PROFILE.RECOVERY_CODES_STATUS' | translate:{ used: usage.used, total: usage.total } }}</span>
+                </div>
+                <div class="recovery-actions">
+                  <button
+                    type="button"
+                    class="refresh-button"
+                    (click)="regenerateRecoveryCodes()"
+                    [disabled]="!canRegenerateCodes()">
+                    @if (!isRegeneratingCodes()) {
+                      <lucide-icon [img]="Refresh" [size]="18"></lucide-icon>
+                      <span>{{ 'PROFILE.RECOVERY_CODES_REGENERATE' | translate }}</span>
+                    }
+                    @if (isRegeneratingCodes()) {
+                      <span class="loading">
+                        <span class="spinner"></span>
+                        {{ 'COMMON.LOADING' | translate }}
+                      </span>
+                    }
+                  </button>
+                  <div class="help-text">
+                    @if (canRegenerateCodes()) {
+                      @if (usage.remaining === 0) {
+                        {{ 'PROFILE.RECOVERY_CODES_REGENERATE_HINT' | translate }}
+                      }
+                      @else {
+                        {{ 'PROFILE.RECOVERY_CODES_THRESHOLD_HINT' | translate:{ used: usage.used, total: usage.total } }}
+                      }
+                    }
+                    @else {
+                      {{ 'PROFILE.RECOVERY_CODES_REMAINING' | translate:{ remaining: usage.remaining } }}
+                    }
+                  </div>
+                </div>
+
+                @if (generatedCodes(); as codes) {
+                  <div class="generated-codes">
+                    <h4>{{ 'PROFILE.RECOVERY_CODES_LIST_TITLE' | translate }}</h4>
+                    <p class="help-text">{{ 'PROFILE.RECOVERY_CODES_REGENERATED' | translate }}</p>
+                    <ul>
+                      @for (code of codes; track code) {
+                        <li>{{ code }}</li>
+                      }
+                    </ul>
+                  </div>
+                }
+              }
+              @else {
+                <div class="info-message">
+                  {{ 'COMMON.LOADING' | translate }}
+                </div>
+              }
+            </div>
+          </div>
         </div>
-      } 
 
       <!-- Action Buttons -->
       <div class="form-actions">

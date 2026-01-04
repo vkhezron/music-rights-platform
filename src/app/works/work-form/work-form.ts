@@ -101,7 +101,7 @@ export class WorkFormComponent implements OnInit {
   statusOptions = ['draft', 'registered', 'published', 'archived'];
   languageOptions = [
     'English', 'Spanish', 'French', 'German', 'Italian', 
-    'Portuguese', 'Japanese', 'Korean', 'Chinese', 'Russian',
+    'Portuguese', 'Japanese', 'Korean', 'Chinese', 'Hebrew',
     'Arabic', 'Hindi', 'Ukrainian', 'Other'
   ];
   genreOptions = [

@@ -1,10 +1,21 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProfileService } from '../../services/profile.service';
 import { Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
-import { PRIMARY_ROLES, SECONDARY_ROLES, LANGUAGES, SOCIAL_PLATFORMS, ProfileFormData } from '../../../models/profile.model';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  PRIMARY_ROLE_GROUPS,
+  PRIMARY_ROLE_OTHER,
+  SECONDARY_ROLE_GROUPS,
+  LANGUAGES,
+  SOCIAL_PLATFORMS,
+  ProfileFormData,
+  RoleGroupDefinition,
+  normalizeRoleKey,
+  normalizeRoleList
+} from '../../../models/profile.model';
 
 // Import Lucide Icons
 import { LucideAngularModule, AlertCircle, Check, X, ChevronDown, ChevronRight, 
@@ -26,6 +37,8 @@ export class ProfileSetup implements OnInit {
   private fb = inject(FormBuilder);
   private profileService = inject(ProfileService);
   private router = inject(Router);
+  private translateService = inject(TranslateService);
+  private destroyRef = inject(DestroyRef);
 
   // Lucide Icons
   readonly AlertCircle = AlertCircle;
@@ -52,10 +65,30 @@ export class ProfileSetup implements OnInit {
   nicknameAvailable = signal<boolean | null>(null);
 
   // Constants for template
-  readonly primaryRoles = PRIMARY_ROLES;
-  readonly secondaryRoles = SECONDARY_ROLES;
+  readonly primaryRoleGroups = PRIMARY_ROLE_GROUPS;
+  readonly secondaryRoleGroups = SECONDARY_ROLE_GROUPS;
   readonly languages = LANGUAGES;
   readonly socialPlatforms = SOCIAL_PLATFORMS;
+
+  primaryRoleSearch = signal('');
+  secondaryRoleSearch = signal('');
+  private primaryRoleSelection = signal('');
+  private secondaryRoleSelection = signal<string[]>([]);
+  private languageVersion = signal(0);
+
+  filteredPrimaryRoleGroups = computed<RoleGroupDefinition[]>(() => {
+    this.languageVersion();
+    const query = this.primaryRoleSearch().trim().toLowerCase();
+    const selected = normalizeRoleKey(this.primaryRoleSelection()) ?? '';
+    return this.filterRoleGroups(this.primaryRoleGroups, query, selected ? [selected] : []);
+  });
+
+  filteredSecondaryRoleGroups = computed<RoleGroupDefinition[]>(() => {
+    this.languageVersion();
+    const query = this.secondaryRoleSearch().trim().toLowerCase();
+    const selected = this.secondaryRoleSelection();
+    return this.filterRoleGroups(this.secondaryRoleGroups, query, selected);
+  });
 
   // UI state
   showOptionalFields = signal(false);
@@ -130,35 +163,58 @@ export class ProfileSetup implements OnInit {
       spotify_artist_url: ['']
     });
 
+    this.translateService.onLangChange
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.languageVersion.update((count) => count + 1));
+
     // Watch nickname changes for availability check
-    this.profileForm.get('nickname')?.valueChanges.subscribe(async (nickname) => {
+    this.profileForm
+      .get('nickname')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(async (nickname) => {
       if (nickname && nickname.length >= 3) {
         await this.checkNicknameAvailability(nickname);
       } else {
         this.nicknameAvailable.set(null);
       }
-    });
+      });
 
-    // Show/hide custom role text based on primary role
-    this.profileForm.get('primary_role')?.valueChanges.subscribe((role) => {
-      const customRoleControl = this.profileForm.get('custom_role_text');
-      if (role === 'other') {
-        customRoleControl?.setValidators([Validators.required]);
-      } else {
-        customRoleControl?.clearValidators();
-        customRoleControl?.setValue('');
-      }
-      customRoleControl?.updateValueAndValidity();
-    });
+    const primaryRoleControl = this.profileForm.get('primary_role');
+    this.primaryRoleSelection.set(normalizeRoleKey(primaryRoleControl?.value) ?? '');
+    primaryRoleControl
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((role) => {
+        const normalized = normalizeRoleKey(role) ?? '';
+        this.primaryRoleSelection.set(normalized);
+
+        const customRoleControl = this.profileForm.get('custom_role_text');
+        if (normalized === 'other') {
+          customRoleControl?.setValidators([Validators.required]);
+        } else {
+          customRoleControl?.clearValidators();
+          customRoleControl?.setValue('');
+        }
+        customRoleControl?.updateValueAndValidity();
+      });
+
+    const secondaryRolesControl = this.profileForm.get('secondary_roles');
+    this.secondaryRoleSelection.set(normalizeRoleList(secondaryRolesControl?.value || []));
+    secondaryRolesControl
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((roles) => this.secondaryRoleSelection.set(Array.isArray(roles) ? normalizeRoleList(roles) : []));
   }
 
   ngOnInit() {
     const displayName = sessionStorage.getItem('displayName');
-    if (displayName) {
-      this.profileForm.patchValue({ nickname: displayName });
+    const nickname = sessionStorage.getItem('nickname');
+    const patch: any = {};
+    if (nickname) patch.nickname = nickname;
+    if (displayName) patch.display_name = displayName;
+    if (Object.keys(patch).length) {
+      this.profileForm.patchValue(patch);
       sessionStorage.removeItem('displayName');
+      sessionStorage.removeItem('nickname');
     }
-    
     this.checkExistingProfile();
   }
 
@@ -186,7 +242,8 @@ export class ProfileSetup implements OnInit {
   }
 
   toggleSecondaryRole(roleValue: string) {
-    const currentRoles = this.profileForm.get('secondary_roles')?.value || [];
+    const control = this.profileForm.get('secondary_roles');
+    const currentRoles = normalizeRoleList(control?.value || []);
     const index = currentRoles.indexOf(roleValue);
     
     if (index > -1) {
@@ -195,16 +252,24 @@ export class ProfileSetup implements OnInit {
       currentRoles.push(roleValue);
     }
     
-    this.profileForm.patchValue({ secondary_roles: currentRoles });
+    control?.setValue(currentRoles);
   }
 
   isSecondaryRoleSelected(roleValue: string): boolean {
-    const roles = this.profileForm.get('secondary_roles')?.value || [];
+    const roles = normalizeRoleList(this.profileForm.get('secondary_roles')?.value || []);
     return roles.includes(roleValue);
   }
 
   toggleOptionalFields() {
     this.showOptionalFields.set(!this.showOptionalFields());
+  }
+
+  onPrimaryRoleSearch(value: string) {
+    this.primaryRoleSearch.set((value ?? '').trimStart());
+  }
+
+  onSecondaryRoleSearch(value: string) {
+    this.secondaryRoleSearch.set((value ?? '').trimStart());
   }
 
   async onSubmit() {
@@ -227,12 +292,16 @@ export class ProfileSetup implements OnInit {
 
     try {
       const formValue = this.profileForm.value;
+
+      const normalizedPrimaryRole = normalizeRoleKey(formValue.primary_role) ?? PRIMARY_ROLE_OTHER;
+      const normalizedSecondaryRoles = normalizeRoleList(formValue.secondary_roles ?? []);
       
       const profileData: ProfileFormData = {
         nickname: formValue.nickname,
-        primary_role: formValue.primary_role,
+        display_name: formValue.display_name,
+        primary_role: normalizedPrimaryRole,
         custom_role_text: formValue.custom_role_text || undefined,
-        secondary_roles: formValue.secondary_roles || [],
+        secondary_roles: normalizedSecondaryRoles,
         bio: formValue.bio || undefined,
         primary_language: formValue.primary_language || 'en',
         social_links: {
@@ -266,5 +335,54 @@ export class ProfileSetup implements OnInit {
   hasError(fieldName: string, errorType: string): boolean {
     const field = this.profileForm.get(fieldName);
     return field ? field.hasError(errorType) && (field.dirty || field.touched) : false;
+  }
+
+  private filterRoleGroups(
+    groups: readonly RoleGroupDefinition[],
+    query: string,
+    alwaysInclude: readonly string[]
+  ): RoleGroupDefinition[] {
+    const includeSet = new Set(alwaysInclude.filter(Boolean));
+
+    if (!query) {
+      return groups.map((group) => ({
+        id: group.id,
+        labelKey: group.labelKey,
+        roles: [...group.roles]
+      }));
+    }
+
+    const normalizedQuery = query.toLowerCase();
+    const filtered: RoleGroupDefinition[] = [];
+
+    for (const group of groups) {
+      const roles = group.roles.filter(
+        (role) => includeSet.has(role) || this.roleMatchesQuery(role, normalizedQuery)
+      );
+
+      if (roles.length > 0) {
+        filtered.push({
+          id: group.id,
+          labelKey: group.labelKey,
+          roles
+        });
+      }
+    }
+
+    return filtered;
+  }
+
+  private roleMatchesQuery(roleKey: string, query: string): boolean {
+    if (!query) {
+      return true;
+    }
+
+    const translated = (this.translateService.instant(`role.${roleKey}`) || '').toString().toLowerCase();
+    if (translated.includes(query)) {
+      return true;
+    }
+
+    const fallback = roleKey.replace(/_/g, ' ');
+    return fallback.includes(query);
   }
 }

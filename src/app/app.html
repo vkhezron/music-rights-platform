@@ -122,6 +122,11 @@
         <button type="button" class="profile-button" (click)="goToProfileHub()">
           {{ 'NAV.PROFILE' | translate }}
         </button>
+        @if (isAdmin()) {
+          <button type="button" class="admin-button" (click)="goToAdminDashboard()">
+            {{ 'NAV.ADMIN_DASHBOARD' | translate }}
+          </button>
+        }
       </div>
 
       <div class="header-right">

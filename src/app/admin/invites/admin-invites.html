@@ -1,0 +1,109 @@
+<div class="admin-invites">
+  <header class="admin-invites__header">
+    <div>
+      <h2>{{ 'ADMIN.INVITES.TITLE' | translate }}</h2>
+      <p>{{ 'ADMIN.INVITES.SUBTITLE' | translate }}</p>
+    </div>
+    <button type="button" class="admin-invites__refresh" (click)="loadInvites()">
+      {{ 'ADMIN.ACTIONS.REFRESH' | translate }}
+    </button>
+  </header>
+
+  <section class="admin-invites__create">
+    <div class="admin-invites__create-copy">
+      <h3>{{ 'ADMIN.INVITES.CREATE_HEADING' | translate }}</h3>
+      <p>{{ 'ADMIN.INVITES.CREATE_HELP' | translate }}</p>
+    </div>
+    <form class="admin-invites__form" (ngSubmit)="createInvite()">
+      <fieldset>
+        <legend class="sr-only">{{ 'ADMIN.INVITES.EXPIRY_LABEL' | translate }}</legend>
+        <label class="admin-invites__radio">
+          <input
+            type="radio"
+            name="expiry"
+            [checked]="expiryMode.value === 'days'"
+            (change)="expiryMode.setValue('days')"
+          />
+          {{ 'ADMIN.INVITES.EXPIRY_IN_DAYS' | translate }}
+        </label>
+        @if (expiryMode.value === 'days') {
+          <label class="admin-invites__days">
+            <span class="sr-only">{{ 'ADMIN.INVITES.DAYS_LABEL' | translate }}</span>
+            <input
+              type="number"
+              min="1"
+              max="365"
+              [formControl]="expiryDays"
+            />
+            <span>{{ 'ADMIN.INVITES.DAYS_SUFFIX' | translate }}</span>
+          </label>
+        }
+        <label class="admin-invites__radio">
+          <input
+            type="radio"
+            name="expiry"
+            [checked]="expiryMode.value === 'never'"
+            (change)="expiryMode.setValue('never')"
+          />
+          {{ 'ADMIN.INVITES.EXPIRY_NEVER' | translate }}
+        </label>
+      </fieldset>
+      <button type="submit" [disabled]="creating()">
+        {{ creating() ? ('ADMIN.INVITES.CREATING' | translate) : ('ADMIN.INVITES.CREATE_BUTTON' | translate) }}
+      </button>
+    </form>
+  </section>
+
+  @if (loading()) {
+    <div class="admin-invites__state admin-invites__state--loading">
+      {{ 'ADMIN.INVITES.LOADING' | translate }}
+    </div>
+  }
+  @else if (error()) {
+    <div class="admin-invites__state admin-invites__state--error">
+      {{ error() | translate }}
+    </div>
+  }
+  @else {
+    @if (invites().length === 0) {
+      <div class="admin-invites__state">
+        {{ 'ADMIN.INVITES.EMPTY' | translate }}
+      </div>
+    } @else {
+      <ul class="admin-invites__list">
+        @for (invite of invites(); track trackById($index, invite)) {
+          <li class="admin-invites__item" [class.admin-invites__item--inactive]="inviteStatus(invite) !== 'active'">
+            <div class="admin-invites__code">
+              <span>{{ invite.code }}</span>
+              <small>{{ ('ADMIN.INVITES.STATUS.' + inviteStatus(invite)) | translate }}</small>
+            </div>
+            <dl class="admin-invites__meta">
+              <div>
+                <dt>{{ 'ADMIN.INVITES.CREATED_AT' | translate }}</dt>
+                <dd>{{ invite.created_at | date:'medium' }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'ADMIN.INVITES.EXPIRES_AT' | translate }}</dt>
+                <dd>
+                  {{ invite.expires_at ? (invite.expires_at | date:'medium') : ('ADMIN.INVITES.NO_EXPIRY' | translate) }}
+                </dd>
+              </div>
+              <div>
+                <dt>{{ 'ADMIN.INVITES.STATUS_LABEL' | translate }}</dt>
+                <dd>{{ ('ADMIN.INVITES.STATUS.' + inviteStatus(invite)) | translate }}</dd>
+              </div>
+            </dl>
+            <div class="admin-invites__actions">
+              <button type="button" (click)="copyCode(invite)">
+                {{ 'ADMIN.INVITES.COPY' | translate }}
+              </button>
+              <button type="button" (click)="revokeInvite(invite)" [disabled]="inviteStatus(invite) !== 'active'">
+                {{ 'ADMIN.INVITES.REVOKE' | translate }}
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  }
+</div>

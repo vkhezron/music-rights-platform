@@ -42,6 +42,7 @@ describe('App', () => {
         {
           provide: ProfileService,
           useValue: {
+            currentProfile: null,
             profile$: of(null),
             loadProfile: () => Promise.resolve(null),
           } as unknown as ProfileService,

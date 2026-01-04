@@ -11,6 +11,7 @@
     "PROTOCOLS": "Protocols",
     "RIGHTS_HOLDERS": "Rights Holders",
     "PROFILE": "Profile",
+    "ADMIN_DASHBOARD": "Admin dashboard",
     "CURRENT_WORKSPACE": "Workspace",
     "MANAGE_WORKSPACES": "Manage Workspaces",
     "ADD_FIRST_WORKSPACE": "Create your first workspace"
@@ -41,6 +42,137 @@
         "RIGHTS_HOLDERS": "Rights holders captured",
         "WORKS": "Works tracked"
       }
+    }
+  },
+  "ADMIN": {
+    "LABEL": "Admin",
+    "HEADLINE": "Administration workspace",
+    "WELCOME": "Hi {{ name }}, thanks for keeping the platform running.",
+    "NAV": {
+      "OVERVIEW": "Overview",
+      "OVERVIEW_DESC": "Live metrics and health signals.",
+      "USERS": "Users",
+      "USERS_DESC": "Review accounts and manage access.",
+      "ANALYTICS": "Analytics",
+      "ANALYTICS_DESC": "Deep dive into growth and retention trends.",
+      "INVITES": "Invites",
+      "INVITES_DESC": "Issue admin invites and follow their status.",
+      "RECOVERY": "Recovery",
+      "RECOVERY_DESC": "Support users through account recovery and security checks.",
+      "MESSAGING": "Messaging",
+      "MESSAGING_DESC": "Coordinate announcements and operational updates."
+    },
+    "OVERVIEW": {
+      "TITLE": "Platform health snapshot",
+      "SUBTITLE": "Monitor adoption, activation, and catalogue quality at a glance.",
+      "LOADING": "Fetching the latest admin metrics…",
+      "SIGNUPS_TITLE": "Weekly new signups",
+      "SIGNUPS_DESC": "Track how many accounts were created in each of the past six weeks."
+    },
+    "METRICS": {
+      "TOTAL_USERS": "Total accounts",
+      "TOTAL_USERS_DESC": "All profiles registered across the platform.",
+      "ACTIVE_USERS": "Active this month",
+      "ACTIVE_USERS_DESC": "Signed in within the past 30 days.",
+      "DEACTIVATED_USERS": "Deactivated users",
+      "DEACTIVATED_USERS_DESC": "Accounts suspended or awaiting review.",
+      "COMPLETE_WORKS": "Works with confirmed splits",
+      "COMPLETE_WORKS_DESC": "Catalogued works where every share is agreed.",
+      "HUMAN_WORKS": "Human-only works",
+      "HUMAN_WORKS_DESC": "Works with no AI assistance recorded.",
+      "AI_ASSISTED": "AI-assisted works",
+      "AI_ASSISTED_DESC": "Works that include human + AI collaboration.",
+      "AI_GENERATED": "AI-generated works",
+      "AI_GENERATED_DESC": "Works declared as primarily AI generated."
+    },
+    "ACTIONS": {
+      "REFRESH": "Refresh"
+    },
+    "ERRORS": {
+      "OVERVIEW_LOAD_FAILED": "We could not load admin metrics right now. Please try again later.",
+      "LOAD_USERS": "We could not load the user list. Please try again.",
+      "UPDATE_USER": "We could not update that user. Refresh and retry.",
+      "LOAD_INVITES": "We could not load admin invites right now.",
+      "CREATE_INVITE": "We could not create a new invite. Try again in a moment.",
+      "REVOKE_INVITE": "We could not revoke that invite.",
+      "NOT_AUTHENTICATED": "You need to be signed in to manage admin invites."
+    },
+    "USERS": {
+      "TITLE": "Manage user access",
+      "SUBTITLE": "Review accounts, grant admin controls, and keep the community safe.",
+      "SEARCH_LABEL": "Search users",
+      "SEARCH_PLACEHOLDER": "Search by name, nickname, or user number…",
+      "FILTER_ALL": "All",
+      "FILTER_ACTIVE": "Active",
+      "FILTER_DEACTIVATED": "Deactivated",
+      "LOADING": "Loading user list…",
+      "EMPTY": "No users found for the current filters.",
+      "COLUMNS": {
+        "USER": "User",
+        "ROLE": "Primary role",
+        "STATUS": "Status",
+        "ADMIN": "Admin",
+        "ACTIONS": "Actions"
+      },
+      "UNSET_DISPLAY": "Name not set",
+      "UNSET_ROLE": "Not provided",
+      "STATUS_ACTIVE": "Active",
+      "STATUS_DEACTIVATED": "Deactivated",
+      "ADMIN_TRUE": "Admin",
+      "ADMIN_FALSE": "Standard",
+      "ACTION_REMOVE_ADMIN": "Remove admin",
+      "ACTION_GRANT_ADMIN": "Grant admin",
+      "ACTION_RESTORE": "Restore account",
+      "ACTION_DEACTIVATE": "Deactivate account",
+      "PAGINATION_LABEL": "User list pages",
+      "PREV": "Previous",
+      "NEXT": "Next",
+      "PAGE_X_OF_Y": "Page {{ page }} of {{ total }}"
+    },
+    "INVITES": {
+      "TITLE": "Admin invites",
+      "SUBTITLE": "Issue codes for trusted collaborators and track their status.",
+      "CREATE_HEADING": "Generate a new invite",
+      "CREATE_HELP": "Each code can unlock admin access during onboarding. Share only with people you trust.",
+      "EXPIRY_LABEL": "Invite expiry",
+      "EXPIRY_IN_DAYS": "Expires in",
+      "EXPIRY_NEVER": "No expiry",
+      "DAYS_LABEL": "Invite expiry in days",
+      "DAYS_SUFFIX": "days",
+      "CREATE_BUTTON": "Generate invite",
+      "CREATING": "Generating…",
+      "LOADING": "Loading admin invites…",
+      "EMPTY": "No admin invites have been created yet.",
+      "CREATED_AT": "Created",
+      "EXPIRES_AT": "Expires",
+      "STATUS_LABEL": "Status",
+      "NO_EXPIRY": "No expiry",
+      "COPY": "Copy code",
+      "REVOKE": "Revoke",
+      "STATUS": {
+        "active": "Active",
+        "claimed": "Claimed",
+        "revoked": "Revoked",
+        "expired": "Expired"
+      }
+    },
+    "ANALYTICS": {
+      "TITLE": "Deep platform analytics",
+      "SUBTITLE": "Retention, engagement, and growth dashboards are on the way.",
+      "WORK_IN_PROGRESS": "Analytics workspace in progress",
+      "WORK_IN_PROGRESS_DESC": "We are connecting telemetry, usage, and protocol data so you can monitor adoption trends without leaving the console."
+    },
+    "RECOVERY": {
+      "TITLE": "Recovery operations",
+      "SUBTITLE": "Support admins with tooling to unblock accounts and audit requests.",
+      "WORK_IN_PROGRESS": "Recovery tooling in progress",
+      "WORK_IN_PROGRESS_DESC": "Upcoming workflows will surface verification history, security question results, and recovery code status to streamline support cases."
+    },
+    "MESSAGING": {
+      "TITLE": "Messaging & announcements",
+      "SUBTITLE": "Coordinate notices to your community directly from the admin console.",
+      "WORK_IN_PROGRESS": "Messaging hub in progress",
+      "WORK_IN_PROGRESS_DESC": "Soon you will be able to draft announcements, schedule delivery, and review delivery analytics for key updates."
     }
   },
   "BUTTONS": {

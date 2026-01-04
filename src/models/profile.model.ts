@@ -346,6 +346,9 @@ export interface UserProfile {
   id: string;
   nickname: string;
   user_number: number;
+  is_admin: boolean;
+  is_deactivated: boolean;
+  deactivated_at?: string | null;
   
   display_name: string;
   // Roles

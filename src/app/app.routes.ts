@@ -1,10 +1,16 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from '../guards/auth.guard';
+import { AdminGuard } from '../guards/admin.guard';
 
 export const routes: Routes = [
     { path: '', loadComponent: () => import('./landing/landing').then(m => m.LandingComponent) },
     { path: 'auth/login', loadComponent: () => import('./auth/login/login').then(m => m.Login) },
     { path: 'auth/register', loadComponent: () => import('./auth/register/register-new').then(m => m.RegisterNewComponent) },
+    {
+        path: 'admin',
+        canActivate: [AuthGuard, AdminGuard],
+        loadChildren: () => import('./admin/admin.routes').then(m => m.routes)
+    },
     { path: 'auth/forgot-password', loadComponent: () => import('./auth/password-recovery/password-recovery').then(m => m.PasswordRecoveryComponent) },
    //Protected routes
     {

@@ -11,6 +11,7 @@
     "PROTOCOLS": "Protocolos",
     "RIGHTS_HOLDERS": "Titulares de derechos",
     "PROFILE": "Perfil",
+    "ADMIN_DASHBOARD": "Panel de administración",
     "CURRENT_WORKSPACE": "Espacio de trabajo",
     "MANAGE_WORKSPACES": "Gestionar espacios de trabajo",
     "ADD_FIRST_WORKSPACE": "Crea tu primer espacio de trabajo"
@@ -315,6 +316,137 @@
     "NAME_PLACEHOLDER": "ej. Vibras de Verano 2025, Álbum Debut, Mi Último Sencillo",
     "TYPE_REQUIRED": "El tipo de proyecto es obligatorio",
     "DESCRIPTION_PLACEHOLDER": "Añade notas sobre este proyecto (fecha de lanzamiento, colaboradores, etc.)",
+  "ADMIN": {
+    "LABEL": "Administración",
+    "HEADLINE": "Panel de administración",
+    "WELCOME": "Hola {{ name }}, gracias por mantener la plataforma en marcha.",
+    "NAV": {
+      "OVERVIEW": "Resumen",
+      "OVERVIEW_DESC": "Métricas en vivo y señales de salud.",
+      "USERS": "Usuarios",
+      "USERS_DESC": "Revisa cuentas y gestiona accesos.",
+      "ANALYTICS": "Analítica",
+      "ANALYTICS_DESC": "Analiza tendencias de crecimiento y retención.",
+      "INVITES": "Invitaciones",
+      "INVITES_DESC": "Envía invitaciones de administradores y haz seguimiento.",
+      "RECOVERY": "Recuperación",
+      "RECOVERY_DESC": "Ayuda en la recuperación de cuentas y revisiones de seguridad.",
+      "MESSAGING": "Mensajería",
+      "MESSAGING_DESC": "Coordina anuncios y actualizaciones operativas."
+    },
+    "OVERVIEW": {
+      "TITLE": "Instantánea del estado de la plataforma",
+      "SUBTITLE": "Supervisa la adopción, la actividad y la calidad del catálogo de un vistazo.",
+      "LOADING": "Obteniendo las métricas administrativas más recientes…",
+      "SIGNUPS_TITLE": "Nuevos registros semanales",
+      "SIGNUPS_DESC": "Sigue cuántas cuentas se crearon en cada una de las últimas seis semanas."
+    },
+    "METRICS": {
+      "TOTAL_USERS": "Cuentas totales",
+      "TOTAL_USERS_DESC": "Todos los perfiles registrados en la plataforma.",
+      "ACTIVE_USERS": "Activos este mes",
+      "ACTIVE_USERS_DESC": "Se han conectado en los últimos 30 días.",
+      "DEACTIVATED_USERS": "Usuarios desactivados",
+      "DEACTIVATED_USERS_DESC": "Cuentas suspendidas o en revisión.",
+      "COMPLETE_WORKS": "Obras con splits confirmados",
+      "COMPLETE_WORKS_DESC": "Obras catalogadas donde cada participación está acordada.",
+      "HUMAN_WORKS": "Obras solo humanas",
+      "HUMAN_WORKS_DESC": "Obras sin asistencia de IA registrada.",
+      "AI_ASSISTED": "Obras asistidas por IA",
+      "AI_ASSISTED_DESC": "Obras con colaboración entre personas y IA.",
+      "AI_GENERATED": "Obras generadas por IA",
+      "AI_GENERATED_DESC": "Obras declaradas como mayormente generadas por IA."
+    },
+    "ACTIONS": {
+      "REFRESH": "Actualizar"
+    },
+    "ERRORS": {
+      "OVERVIEW_LOAD_FAILED": "No pudimos cargar las métricas administrativas en este momento. Inténtalo de nuevo más tarde.",
+      "LOAD_USERS": "No pudimos cargar la lista de usuarios. Inténtalo de nuevo.",
+      "UPDATE_USER": "No pudimos actualizar a ese usuario. Actualiza y vuelve a intentarlo.",
+      "LOAD_INVITES": "No pudimos cargar las invitaciones administrativas ahora mismo.",
+      "CREATE_INVITE": "No pudimos generar una nueva invitación. Inténtalo en unos segundos.",
+      "REVOKE_INVITE": "No pudimos revocar esa invitación.",
+      "NOT_AUTHENTICATED": "Debes iniciar sesión para gestionar invitaciones de administrador."
+    },
+    "USERS": {
+      "TITLE": "Gestionar acceso de usuarios",
+      "SUBTITLE": "Revisa cuentas, otorga controles de administrador y protege a la comunidad.",
+      "SEARCH_LABEL": "Buscar usuarios",
+      "SEARCH_PLACEHOLDER": "Busca por nombre, nickname o número de usuario…",
+      "FILTER_ALL": "Todos",
+      "FILTER_ACTIVE": "Activos",
+      "FILTER_DEACTIVATED": "Desactivados",
+      "LOADING": "Cargando lista de usuarios…",
+      "EMPTY": "No se encontraron usuarios con los filtros actuales.",
+      "COLUMNS": {
+        "USER": "Usuario",
+        "ROLE": "Rol principal",
+        "STATUS": "Estado",
+        "ADMIN": "Admin",
+        "ACTIONS": "Acciones"
+      },
+      "UNSET_DISPLAY": "Nombre no configurado",
+      "UNSET_ROLE": "Sin especificar",
+      "STATUS_ACTIVE": "Activo",
+      "STATUS_DEACTIVATED": "Desactivado",
+      "ADMIN_TRUE": "Admin",
+      "ADMIN_FALSE": "Estándar",
+      "ACTION_REMOVE_ADMIN": "Quitar admin",
+      "ACTION_GRANT_ADMIN": "Conceder admin",
+      "ACTION_RESTORE": "Restaurar cuenta",
+      "ACTION_DEACTIVATE": "Desactivar cuenta",
+      "PAGINATION_LABEL": "Páginas de la lista de usuarios",
+      "PREV": "Anterior",
+      "NEXT": "Siguiente",
+      "PAGE_X_OF_Y": "Página {{ page }} de {{ total }}"
+    },
+    "INVITES": {
+      "TITLE": "Invitaciones de administrador",
+      "SUBTITLE": "Genera códigos para colaboradores de confianza y sigue su estado.",
+      "CREATE_HEADING": "Generar una nueva invitación",
+      "CREATE_HELP": "Cada código puede habilitar acceso de administrador durante el onboarding. Compártelo solo con personas de confianza.",
+      "EXPIRY_LABEL": "Caducidad de la invitación",
+      "EXPIRY_IN_DAYS": "Caduca en",
+      "EXPIRY_NEVER": "Sin caducidad",
+      "DAYS_LABEL": "Caducidad en días",
+      "DAYS_SUFFIX": "días",
+      "CREATE_BUTTON": "Generar invitación",
+      "CREATING": "Generando…",
+      "LOADING": "Cargando invitaciones de administrador…",
+      "EMPTY": "Aún no se han creado invitaciones de administrador.",
+      "CREATED_AT": "Creada",
+      "EXPIRES_AT": "Caduca",
+      "STATUS_LABEL": "Estado",
+      "NO_EXPIRY": "Sin caducidad",
+      "COPY": "Copiar código",
+      "REVOKE": "Revocar",
+      "STATUS": {
+        "active": "Activa",
+        "claimed": "Reclamada",
+        "revoked": "Revocada",
+        "expired": "Caducada"
+      }
+    },
+    "ANALYTICS": {
+      "TITLE": "Analítica profunda de la plataforma",
+      "SUBTITLE": "Los paneles de retención, engagement y crecimiento están en camino.",
+      "WORK_IN_PROGRESS": "Área de analítica en desarrollo",
+      "WORK_IN_PROGRESS_DESC": "Estamos conectando telemetría, uso y datos de protocolos para que monitorees tendencias sin salir de la consola."
+    },
+    "RECOVERY": {
+      "TITLE": "Operaciones de recuperación",
+      "SUBTITLE": "Brinda soporte con herramientas para desbloquear cuentas y auditar solicitudes.",
+      "WORK_IN_PROGRESS": "Herramientas de recuperación en desarrollo",
+      "WORK_IN_PROGRESS_DESC": "Próximamente verás historial de verificación, respuestas a preguntas de seguridad y estado de códigos de respaldo para agilizar casos de soporte."
+    },
+    "MESSAGING": {
+      "TITLE": "Mensajería y anuncios",
+      "SUBTITLE": "Coordina avisos para la comunidad directamente desde la consola de administración.",
+      "WORK_IN_PROGRESS": "Centro de mensajería en desarrollo",
+      "WORK_IN_PROGRESS_DESC": "Muy pronto podrás redactar anuncios, programar envíos y revisar métricas de entrega para tus comunicaciones clave."
+    }
+  },
     "DESCRIPTION_HINT": "Esto te ayuda a organizar y recordar detalles sobre tu proyecto",
     "CREATE_PROJECT_BTN": "Crear proyecto",
     "TYPE_SINGLE": "Sencillo",

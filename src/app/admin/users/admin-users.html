@@ -1,0 +1,131 @@
+<div class="admin-users">
+  <header class="admin-users__header">
+    <div>
+      <h2>{{ 'ADMIN.USERS.TITLE' | translate }}</h2>
+      <p>{{ 'ADMIN.USERS.SUBTITLE' | translate }}</p>
+    </div>
+    <button type="button" class="admin-users__refresh" (click)="refresh()">
+      {{ 'ADMIN.ACTIONS.REFRESH' | translate }}
+    </button>
+  </header>
+
+  <section class="admin-users__controls">
+    <label class="admin-users__search">
+      <span class="sr-only">{{ 'ADMIN.USERS.SEARCH_LABEL' | translate }}</span>
+      <input
+        type="search"
+        [formControl]="searchControl"
+        [placeholder]="'ADMIN.USERS.SEARCH_PLACEHOLDER' | translate"
+      />
+    </label>
+
+    <div class="admin-users__filters">
+      <button
+        type="button"
+        class="admin-users__filter"
+        [class.active]="statusFilter() === 'all'"
+        (click)="setStatusFilter('all')"
+      >
+        {{ 'ADMIN.USERS.FILTER_ALL' | translate }}
+      </button>
+      <button
+        type="button"
+        class="admin-users__filter"
+        [class.active]="statusFilter() === 'active'"
+        (click)="setStatusFilter('active')"
+      >
+        {{ 'ADMIN.USERS.FILTER_ACTIVE' | translate }}
+      </button>
+      <button
+        type="button"
+        class="admin-users__filter"
+        [class.active]="statusFilter() === 'deactivated'"
+        (click)="setStatusFilter('deactivated')"
+      >
+        {{ 'ADMIN.USERS.FILTER_DEACTIVATED' | translate }}
+      </button>
+    </div>
+  </section>
+
+  @if (loading()) {
+    <div class="admin-users__state admin-users__state--loading">
+      {{ 'ADMIN.USERS.LOADING' | translate }}
+    </div>
+  }
+  @else if (error()) {
+    <div class="admin-users__state admin-users__state--error">
+      {{ error() | translate }}
+    </div>
+  }
+  @else {
+    @if (users().length === 0) {
+      <div class="admin-users__state">
+        {{ 'ADMIN.USERS.EMPTY' | translate }}
+      </div>
+    } @else {
+      <div class="admin-users__table-wrapper">
+        <table class="admin-users__table">
+          <thead>
+            <tr>
+              <th>{{ 'ADMIN.USERS.COLUMNS.USER' | translate }}</th>
+              <th>{{ 'ADMIN.USERS.COLUMNS.ROLE' | translate }}</th>
+              <th>{{ 'ADMIN.USERS.COLUMNS.STATUS' | translate }}</th>
+              <th>{{ 'ADMIN.USERS.COLUMNS.ADMIN' | translate }}</th>
+              <th>{{ 'ADMIN.USERS.COLUMNS.ACTIONS' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of users(); track user.id) {
+              <tr>
+                <td>
+                  <div class="admin-users__identity">
+                    <span class="admin-users__display">{{ user.display_name || ('ADMIN.USERS.UNSET_DISPLAY' | translate) }}</span>
+                    <span class="admin-users__nickname">@{{ user.nickname }}</span>
+                    <span class="admin-users__meta">#{{ user.user_number }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="admin-users__role">
+                    {{ user.primary_role || ('ADMIN.USERS.UNSET_ROLE' | translate) }}
+                  </span>
+                </td>
+                <td>
+                  <span class="admin-users__badge" [class.admin-users__badge--deactivated]="user.is_deactivated">
+                    {{ user.is_deactivated ? ('ADMIN.USERS.STATUS_DEACTIVATED' | translate) : ('ADMIN.USERS.STATUS_ACTIVE' | translate) }}
+                  </span>
+                </td>
+                <td>
+                  <span class="admin-users__badge" [class.admin-users__badge--admin]="user.is_admin">
+                    {{ user.is_admin ? ('ADMIN.USERS.ADMIN_TRUE' | translate) : ('ADMIN.USERS.ADMIN_FALSE' | translate) }}
+                  </span>
+                </td>
+                <td>
+                  <div class="admin-users__actions">
+                    <button type="button" (click)="toggleAdmin(user)">
+                      {{ user.is_admin ? ('ADMIN.USERS.ACTION_REMOVE_ADMIN' | translate) : ('ADMIN.USERS.ACTION_GRANT_ADMIN' | translate) }}
+                    </button>
+                    <button type="button" (click)="toggleDeactivated(user)">
+                      {{ user.is_deactivated ? ('ADMIN.USERS.ACTION_RESTORE' | translate) : ('ADMIN.USERS.ACTION_DEACTIVATE' | translate) }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (pageCount() > 1) {
+        <nav class="admin-users__pagination" aria-label="{{ 'ADMIN.USERS.PAGINATION_LABEL' | translate }}">
+          <button type="button" (click)="goToPage(page() - 1)" [disabled]="page() === 1">
+            {{ 'ADMIN.USERS.PREV' | translate }}
+          </button>
+          <span>{{ 'ADMIN.USERS.PAGE_X_OF_Y' | translate:{ page: page(), total: pageCount() } }}</span>
+          <button type="button" (click)="goToPage(page() + 1)" [disabled]="page() === pageCount()">
+            {{ 'ADMIN.USERS.NEXT' | translate }}
+          </button>
+        </nav>
+      }
+    }
+  }
+</div>

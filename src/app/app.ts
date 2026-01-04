@@ -1,4 +1,4 @@
-import { Component, DestroyRef, ElementRef, HostListener, QueryList, ViewChildren, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, HostListener, QueryList, ViewChildren, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { CommonModule } from '@angular/common';
@@ -9,6 +9,7 @@ import { SupabaseService } from './services/supabase.service';
 import { filter } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { LanguageService } from './services/language.service';
+import { ProfileService } from './services/profile.service';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +22,7 @@ export class App {
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
   private languageService = inject(LanguageService);
+  private profileService = inject(ProfileService);
   @ViewChildren('languageSwitcherRef') private languageSwitcherRefs!: QueryList<ElementRef<HTMLElement>>;
   
   readonly languages = this.languageService.languages;
@@ -32,6 +34,8 @@ export class App {
   languageMenuOpen = false;
   private readonly userSignal = toSignal(this.supabase.user$, { initialValue: this.supabase.currentUser });
   private readonly currentRoute = signal(this.router.url ?? '');
+  private readonly profileSignal = toSignal(this.profileService.profile$, { initialValue: this.profileService.currentProfile });
+  protected readonly isAdmin = computed(() => Boolean(this.profileSignal()?.is_admin));
   
   constructor() {
     this.router.events
@@ -93,6 +97,10 @@ export class App {
 
   goToProfileHub() {
     this.router.navigate(['/profile-hub']);
+  }
+
+  goToAdminDashboard() {
+    this.router.navigate(['/admin']);
   }
 
   async logout() {

@@ -11,6 +11,7 @@
     "PROTOCOLS": "Protokolle",
     "RIGHTS_HOLDERS": "Rechteinhaber",
     "PROFILE": "Profil",
+    "ADMIN_DASHBOARD": "Admin-Dashboard",
     "CURRENT_WORKSPACE": "Arbeitsbereich",
     "MANAGE_WORKSPACES": "Arbeitsbereiche verwalten",
     "ADD_FIRST_WORKSPACE": "Erstelle deinen ersten Arbeitsbereich"
@@ -315,6 +316,137 @@
     "NAME_PLACEHOLDER": "z.B. Sommervibes 2025, Debütalbum, Meine neueste Single",
     "TYPE_REQUIRED": "Projekttyp ist erforderlich",
     "DESCRIPTION_PLACEHOLDER": "Fügen Sie Notizen zu diesem Projekt hinzu (Veröffentlichungsdatum, Mitwirkende usw.)",
+  "ADMIN": {
+    "LABEL": "Admin",
+    "HEADLINE": "Administrationsbereich",
+    "WELCOME": "Hallo {{ name }}, danke, dass du die Plattform am Laufen hältst.",
+    "NAV": {
+      "OVERVIEW": "Übersicht",
+      "OVERVIEW_DESC": "Live-Kennzahlen und Gesundheitsindikatoren.",
+      "USERS": "Nutzer",
+      "USERS_DESC": "Konten prüfen und Zugänge verwalten.",
+      "ANALYTICS": "Analysen",
+      "ANALYTICS_DESC": "Tiefe Einblicke in Wachstum und Bindung.",
+      "INVITES": "Einladungen",
+      "INVITES_DESC": "Admin-Einladungen verschicken und nachverfolgen.",
+      "RECOVERY": "Wiederherstellung",
+      "RECOVERY_DESC": "Unterstütze Nutzer bei Kontowiederherstellung und Sicherheit.",
+      "MESSAGING": "Mitteilungen",
+      "MESSAGING_DESC": "Ankündigungen und Updates koordinieren."
+    },
+    "OVERVIEW": {
+      "TITLE": "Plattformstatus auf einen Blick",
+      "SUBTITLE": "Behalte Einführung, Aktivität und Katalogqualität im Blick.",
+      "LOADING": "Aktuelle Admin-Kennzahlen werden geladen…",
+      "SIGNUPS_TITLE": "Wöchentliche Neuanmeldungen",
+      "SIGNUPS_DESC": "Verfolge, wie viele Konten in den vergangenen sechs Wochen erstellt wurden."
+    },
+    "METRICS": {
+      "TOTAL_USERS": "Gesamtzahl der Konten",
+      "TOTAL_USERS_DESC": "Alle registrierten Profile auf der Plattform.",
+      "ACTIVE_USERS": "Aktiv in diesem Monat",
+      "ACTIVE_USERS_DESC": "In den letzten 30 Tagen angemeldet.",
+      "DEACTIVATED_USERS": "Deaktivierte Nutzer",
+      "DEACTIVATED_USERS_DESC": "Konten, die gesperrt sind oder überprüft werden.",
+      "COMPLETE_WORKS": "Werke mit bestätigten Splits",
+      "COMPLETE_WORKS_DESC": "Katalogeinträge, bei denen alle Anteile abgestimmt sind.",
+      "HUMAN_WORKS": "Rein menschliche Werke",
+      "HUMAN_WORKS_DESC": "Werke ohne erfasste KI-Unterstützung.",
+      "AI_ASSISTED": "KI-unterstützte Werke",
+      "AI_ASSISTED_DESC": "Werke mit Zusammenarbeit von Mensch und KI.",
+      "AI_GENERATED": "KI-generierte Werke",
+      "AI_GENERATED_DESC": "Werke, die überwiegend von KI erstellt wurden."
+    },
+    "ACTIONS": {
+      "REFRESH": "Aktualisieren"
+    },
+    "ERRORS": {
+      "OVERVIEW_LOAD_FAILED": "Admin-Kennzahlen konnten nicht geladen werden. Bitte versuche es später erneut.",
+      "LOAD_USERS": "Die Nutzerliste konnte nicht geladen werden. Bitte versuche es erneut.",
+      "UPDATE_USER": "Der Nutzer konnte nicht aktualisiert werden. Bitte aktualisiere und versuche es noch einmal.",
+      "LOAD_INVITES": "Admin-Einladungen konnten gerade nicht geladen werden.",
+      "CREATE_INVITE": "Die Einladung konnte nicht erstellt werden. Bitte versuche es gleich noch einmal.",
+      "REVOKE_INVITE": "Die Einladung konnte nicht widerrufen werden.",
+      "NOT_AUTHENTICATED": "Du musst angemeldet sein, um Admin-Einladungen zu verwalten."
+    },
+    "USERS": {
+      "TITLE": "Nutzerzugänge verwalten",
+      "SUBTITLE": "Prüfe Konten, vergebe Adminrechte und halte die Community sicher.",
+      "SEARCH_LABEL": "Nutzer suchen",
+      "SEARCH_PLACEHOLDER": "Suche nach Name, Nickname oder Nutzernummer…",
+      "FILTER_ALL": "Alle",
+      "FILTER_ACTIVE": "Aktiv",
+      "FILTER_DEACTIVATED": "Deaktiviert",
+      "LOADING": "Nutzerliste wird geladen…",
+      "EMPTY": "Keine Nutzer für die aktuellen Filter gefunden.",
+      "COLUMNS": {
+        "USER": "Nutzer",
+        "ROLE": "Primäre Rolle",
+        "STATUS": "Status",
+        "ADMIN": "Admin",
+        "ACTIONS": "Aktionen"
+      },
+      "UNSET_DISPLAY": "Kein Name gesetzt",
+      "UNSET_ROLE": "Keine Angabe",
+      "STATUS_ACTIVE": "Aktiv",
+      "STATUS_DEACTIVATED": "Deaktiviert",
+      "ADMIN_TRUE": "Admin",
+      "ADMIN_FALSE": "Standard",
+      "ACTION_REMOVE_ADMIN": "Admin entfernen",
+      "ACTION_GRANT_ADMIN": "Admin vergeben",
+      "ACTION_RESTORE": "Konto reaktivieren",
+      "ACTION_DEACTIVATE": "Konto deaktivieren",
+      "PAGINATION_LABEL": "Seiten der Nutzerliste",
+      "PREV": "Zurück",
+      "NEXT": "Weiter",
+      "PAGE_X_OF_Y": "Seite {{ page }} von {{ total }}"
+    },
+    "INVITES": {
+      "TITLE": "Admin-Einladungen",
+      "SUBTITLE": "Erstelle Codes für vertrauenswürdige Personen und verfolge den Status.",
+      "CREATE_HEADING": "Neue Einladung generieren",
+      "CREATE_HELP": "Jeder Code kann während des Onboardings Adminzugriff freischalten. Teile ihn nur mit vertrauenswürdigen Personen.",
+      "EXPIRY_LABEL": "Ablauf der Einladung",
+      "EXPIRY_IN_DAYS": "Läuft ab in",
+      "EXPIRY_NEVER": "Kein Ablauf",
+      "DAYS_LABEL": "Ablauf in Tagen",
+      "DAYS_SUFFIX": "Tage",
+      "CREATE_BUTTON": "Einladung generieren",
+      "CREATING": "Wird erstellt…",
+      "LOADING": "Admin-Einladungen werden geladen…",
+      "EMPTY": "Es wurden noch keine Admin-Einladungen erstellt.",
+      "CREATED_AT": "Erstellt",
+      "EXPIRES_AT": "Läuft ab",
+      "STATUS_LABEL": "Status",
+      "NO_EXPIRY": "Kein Ablauf",
+      "COPY": "Code kopieren",
+      "REVOKE": "Widerrufen",
+      "STATUS": {
+        "active": "Aktiv",
+        "claimed": "Eingelöst",
+        "revoked": "Widerrufen",
+        "expired": "Abgelaufen"
+      }
+    },
+    "ANALYTICS": {
+      "TITLE": "Tiefe Plattform-Analysen",
+      "SUBTITLE": "Dashboards zu Bindung, Engagement und Wachstum sind in Arbeit.",
+      "WORK_IN_PROGRESS": "Analysebereich in Arbeit",
+      "WORK_IN_PROGRESS_DESC": "Wir verknüpfen Telemetrie-, Nutzungs- und Protokolldaten, damit du Trends direkt in der Konsole verfolgen kannst."
+    },
+    "RECOVERY": {
+      "TITLE": "Wiederherstellungsprozesse",
+      "SUBTITLE": "Unterstütze Admins mit Werkzeugen, um Konten zu entsperren und Anfragen zu prüfen.",
+      "WORK_IN_PROGRESS": "Recovery-Tools in Arbeit",
+      "WORK_IN_PROGRESS_DESC": "Bald siehst du Verifizierungshistorie, Antworten auf Sicherheitsfragen und Backup-Codes, um Supportfälle zu beschleunigen."
+    },
+    "MESSAGING": {
+      "TITLE": "Mitteilungen & Ankündigungen",
+      "SUBTITLE": "Koordiniere Nachrichten an die Community direkt aus der Admin-Konsole.",
+      "WORK_IN_PROGRESS": "Messaging-Hub in Arbeit",
+      "WORK_IN_PROGRESS_DESC": "Demnächst kannst du Ankündigungen verfassen, planen und deren Performance auswerten."
+    }
+  },
     "DESCRIPTION_HINT": "Dies hilft Ihnen, Details zu Ihrem Projekt zu organisieren und zu merken",
     "CREATE_PROJECT_BTN": "Projekt erstellen",
     "TYPE_SINGLE": "Einzelwerk",

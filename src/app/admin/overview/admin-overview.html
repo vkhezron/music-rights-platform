@@ -1,0 +1,99 @@
+<div class="admin-overview">
+  <header class="admin-overview__header">
+    <div>
+      <h2>{{ 'ADMIN.OVERVIEW.TITLE' | translate }}</h2>
+      <p>{{ 'ADMIN.OVERVIEW.SUBTITLE' | translate }}</p>
+    </div>
+    <button type="button" class="admin-overview__refresh" (click)="refresh()">
+      {{ 'ADMIN.ACTIONS.REFRESH' | translate }}
+    </button>
+  </header>
+
+  @if (loading()) {
+    <div class="admin-overview__state admin-overview__state--loading">
+      {{ 'ADMIN.OVERVIEW.LOADING' | translate }}
+    </div>
+  }
+  @else if (error()) {
+    <div class="admin-overview__state admin-overview__state--error">
+      {{ error() | translate }}
+    </div>
+  }
+  @else if (snapshot()) {
+    <section class="admin-overview__grid">
+      <article class="metric-card">
+        <h3>{{ 'ADMIN.METRICS.TOTAL_USERS' | translate }}</h3>
+        <p class="metric-card__value">{{ snapshot()?.totalUsers | number }}</p>
+        <span>{{ 'ADMIN.METRICS.TOTAL_USERS_DESC' | translate }}</span>
+      </article>
+
+      <article class="metric-card">
+        <h3>{{ 'ADMIN.METRICS.ACTIVE_USERS' | translate }}</h3>
+        <p class="metric-card__value">{{ snapshot()?.activeUsers | number }}</p>
+        <span>{{ 'ADMIN.METRICS.ACTIVE_USERS_DESC' | translate }}</span>
+      </article>
+
+      <article class="metric-card">
+        <h3>{{ 'ADMIN.METRICS.DEACTIVATED_USERS' | translate }}</h3>
+        <p class="metric-card__value">{{ snapshot()?.deactivatedUsers | number }}</p>
+        <span>{{ 'ADMIN.METRICS.DEACTIVATED_USERS_DESC' | translate }}</span>
+      </article>
+
+      <article class="metric-card">
+        <h3>{{ 'ADMIN.METRICS.COMPLETE_WORKS' | translate }}</h3>
+        <p class="metric-card__value">{{ snapshot()?.worksWithCompleteSplits | number }}</p>
+        <span>{{ 'ADMIN.METRICS.COMPLETE_WORKS_DESC' | translate }}</span>
+      </article>
+
+      <article class="metric-card">
+        <h3>{{ 'ADMIN.METRICS.HUMAN_WORKS' | translate }}</h3>
+        <p class="metric-card__value">{{ snapshot()?.worksHumanOnly | number }}</p>
+        <span>{{ 'ADMIN.METRICS.HUMAN_WORKS_DESC' | translate }}</span>
+      </article>
+
+      <article class="metric-card">
+        <h3>{{ 'ADMIN.METRICS.AI_ASSISTED' | translate }}</h3>
+        <p class="metric-card__value">{{ snapshot()?.worksAiAssisted | number }}</p>
+        <span>{{ 'ADMIN.METRICS.AI_ASSISTED_DESC' | translate }}</span>
+      </article>
+
+      <article class="metric-card">
+        <h3>{{ 'ADMIN.METRICS.AI_GENERATED' | translate }}</h3>
+        <p class="metric-card__value">{{ snapshot()?.worksAiGenerated | number }}</p>
+        <span>{{ 'ADMIN.METRICS.AI_GENERATED_DESC' | translate }}</span>
+      </article>
+    </section>
+
+    <section class="admin-overview__chart">
+      <header>
+        <h3>{{ 'ADMIN.OVERVIEW.SIGNUPS_TITLE' | translate }}</h3>
+        <span>{{ 'ADMIN.OVERVIEW.SIGNUPS_DESC' | translate }}</span>
+      </header>
+      <div class="signup-chart">
+        <svg viewBox="0 0 240 80" preserveAspectRatio="none" role="img" aria-label="{{ 'ADMIN.OVERVIEW.SIGNUPS_TITLE' | translate }}">
+          <polyline
+            class="signup-chart__line"
+            fill="none"
+            stroke="url(#signupGradient)"
+            stroke-width="3"
+            [attr.points]="signupChartPath()"
+          />
+          <defs>
+            <linearGradient id="signupGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#6366f1" />
+              <stop offset="100%" stop-color="#7c3aed" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <ul class="signup-chart__legend">
+          @for (point of snapshot()?.weeklySignups ?? []; track point.week) {
+            <li>
+              <span class="signup-chart__legend-week">{{ point.week }}</span>
+              <span class="signup-chart__legend-count">{{ point.count | number }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+    </section>
+  }
+</div>

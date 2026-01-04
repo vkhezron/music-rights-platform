@@ -1,0 +1,57 @@
+<div class="admin-shell" [class.admin-shell--nav-open]="navOpen()">
+  <aside id="admin-nav" class="admin-sidebar">
+    <button
+      type="button"
+      class="admin-sidebar__close"
+      (click)="closeNav()"
+      aria-label="Close admin navigation"
+    >
+      <span aria-hidden="true">Close</span>
+    </button>
+    <div class="admin-sidebar__header">
+      <div class="admin-sidebar__eyebrow">{{ 'ADMIN.LABEL' | translate }}</div>
+      <h1>{{ 'ADMIN.HEADLINE' | translate }}</h1>
+      @if (profileName()) {
+        <p class="admin-sidebar__welcome">
+          {{ 'ADMIN.WELCOME' | translate:{ name: profileName() } }}
+        </p>
+      }
+    </div>
+    <nav class="admin-sidebar__nav">
+      @for (item of navItems; track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          class="admin-sidebar__link"
+          (click)="handleNavClick()"
+        >
+          <span class="admin-sidebar__link-label">{{ item.labelKey | translate }}</span>
+          <span class="admin-sidebar__link-desc">{{ item.descriptionKey | translate }}</span>
+        </a>
+      }
+    </nav>
+  </aside>
+
+  @if (navOpen()) {
+    <div class="admin-overlay" (click)="closeNav()" aria-hidden="true"></div>
+  }
+
+  <section class="admin-content">
+    <header class="admin-mobile-header">
+      <button
+        type="button"
+        class="admin-mobile-header__button"
+        (click)="toggleNav()"
+        [attr.aria-expanded]="navOpen()"
+        aria-controls="admin-nav"
+      >
+        <span class="admin-mobile-header__icon" aria-hidden="true"></span>
+        <span class="admin-mobile-header__label">{{ 'ADMIN.LABEL' | translate }}</span>
+      </button>
+      @if (profileName()) {
+        <span class="admin-mobile-header__profile">{{ profileName() }}</span>
+      }
+    </header>
+    <router-outlet />
+  </section>
+</div>

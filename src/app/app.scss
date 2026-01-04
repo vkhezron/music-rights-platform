@@ -114,6 +114,7 @@
 }
 
 .profile-button,
+.admin-button,
 .logout-button {
   padding: 0.5rem 1rem;
   border-radius: 999px;
@@ -130,6 +131,18 @@
 
   &:hover {
     filter: brightness(1.05);
+  }
+}
+
+.admin-button {
+  background: rgba(99, 102, 241, 0.1);
+  color: #312e81;
+  border-color: rgba(129, 140, 248, 0.45);
+
+  &:hover {
+    background: rgba(79, 70, 229, 0.18);
+    border-color: #6366f1;
+    color: #1e1b4b;
   }
 }
 

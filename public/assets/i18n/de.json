@@ -15,6 +15,34 @@
     "MANAGE_WORKSPACES": "Arbeitsbereiche verwalten",
     "ADD_FIRST_WORKSPACE": "Erstelle deinen ersten Arbeitsbereich"
   },
+  "LANDING": {
+    "HERO": {
+      "TITLE": "Schaffe Klarheit in deinen Musikrechten",
+      "DESCRIPTION": "Bewahre jede Komposition, jeden Split und jeden Rechteinhaber in einem gemeinsamen Arbeitsbereich auf. Lade Mitwirkende ein, dokumentiere Vereinbarungen und exportiere in wenigen Minuten unterschriftsreife Protokolle.",
+      "PRIMARY_CTA": "Konto erstellen",
+      "SECONDARY_CTA": "Anmelden",
+      "NOTE": "Viele weitere Tools für Clearing, Lizenzen und Zusammenarbeit sind bereits in Entwicklung und erscheinen in Kürze."
+    },
+    "HOW_IT_WORKS": {
+      "TITLE": "Deinen Katalog hinzuzufügen ist ganz unkompliziert",
+      "STEP_ONE_TITLE": "1. Registrieren und Arbeitsbereich anlegen",
+      "STEP_ONE_BODY": "Melde dich an, erstelle einen Arbeitsbereich und passe ihn an deinen Katalog oder die Struktur deiner Organisation an.",
+      "STEP_TWO_TITLE": "2. Werke und Rechteinhaber hinzufügen",
+      "STEP_TWO_BODY": "Lege neue Werke an, erfasse die wichtigsten Metadaten und verknüpfe Autorinnen, Autoren oder Interpretinnen mit ihren genauen Beteiligungen.",
+      "STEP_THREE_TITLE": "3. Teilen und abgestimmt bleiben",
+      "STEP_THREE_BODY": "Nutze QR-Codes oder Einladungen, um Mitwirkende einzubinden, Splits abzustimmen und jederzeit protokollbereite PDFs zu exportieren."
+    },
+    "STATS": {
+      "TITLE": "Vertrauenswürdig für eine wachsende Community",
+      "LOADING": "Live-Zahlen werden geladen…",
+      "ERROR": "Die aktuellen Zahlen konnten nicht geladen werden. Bitte versuche es bald erneut.",
+      "LABELS": {
+        "USERS": "Registrierte Nutzerinnen und Nutzer",
+        "RIGHTS_HOLDERS": "Erfasste Rechteinhaberinnen und Rechteinhaber",
+        "WORKS": "Verwaltete Werke"
+      }
+    }
+  },
   "BUTTONS": {
     "SAVE": "Speichern",
     "CANCEL": "Abbrechen",

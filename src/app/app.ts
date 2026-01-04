@@ -74,6 +74,19 @@ export class App {
     return Boolean(user) && !this.isAuthRoute(url);
   }
 
+  isLandingRoute(): boolean {
+    const url = this.currentRoute() ?? '';
+    if (url === '' || url === '/') {
+      return true;
+    }
+
+    if (url.startsWith('/?')) {
+      return true;
+    }
+
+    return false;
+  }
+
   private isAuthRoute(url: string): boolean {
     return url.startsWith('/auth');
   }

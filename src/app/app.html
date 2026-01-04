@@ -131,6 +131,21 @@
         </button>
       </div>
     </header>
+  } @else if (isLandingRoute()) {
+    <header class="landing-header">
+      <a class="landing-header__brand" routerLink="/">
+        {{ 'NAV.BRAND' | translate }}
+      </a>
+      <div class="landing-header__actions">
+        <a routerLink="/auth/login" class="landing-header__link">
+          {{ 'AUTH.LOG_IN' | translate }}
+        </a>
+        <a routerLink="/auth/register" class="landing-header__cta">
+          {{ 'AUTH.SIGN_UP' | translate }}
+        </a>
+        <ng-container *ngTemplateOutlet="languageSwitcher; context: { mode: 'header' }"></ng-container>
+      </div>
+    </header>
   } @else {
     <ng-container *ngTemplateOutlet="languageSwitcher; context: { mode: 'auth' }"></ng-container>
   }

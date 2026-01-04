@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from '../guards/auth.guard';
 
 export const routes: Routes = [
-    { path: '', redirectTo: '/auth/login', pathMatch: 'full' },
+    { path: '', loadComponent: () => import('./landing/landing').then(m => m.LandingComponent) },
     { path: 'auth/login', loadComponent: () => import('./auth/login/login').then(m => m.Login) },
     { path: 'auth/register', loadComponent: () => import('./auth/register/register-new').then(m => m.RegisterNewComponent) },
     { path: 'auth/forgot-password', loadComponent: () => import('./auth/password-recovery/password-recovery').then(m => m.PasswordRecoveryComponent) },
@@ -125,6 +125,6 @@ export const routes: Routes = [
         path: 'terms-of-service',
         loadComponent: () => import('./legal/terms-of-service/terms-of-service').then(m => m.TermsOfServiceComponent)
     },
-    {path: '**', redirectTo: 'login' }
+    { path: '**', redirectTo: '/auth/login' }
 
 ];

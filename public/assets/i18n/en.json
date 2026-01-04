@@ -15,6 +15,34 @@
     "MANAGE_WORKSPACES": "Manage Workspaces",
     "ADD_FIRST_WORKSPACE": "Create your first workspace"
   },
+  "LANDING": {
+    "HERO": {
+      "TITLE": "Build Clarity Into Your Music Rights",
+      "DESCRIPTION": "Keep every composition, split, and rights holder organised in a single workspace. Invite collaborators, document agreements, and export ready-to-sign protocols in minutes.",
+      "PRIMARY_CTA": "Create an account",
+      "SECONDARY_CTA": "Log in",
+      "NOTE": "Many additional clearance, licensing, and collaboration tools are in development and will arrive shortly."
+    },
+    "HOW_IT_WORKS": {
+      "TITLE": "Adding your catalogue is straightforward",
+      "STEP_ONE_TITLE": "1. Register and create your workspace",
+      "STEP_ONE_BODY": "Sign up, create a workspace, and tailor it for your catalogue or organisation structure.",
+      "STEP_TWO_TITLE": "2. Add works and rights holders",
+      "STEP_TWO_BODY": "Upload new works, capture key metadata, and connect writers or performers with precise ownership splits.",
+      "STEP_THREE_TITLE": "3. Share and stay aligned",
+      "STEP_THREE_BODY": "Use QR codes or invites to bring collaborators in, agree on splits, and export protocol-ready PDFs whenever you need them."
+    },
+    "STATS": {
+      "TITLE": "Trusted by a growing community",
+      "LOADING": "Loading live totals…",
+      "ERROR": "We could not load the latest numbers. Check back soon.",
+      "LABELS": {
+        "USERS": "Registered users",
+        "RIGHTS_HOLDERS": "Rights holders captured",
+        "WORKS": "Works tracked"
+      }
+    }
+  },
   "BUTTONS": {
     "SAVE": "Save",
     "CANCEL": "Cancel",

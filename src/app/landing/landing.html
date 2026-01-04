@@ -1,0 +1,58 @@
+<div class="landing">
+  <section class="hero">
+    <div class="hero__content">
+      <h1>{{ 'LANDING.HERO.TITLE' | translate }}</h1>
+      <p>{{ 'LANDING.HERO.DESCRIPTION' | translate }}</p>
+      <div class="hero__actions">
+        <a routerLink="/auth/register" class="hero__button hero__button--primary">{{ 'LANDING.HERO.PRIMARY_CTA' | translate }}</a>
+        <a routerLink="/auth/login" class="hero__button hero__button--secondary">{{ 'LANDING.HERO.SECONDARY_CTA' | translate }}</a>
+      </div>
+      <p class="hero__note">{{ 'LANDING.HERO.NOTE' | translate }}</p>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <h2>{{ 'LANDING.HOW_IT_WORKS.TITLE' | translate }}</h2>
+    <div class="how-it-works__steps">
+      <div class="step">
+        <h3>{{ 'LANDING.HOW_IT_WORKS.STEP_ONE_TITLE' | translate }}</h3>
+        <p>{{ 'LANDING.HOW_IT_WORKS.STEP_ONE_BODY' | translate }}</p>
+      </div>
+      <div class="step">
+        <h3>{{ 'LANDING.HOW_IT_WORKS.STEP_TWO_TITLE' | translate }}</h3>
+        <p>{{ 'LANDING.HOW_IT_WORKS.STEP_TWO_BODY' | translate }}</p>
+      </div>
+      <div class="step">
+        <h3>{{ 'LANDING.HOW_IT_WORKS.STEP_THREE_TITLE' | translate }}</h3>
+        <p>{{ 'LANDING.HOW_IT_WORKS.STEP_THREE_BODY' | translate }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats" aria-live="polite">
+    <h2>{{ 'LANDING.STATS.TITLE' | translate }}</h2>
+
+    @if (loading()) {
+      <div class="stats__message">{{ 'LANDING.STATS.LOADING' | translate }}</div>
+    }
+    @else if (errorMessage()) {
+      <div class="stats__message stats__message--error">{{ errorMessage() | translate }}</div>
+    }
+    @else if (hasStats()) {
+      <div class="stats__grid">
+        <div class="stat-card">
+          <span class="stat-card__label">{{ 'LANDING.STATS.LABELS.USERS' | translate }}</span>
+          <span class="stat-card__value">{{ formatCount(stats()?.users) }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">{{ 'LANDING.STATS.LABELS.RIGHTS_HOLDERS' | translate }}</span>
+          <span class="stat-card__value">{{ formatCount(stats()?.rightsHolders) }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">{{ 'LANDING.STATS.LABELS.WORKS' | translate }}</span>
+          <span class="stat-card__value">{{ formatCount(stats()?.works) }}</span>
+        </div>
+      </div>
+    }
+  </section>
+</div>

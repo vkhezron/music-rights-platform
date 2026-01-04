@@ -15,6 +15,34 @@
     "MANAGE_WORKSPACES": "Gestionar espacios de trabajo",
     "ADD_FIRST_WORKSPACE": "Crea tu primer espacio de trabajo"
   },
+  "LANDING": {
+    "HERO": {
+      "TITLE": "Aporta claridad a tus derechos musicales",
+      "DESCRIPTION": "Mantén cada composición, split y titular de derechos organizado en un solo espacio de trabajo. Invita a colaboradores, documenta acuerdos y exporta protocolos listos para firmar en minutos.",
+      "PRIMARY_CTA": "Crear una cuenta",
+      "SECONDARY_CTA": "Iniciar sesión",
+      "NOTE": "Muchas otras herramientas de gestión, licencias y colaboración están en desarrollo y llegarán muy pronto."
+    },
+    "HOW_IT_WORKS": {
+      "TITLE": "Agregar tu catálogo es muy sencillo",
+      "STEP_ONE_TITLE": "1. Regístrate y crea tu espacio de trabajo",
+      "STEP_ONE_BODY": "Regístrate, crea un espacio de trabajo y ajústalo a tu catálogo o a la estructura de tu organización.",
+      "STEP_TWO_TITLE": "2. Añade obras y titulares de derechos",
+      "STEP_TWO_BODY": "Carga nuevas obras, captura los metadatos clave y conecta a autores o intérpretes con repartos de propiedad precisos.",
+      "STEP_THREE_TITLE": "3. Comparte y mantente alineado",
+      "STEP_THREE_BODY": "Usa códigos QR o invitaciones para sumar colaboradores, acordar los splits y exportar PDF listos para protocolo cuando lo necesites."
+    },
+    "STATS": {
+      "TITLE": "Con la confianza de una comunidad en crecimiento",
+      "LOADING": "Cargando totales en vivo…",
+      "ERROR": "No pudimos cargar los números más recientes. Vuelve a intentarlo pronto.",
+      "LABELS": {
+        "USERS": "Usuarios registrados",
+        "RIGHTS_HOLDERS": "Titulares de derechos registrados",
+        "WORKS": "Obras gestionadas"
+      }
+    }
+  },
   "BUTTONS": {
     "SAVE": "Guardar",
     "CANCEL": "Cancelar",

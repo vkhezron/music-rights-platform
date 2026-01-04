@@ -125,6 +125,7 @@ export class WorkFormComponent implements OnInit {
   initializeForm() {
     this.workForm = this.fb.group({
       work_title: ['', [Validators.required, Validators.minLength(1)]],
+      release_title: [''],
       alternative_titles: this.fb.array([]),
       isrc: ['', [Validators.pattern(/^[A-Z]{2}[A-Z0-9]{3}[0-9]{7}$/)]],
       iswc: ['', [Validators.pattern(/^T-\d{3}\.\d{3}\.\d{3}-\d$/)]],
@@ -192,6 +193,7 @@ export class WorkFormComponent implements OnInit {
       // Populate form
       this.workForm.patchValue({
         work_title: work.work_title,
+        release_title: work.release_title || '',
         isrc: work.isrc,
         iswc: work.iswc,
         duration_seconds: work.duration_seconds,
@@ -455,6 +457,7 @@ export class WorkFormComponent implements OnInit {
 
     return {
       work_title: formValue.work_title,
+      release_title: formValue.release_title || undefined,
       alternative_titles: this.alternativeTitles.value.filter((t: string) => t.trim()),
       isrc: formValue.isrc || undefined,
       iswc: formValue.iswc || undefined,

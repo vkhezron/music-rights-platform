@@ -29,6 +29,7 @@
         {{ 'WORKS.BASIC_INFO' | translate }}
       </h2>
 
+
       <!-- Work Title -->
       <div class="form-group">
         <label for="work_title" class="required">
@@ -47,6 +48,20 @@
             {{ 'WORKS.TITLE_REQUIRED' | translate }}
           </div>
         }
+      </div>
+
+      <!-- Release Title -->
+      <div class="form-group">
+        <label for="release_title">
+          {{ 'WORKS.RELEASE_TITLE' | translate }}
+        </label>
+        <input
+          id="release_title"
+          type="text"
+          formControlName="release_title"
+          class="form-input"
+          placeholder="Enter the release title (if different)"
+        />
       </div>
 
       <!-- Alternative Titles -->

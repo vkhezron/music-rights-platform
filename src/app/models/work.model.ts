@@ -8,6 +8,7 @@ export interface Work {
   id: string;
   workspace_id: string;
   work_title: string;
+  release_title?: string;
   alternative_titles?: string[];
   catalog_number?: string;
   ean?: string;
@@ -45,6 +46,7 @@ export interface Work {
 
 export interface WorkFormData {
   work_title: string;
+  release_title?: string;
   alternative_titles?: string[];
   isrc?: string;
   iswc?: string;

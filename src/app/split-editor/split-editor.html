@@ -257,4 +257,28 @@
       </div>
     </div>
   }
-</div>
+  <div class="header-actions">
+      <button
+        type="button"
+        class="secondary-btn"
+        (click)="downloadPdf()"
+        [disabled]="isSaving() || isLoading()"
+      >
+        {{ 'COMMON.DOWNLOAD' | translate }}
+      </button>
+      <button
+        type="button"
+        class="primary-btn"
+        (click)="saveSplits()"
+        [disabled]="saveDisabled()"
+        [attr.title]="saveBlockedReason() || null"
+      >
+        @if (!isSaving()) {
+          {{ 'COMMON.SAVE' | translate }}
+        } @else {
+          {{ 'COMMON.SAVING' | translate }}...
+        }
+      </button>
+    </div>
+  </div>
+

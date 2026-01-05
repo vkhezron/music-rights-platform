@@ -145,9 +145,9 @@
         <a routerLink="/auth/login" class="landing-header__link">
           {{ 'AUTH.LOG_IN' | translate }}
         </a>
-        <a routerLink="/auth/register" class="landing-header__cta">
+        <span class="landing-header__cta landing-header__cta--disabled" aria-hidden="true">
           {{ 'AUTH.SIGN_UP' | translate }}
-        </a>
+        </span>
         <ng-container *ngTemplateOutlet="languageSwitcher; context: { mode: 'header' }"></ng-container>
       </div>
     </header>

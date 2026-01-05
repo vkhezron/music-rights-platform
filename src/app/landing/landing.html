@@ -1,58 +1,301 @@
 <div class="landing">
-  <section class="hero">
-    <div class="hero__content">
-      <h1>{{ 'LANDING.HERO.TITLE' | translate }}</h1>
-      <p>{{ 'LANDING.HERO.DESCRIPTION' | translate }}</p>
-      <div class="hero__actions">
-        <a routerLink="/auth/register" class="hero__button hero__button--primary">{{ 'LANDING.HERO.PRIMARY_CTA' | translate }}</a>
-        <a routerLink="/auth/login" class="hero__button hero__button--secondary">{{ 'LANDING.HERO.SECONDARY_CTA' | translate }}</a>
+  <header class="topbar">
+    <div class="topbar__actions">
+      <div class="invite-toggle">
+        <button
+          type="button"
+          class="link"
+          (click)="toggleInviteCode()"
+          [attr.aria-expanded]="inviteCodeVisible()"
+          [attr.aria-controls]="inviteCodeVisible() ? 'topbar-invite-panel' : null"
+        >
+          {{ 'LANDING.INVITE.TOGGLE' | translate }}
+        </button>
       </div>
-      <p class="hero__note">{{ 'LANDING.HERO.NOTE' | translate }}</p>
+    </div>
+  </header>
+
+  @if (inviteCodeVisible()) {
+    <div class="invite-panel-wrapper" id="topbar-invite-panel">
+      <div class="invite-panel">
+        <div class="invite-inline-hint">
+          <p>{{ 'LANDING.INVITE.LABEL' | translate }}</p>
+          <p>{{ 'LANDING.INVITE.PLACEHOLDER' | translate }}</p>
+          <p>{{ 'LANDING.INVITE.CONTINUE' | translate }}</p>
+          <p>{{ 'LANDING.INVITE.HELP' | translate }}</p>
+        </div>
+        <label class="label" for="topbar-invite-code">{{ 'LANDING.INVITE.LABEL' | translate }}</label>
+        <div class="invite-panel__controls">
+          <input
+            #inviteCodeInput
+            id="topbar-invite-code"
+            type="text"
+            [formControl]="inviteCodeControl"
+            placeholder="{{ 'LANDING.INVITE.PLACEHOLDER' | translate }}"
+            autocomplete="off"
+          />
+          <button type="button" class="secondary" (click)="goToRegisterWithCode()">
+            {{ 'LANDING.INVITE.CONTINUE' | translate }}
+          </button>
+        </div>
+        <p class="helper">{{ 'LANDING.INVITE.HELP' | translate }}</p>
+      </div>
+    </div>
+  }
+
+  <section class="hero">
+    <div class="hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow">{{ 'LANDING.HERO.TAGLINE' | translate }}</p>
+        <h1>{{ 'LANDING.HERO.TITLE' | translate }}</h1>
+        <p class="lead">{{ 'LANDING.HERO.DESCRIPTION' | translate }}</p>
+
+        @if (!statsLoading() && stats()) {
+          <div class="hero__highlight" aria-live="polite">
+            <span class="hero__highlight-value">{{ formatCount(stats()?.waitlistCount) }}</span>
+            <div class="hero__highlight-meta">
+              <span class="hero__highlight-label">{{ 'LANDING.STATS.HIGHLIGHT_LABEL' | translate }}</span>
+              <p>{{ 'LANDING.STATS.HIGHLIGHT_CAPTION' | translate:{ count: formatCount(stats()?.waitlistCount) } }}</p>
+            </div>
+          </div>
+        }
+        @else {
+          @if (statsLoading()) {
+            <div class="hero__highlight hero__highlight--placeholder" aria-live="polite">
+              <span class="hero__highlight-value">···</span>
+              <div class="hero__highlight-meta">
+                <span class="hero__highlight-label">{{ 'LANDING.STATS.HIGHLIGHT_LABEL' | translate }}</span>
+                <p>{{ 'LANDING.STATS.LOADING' | translate }}</p>
+              </div>
+            </div>
+          }
+          @else {
+            @if (statsErrorKey()) {
+              <div class="hero__highlight hero__highlight--error" aria-live="polite">
+                <span class="hero__highlight-value">!</span>
+                <div class="hero__highlight-meta">
+                  <span class="hero__highlight-label">{{ 'LANDING.STATS.HIGHLIGHT_LABEL' | translate }}</span>
+                  <p>{{ statsErrorKey() | translate }}</p>
+                </div>
+              </div>
+            }
+          }
+        }
+
+        <ul class="hero__benefits">
+          <li>{{ 'LANDING.HERO.BENEFITS.ONE' | translate }}</li>
+          <li>{{ 'LANDING.HERO.BENEFITS.TWO' | translate }}</li>
+          <li>{{ 'LANDING.HERO.BENEFITS.THREE' | translate }}</li>
+        </ul>
+
+      </div>
+
+      <form class="waitlist-card" [formGroup]="waitlistForm" (ngSubmit)="submitWaitlist()" novalidate>
+        <div class="waitlist-card__header">
+          <h2>{{ 'LANDING.FORM.TITLE' | translate }}</h2>
+          <p class="muted">{{ 'LANDING.FORM.SUBTITLE' | translate }}</p>
+        </div>
+
+        <div class="field-group" [class.field-group--error]="controlInvalid('contactMethod', 'required')">
+          <span class="label">{{ 'LANDING.FORM.CONTACT_LABEL' | translate }}</span>
+          <div class="chips">
+            @for (option of contactOptions; track option.value) {
+              <label class="chip">
+                <input type="radio" formControlName="contactMethod" [value]="option.value" />
+                <span>{{ option.label | translate }}</span>
+              </label>
+            }
+          </div>
+          <div class="messages" aria-live="polite">
+            @if (controlInvalid('contactMethod', 'required')) {
+              <span>{{ 'LANDING.FORM.ERRORS.CONTACT_REQUIRED' | translate }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="field-group" [class.field-group--error]="controlInvalid('contactHandle', 'required') || controlInvalid('contactHandle', 'minlength')">
+          <label class="label" for="waitlist-handle">{{ 'LANDING.FORM.CONTACT_HANDLE_LABEL' | translate }}</label>
+          <input
+            id="waitlist-handle"
+            type="text"
+            formControlName="contactHandle"
+            autocapitalize="none"
+            autocomplete="off"
+            placeholder="{{ 'LANDING.FORM.CONTACT_HANDLE_PLACEHOLDER' | translate }}"
+          />
+          <div class="messages" aria-live="polite">
+            @if (controlInvalid('contactHandle', 'required')) {
+              <span>{{ 'LANDING.FORM.ERRORS.CONTACT_HANDLE_REQUIRED' | translate }}</span>
+            }
+            @else {
+              @if (controlInvalid('contactHandle', 'minlength')) {
+                <span>{{ 'LANDING.FORM.ERRORS.CONTACT_HANDLE_SHORT' | translate }}</span>
+              }
+            }
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field-group" [class.field-group--error]="controlInvalid('country', 'required')">
+            <label class="label" for="waitlist-country">{{ 'LANDING.FORM.COUNTRY_LABEL' | translate }}</label>
+            <input
+              id="waitlist-country"
+              type="text"
+              formControlName="country"
+              autocomplete="country"
+              placeholder="{{ 'LANDING.FORM.COUNTRY_PLACEHOLDER' | translate }}"
+            />
+            <div class="messages" aria-live="polite">
+              @if (controlInvalid('country', 'required')) {
+                <span>{{ 'LANDING.FORM.ERRORS.COUNTRY_REQUIRED' | translate }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label" for="waitlist-city">{{ 'LANDING.FORM.CITY_LABEL' | translate }}</label>
+            <input
+              id="waitlist-city"
+              type="text"
+              formControlName="city"
+              autocomplete="address-level2"
+              placeholder="{{ 'LANDING.FORM.CITY_PLACEHOLDER' | translate }}"
+            />
+          </div>
+        </div>
+
+        <div class="field-group" [class.field-group--error]="controlInvalid('role', 'required')">
+          <label class="label" for="waitlist-role">{{ 'LANDING.FORM.ROLE_LABEL' | translate }}</label>
+          <div class="select-corporate">
+            <select id="waitlist-role" formControlName="role" class="select-corporate__control">
+              <option value="" disabled>{{ 'LANDING.FORM.ROLE_PLACEHOLDER' | translate }}</option>
+              @for (group of roleGroups; track group.id) {
+                <optgroup [attr.label]="group.labelKey | translate">
+                  @for (role of group.roles; track role) {
+                    <option [value]="role">{{ ('role.' + role) | translate }}</option>
+                  }
+                </optgroup>
+              }
+              <option [value]="roleOther">{{ 'LANDING.FORM.ROLES.OTHER' | translate }}</option>
+            </select>
+            <span class="select-corporate__icon" aria-hidden="true"></span>
+          </div>
+          <div class="messages" aria-live="polite">
+            @if (controlInvalid('role', 'required')) {
+              <span>{{ 'LANDING.FORM.ERRORS.ROLE_REQUIRED' | translate }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="field-group" [class.field-group--error]="controlInvalid('roleDescription', 'required') || controlInvalid('roleDescription', 'minlength')">
+          <label class="label" for="waitlist-description">{{ 'LANDING.FORM.ROLE_DESCRIPTION_LABEL' | translate }}</label>
+          <textarea
+            id="waitlist-description"
+            formControlName="roleDescription"
+            rows="3"
+            placeholder="{{ 'LANDING.FORM.ROLE_DESCRIPTION_PLACEHOLDER' | translate }}"
+          ></textarea>
+          <div class="messages" aria-live="polite">
+            @if (controlInvalid('roleDescription', 'required')) {
+              <span>{{ 'LANDING.FORM.ERRORS.ROLE_DESCRIPTION_REQUIRED' | translate }}</span>
+            }
+            @else {
+              @if (controlInvalid('roleDescription', 'minlength')) {
+                <span>{{ 'LANDING.FORM.ERRORS.ROLE_DESCRIPTION_SHORT' | translate }}</span>
+              }
+            }
+          </div>
+        </div>
+
+        <button type="submit" class="primary" [disabled]="submitting()">
+          @if (submitting()) {
+            <span>{{ 'LANDING.FORM.SUBMITTING' | translate }}</span>
+          }
+          @else {
+            <span>{{ 'LANDING.FORM.SUBMIT' | translate }}</span>
+          }
+        </button>
+
+        <div class="form-feedback" aria-live="polite">
+          @if (submitSuccessKey()) {
+            <p class="form-feedback__success">{{ submitSuccessKey() | translate }}</p>
+          }
+          @if (submitErrorKey()) {
+            <p class="form-feedback__error">{{ submitErrorKey() | translate }}</p>
+          }
+        </div>
+      </form>
     </div>
   </section>
 
-  <section class="how-it-works">
-    <h2>{{ 'LANDING.HOW_IT_WORKS.TITLE' | translate }}</h2>
-    <div class="how-it-works__steps">
-      <div class="step">
+  <section class="journey">
+    <div class="journey__intro">
+      <p class="journey__eyebrow">{{ 'LANDING.HOW_IT_WORKS.TITLE' | translate }}</p>
+      <h2>{{ 'LANDING.JOURNEY.HEADING' | translate }}</h2>
+      <p>{{ 'LANDING.JOURNEY.SUBTITLE' | translate }}</p>
+    </div>
+
+    <div class="journey__grid">
+      <article class="journey__card">
+        <span class="journey__badge">1</span>
         <h3>{{ 'LANDING.HOW_IT_WORKS.STEP_ONE_TITLE' | translate }}</h3>
         <p>{{ 'LANDING.HOW_IT_WORKS.STEP_ONE_BODY' | translate }}</p>
-      </div>
-      <div class="step">
+      </article>
+      <article class="journey__card">
+        <span class="journey__badge">2</span>
         <h3>{{ 'LANDING.HOW_IT_WORKS.STEP_TWO_TITLE' | translate }}</h3>
         <p>{{ 'LANDING.HOW_IT_WORKS.STEP_TWO_BODY' | translate }}</p>
-      </div>
-      <div class="step">
+      </article>
+      <article class="journey__card">
+        <span class="journey__badge">3</span>
         <h3>{{ 'LANDING.HOW_IT_WORKS.STEP_THREE_TITLE' | translate }}</h3>
         <p>{{ 'LANDING.HOW_IT_WORKS.STEP_THREE_BODY' | translate }}</p>
-      </div>
+      </article>
     </div>
   </section>
 
   <section class="stats" aria-live="polite">
-    <h2>{{ 'LANDING.STATS.TITLE' | translate }}</h2>
-
-    @if (loading()) {
-      <div class="stats__message">{{ 'LANDING.STATS.LOADING' | translate }}</div>
-    }
-    @else if (errorMessage()) {
-      <div class="stats__message stats__message--error">{{ errorMessage() | translate }}</div>
-    }
-    @else if (hasStats()) {
-      <div class="stats__grid">
-        <div class="stat-card">
-          <span class="stat-card__label">{{ 'LANDING.STATS.LABELS.USERS' | translate }}</span>
-          <span class="stat-card__value">{{ formatCount(stats()?.users) }}</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-card__label">{{ 'LANDING.STATS.LABELS.RIGHTS_HOLDERS' | translate }}</span>
-          <span class="stat-card__value">{{ formatCount(stats()?.rightsHolders) }}</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-card__label">{{ 'LANDING.STATS.LABELS.WORKS' | translate }}</span>
-          <span class="stat-card__value">{{ formatCount(stats()?.works) }}</span>
-        </div>
+    <div class="stats__surface">
+      <div class="stats__heading">
+        <p class="stats__eyebrow">{{ 'LANDING.STATS.EYEBROW' | translate }}</p>
+        <h2>{{ 'LANDING.STATS.TITLE' | translate }}</h2>
+        <p class="stats__description">{{ 'LANDING.STATS.DESCRIPTION' | translate }}</p>
       </div>
-    }
+
+      @if (statsLoading()) {
+        <div class="stats__message">{{ 'LANDING.STATS.LOADING' | translate }}</div>
+      }
+      @else {
+        @if (statsErrorKey()) {
+          <div class="stats__message stats__message--error">{{ statsErrorKey() | translate }}</div>
+        }
+        @else {
+          @if (hasStats()) {
+            <div class="stats__grid">
+              <div class="stat-card">
+                <span class="stat-card__label">{{ 'LANDING.STATS.LABELS.WAITLIST' | translate }}</span>
+                <span class="stat-card__value">{{ formatCount(stats()?.waitlistCount) }}</span>
+                <span class="stat-card__caption">{{ 'LANDING.STATS.CAPTIONS.WAITLIST' | translate }}</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-card__label">{{ 'LANDING.STATS.LABELS.USERS' | translate }}</span>
+                <span class="stat-card__value">{{ formatCount(stats()?.userCount) }}</span>
+                <span class="stat-card__caption">{{ 'LANDING.STATS.CAPTIONS.USERS' | translate }}</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-card__label">{{ 'LANDING.STATS.LABELS.RIGHTS_HOLDERS' | translate }}</span>
+                <span class="stat-card__value">{{ formatCount(stats()?.rightsHolderCount) }}</span>
+                <span class="stat-card__caption">{{ 'LANDING.STATS.CAPTIONS.RIGHTS_HOLDERS' | translate }}</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-card__label">{{ 'LANDING.STATS.LABELS.WORKS' | translate }}</span>
+                <span class="stat-card__value">{{ formatCount(stats()?.workCount) }}</span>
+                <span class="stat-card__caption">{{ 'LANDING.STATS.CAPTIONS.WORKS' | translate }}</span>
+              </div>
+            </div>
+          }
+        }
+      }
+    </div>
   </section>
 </div>

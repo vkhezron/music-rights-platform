@@ -18,30 +18,146 @@
   },
   "LANDING": {
     "HERO": {
-      "TITLE": "Schaffe Klarheit in deinen Musikrechten",
-      "DESCRIPTION": "Bewahre jede Komposition, jeden Split und jeden Rechteinhaber in einem gemeinsamen Arbeitsbereich auf. Lade Mitwirkende ein, dokumentiere Vereinbarungen und exportiere in wenigen Minuten unterschriftsreife Protokolle.",
-      "PRIMARY_CTA": "Konto erstellen",
-      "SECONDARY_CTA": "Anmelden",
-      "NOTE": "Viele weitere Tools für Clearing, Lizenzen und Zusammenarbeit sind bereits in Entwicklung und erscheinen in Kürze."
+      "TAGLINE": "Invite-Only-Beta",
+      "TITLE": "Deinen Katalog zu erfassen ist unkompliziert",
+      "DESCRIPTION": "Sichere dir einen Platz auf der kuratierten Warteliste und verwalte anschließend Werke, Splits und Disclosure-Protokolle mit den Teams, denen du vertraust.",
+      "BENEFITS": {
+        "ONE": "Halte Splits, Werke und Disclosure-Nachweise in einem einzigen Workspace synchron.",
+        "TWO": "Hole vertraute Kollaborateur*innen in einen DSGVO-konformen Flow, der Transparenz leicht macht.",
+        "THREE": "Exportiere protokollfertige Pakete ohne Tabellenkalkulationen oder endlose E-Mail-Threads."
+      }
     },
-    "HOW_IT_WORKS": {
-      "TITLE": "Deinen Katalog hinzuzufügen ist ganz unkompliziert",
-      "STEP_ONE_TITLE": "1. Registrieren und Arbeitsbereich anlegen",
-      "STEP_ONE_BODY": "Melde dich an, erstelle einen Arbeitsbereich und passe ihn an deinen Katalog oder die Struktur deiner Organisation an.",
-      "STEP_TWO_TITLE": "2. Werke und Rechteinhaber hinzufügen",
-      "STEP_TWO_BODY": "Lege neue Werke an, erfasse die wichtigsten Metadaten und verknüpfe Autorinnen, Autoren oder Interpretinnen mit ihren genauen Beteiligungen.",
-      "STEP_THREE_TITLE": "3. Teilen und abgestimmt bleiben",
-      "STEP_THREE_BODY": "Nutze QR-Codes oder Einladungen, um Mitwirkende einzubinden, Splits abzustimmen und jederzeit protokollbereite PDFs zu exportieren."
+    "ALREADY_INVITED": {
+      "LABEL": "Du hast schon einen Einladungscode?",
+      "CTA": "Anmelden"
+    },
+    "INVITE": {
+      "TOGGLE": "Mit Einladungscode beitreten",
+      "LABEL": "Füge deinen Einladungscode ein",
+      "PLACEHOLDER": "z. B. RIGHT-123-456",
+      "CONTINUE": "Weiter zur Registrierung",
+      "HELP": "Wir bringen dich direkt zur Kontoerstellung und übernehmen deinen Code automatisch."
+    },
+    "FORM": {
+      "TITLE": "Zur Warteliste anmelden",
+      "SUBTITLE": "Erzähl uns, wie wir dich erreichen und wo du arbeitest, damit wir deinen Platz priorisieren können.",
+      "CONTACT_LABEL": "Wie sollen wir dich erreichen?",
+      "CONTACT_OPTIONS": {
+        "INSTAGRAM": "Instagram",
+        "TELEGRAM": "Telegram"
+      },
+      "CONTACT_HANDLE_LABEL": "Profil oder Handle",
+      "CONTACT_HANDLE_PLACEHOLDER": "@rightnote.music",
+      "COUNTRY_LABEL": "Land des Wohnsitzes",
+      "COUNTRY_PLACEHOLDER": "Spanien, Deutschland, Schweden …",
+      "CITY_LABEL": "Stadt (optional)",
+      "CITY_PLACEHOLDER": "Berlin, Hamburg, München …",
+      "ROLE_LABEL": "Rolle",
+      "ROLE_PLACEHOLDER": "Rolle auswählen",
+      "ROLE_DESCRIPTION_LABEL": "Beschreibe deine Arbeit",
+      "ROLE_DESCRIPTION_PLACEHOLDER": "Teile Releases, Kollaborationen oder Verantwortlichkeiten, damit wir dein Invite priorisieren können.",
+      "SUBMIT": "Zur Warteliste hinzufügen",
+      "SUBMITTING": "Anfrage wird gesendet…",
+      "ERRORS": {
+        "CONTACT_REQUIRED": "Wähle den Kanal, über den wir dich kontaktieren sollen.",
+        "CONTACT_HANDLE_REQUIRED": "Gib das Handle oder den Nutzernamen an, den wir anschreiben dürfen.",
+        "CONTACT_HANDLE_SHORT": "Handles benötigen mindestens drei Zeichen.",
+        "COUNTRY_REQUIRED": "Nenne uns dein Wohnsitzland.",
+        "ROLE_REQUIRED": "Teile uns mit, welche Rolle am besten passt.",
+        "ROLE_DESCRIPTION_REQUIRED": "Füge eine kurze Beschreibung hinzu, damit wir deinen Fokus verstehen.",
+        "ROLE_DESCRIPTION_SHORT": "Erzähle uns etwas mehr (mindestens 10 Zeichen)."
+      },
+      "ROLES": {
+        "ARTIST": "Artist",
+        "PRODUCER": "Producer",
+        "SONGWRITER": "Songwriter",
+        "MANAGER": "Manager",
+        "LABEL": "Label",
+        "PUBLISHER": "Verlag",
+        "LAWYER": "Anwalt / Anwältin",
+        "COLLECTIVE": "Collective-Vertretung",
+        "OTHER": "Andere"
+      }
+    },
+    "MESSAGES": {
+      "SUCCESS": "Vielen Dank für dein Interesse! Wir prüfen deine Anfrage und senden eine Einladung, sobald ein Platz frei wird.",
+      "DUPLICATE": "Du stehst bereits auf der Warteliste. Wir melden uns bald bei dir.",
+      "ERROR": "Deine Anfrage konnte nicht gesendet werden. Bitte versuche es in Kürze erneut."
     },
     "STATS": {
-      "TITLE": "Vertrauenswürdig für eine wachsende Community",
+      "EYEBROW": "Nachweisbare Traktion",
+      "TITLE": "Ein fokussiertes Netzwerk für klare Splits",
+      "DESCRIPTION": "Diese Live-Zahlen kombinieren die aktuelle Warteliste mit verifizierter Aktivität auf Rightnote.",
       "LOADING": "Live-Zahlen werden geladen…",
       "ERROR": "Die aktuellen Zahlen konnten nicht geladen werden. Bitte versuche es bald erneut.",
+      "HIGHLIGHT_LABEL": "Teams bereits in der Warteschlange",
+      "HIGHLIGHT_CAPTION": "{{ count }} unabhängige Teams warten gerade auf ihre Einladung.",
       "LABELS": {
-        "USERS": "Registrierte Nutzerinnen und Nutzer",
-        "RIGHTS_HOLDERS": "Erfasste Rechteinhaberinnen und Rechteinhaber",
-        "WORKS": "Verwaltete Werke"
+        "WAITLIST": "Wartelisten-Anfragen",
+        "USERS": "Registrierte Nutzer",
+        "RIGHTS_HOLDERS": "Erfasste Rechteinhaber",
+        "WORKS": "Werke bereit zum Start"
+      },
+      "CAPTIONS": {
+        "WAITLIST": "Artists und Teams, die einen Invite anfragen.",
+        "USERS": "Accounts, die bereits auf Rightnote zusammenarbeiten.",
+        "RIGHTS_HOLDERS": "Vertretene Personen mit bestätigten Anteilen.",
+        "WORKS": "Tracks und Kompositionen, die in Rightnote startklar sind."
       }
+    },
+    "PAIN_POINTS": {
+      "TITLE": "Entwickelt für ein reguliertes Umfeld",
+      "AI_DISCLOSURE": {
+        "TITLE": "Verpflichtende AI-Disclosure",
+        "BODY": "Protokolliere den AI-Einsatz pro Werk, damit deine Exportpakete EU-Transparenzpflichten ohne Zusatzaufwand erfüllen."
+      },
+      "PRIVACY": {
+        "TITLE": "Privacy-first Zusammenarbeit",
+        "BODY": "Verwalte Einladungen, Splits und Vereinbarungen ohne Postfächer offenzulegen oder unveröffentlichte Metadaten zu streuen."
+      },
+      "COMPLEXITY": {
+        "TITLE": "Weniger Admin, mehr Releases",
+        "BODY": "Intelligente Defaults und geführte Abläufe ersetzen Tabellen, E-Mail-Threads und doppeltes Erfassen."
+      }
+    },
+    "DIFFERENTIATORS": {
+      "TITLE": "Darum wechseln Teams zu Rightnote",
+      "INTRO": "Sieh, wie Rightnote im Vergleich zu klassischen Split-Sheet-Tools und generischen Projektmanagern abschneidet.",
+      "RIGHTNOTE": "Rightnote",
+      "OTHERS": "Legacy-Tools",
+      "FEATURES": {
+        "AI_LOGGING": "AI-Disclosure-Logging",
+        "AI_LOGGING_YES": "Integriert mit exportierbaren Nachweisen",
+        "AI_LOGGING_NO": "Manuelle Notizen ohne Audit-Trail",
+        "RIGHTS_AUDIT": "Rights-Holder-Audit",
+        "RIGHTS_AUDIT_YES": "Review mit einem Klick",
+        "RIGHTS_AUDIT_NO": "Verstreute Tabellen",
+        "EXPORT_PROTOCOLS": "Protokollfähige Exporte",
+        "EXPORT_PROTOCOLS_YES": "PFLICHTENHEFT-konforme Bundles",
+        "EXPORT_PROTOCOLS_NO": "Benötigt juristische Nacharbeiten",
+        "GDPR": "DSGVO-ready Warteliste",
+        "GDPR_YES": "Gezielte Invites, geschützte Daten",
+        "GDPR_NO": "Sammelt mehr als nötig"
+      }
+    },
+    "HOW_IT_WORKS": {
+      "TITLE": "Wie es funktioniert",
+      "STEP_ONE_TITLE": "Registriere dich und erstelle deinen Workspace",
+      "STEP_ONE_BODY": "Registriere dich, erstelle einen Workspace und passe ihn an deinen Katalog oder deine Organisation an.",
+      "STEP_TWO_TITLE": "Füge Werke und Rechteinhaber hinzu",
+      "STEP_TWO_BODY": "Lade neue Werke hoch, erfasse wichtige Metadaten und verbinde Autor*innen oder Performer*innen mit präzisen Anteilen.",
+      "STEP_THREE_TITLE": "Teilen und abgestimmt bleiben",
+      "STEP_THREE_BODY": "Nutze QR-Codes oder Einladungen, um Mitwirkende einzuladen, Splits abzustimmen und bei Bedarf protokollfertige PDFs zu exportieren."
+    },
+    "JOURNEY": {
+      "HEADING": "So läuft dein Invite-Weg ab",
+      "SUBTITLE": "Ein schneller Überblick, wie du von der Warteliste zur ersten gemeinsamen Release kommst."
+    },
+    "FOOTER": {
+      "TAGLINE": "Rightnote — Musikrechte bereit für den Release.",
+      "PRIVACY": "Datenschutz",
+      "TERMS": "Nutzungsbedingungen",
+      "LOGIN": "Admin-Login"
     }
   },
   "BUTTONS": {

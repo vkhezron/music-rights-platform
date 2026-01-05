@@ -18,30 +18,146 @@
   },
   "LANDING": {
     "HERO": {
-      "TITLE": "Build Clarity Into Your Music Rights",
-      "DESCRIPTION": "Keep every composition, split, and rights holder organised in a single workspace. Invite collaborators, document agreements, and export ready-to-sign protocols in minutes.",
-      "PRIMARY_CTA": "Create an account",
-      "SECONDARY_CTA": "Log in",
-      "NOTE": "Many additional clearance, licensing, and collaboration tools are in development and will arrive shortly."
-    },
-    "HOW_IT_WORKS": {
+      "TAGLINE": "Invite-only beta",
       "TITLE": "Adding your catalogue is straightforward",
-      "STEP_ONE_TITLE": "1. Register and create your workspace",
-      "STEP_ONE_BODY": "Sign up, create a workspace, and tailor it for your catalogue or organisation structure.",
-      "STEP_TWO_TITLE": "2. Add works and rights holders",
-      "STEP_TWO_BODY": "Upload new works, capture key metadata, and connect writers or performers with precise ownership splits.",
-      "STEP_THREE_TITLE": "3. Share and stay aligned",
-      "STEP_THREE_BODY": "Use QR codes or invites to bring collaborators in, agree on splits, and export protocol-ready PDFs whenever you need them."
+      "DESCRIPTION": "Join the curated waitlist, then track works, splits, and disclosures with the teams you trust.",
+      "BENEFITS": {
+        "ONE": "Keep splits, works, and disclosure evidence aligned in a single workspace.",
+        "TWO": "Bring collaborators into a GDPR-friendly flow that makes transparency effortless.",
+        "THREE": "Export protocol-ready packs without juggling spreadsheets or long email threads."
+      }
+    },
+    "ALREADY_INVITED": {
+      "LABEL": "Already holding an invite code?",
+      "CTA": "Log in"
+    },
+    "INVITE": {
+      "TOGGLE": "Join with invitation code",
+      "LABEL": "Paste your invitation code",
+      "PLACEHOLDER": "e.g. RIGHT-123-456",
+      "CONTINUE": "Continue to sign up",
+      "HELP": "We will take you to create an account and apply your code automatically."
+    },
+    "FORM": {
+      "TITLE": "Join the waitlist",
+      "SUBTITLE": "Tell us how to reach you and where you work so we can prioritise your slot.",
+      "CONTACT_LABEL": "How should we reach you?",
+      "CONTACT_OPTIONS": {
+        "INSTAGRAM": "Instagram",
+        "TELEGRAM": "Telegram"
+      },
+      "CONTACT_HANDLE_LABEL": "Profile or handle",
+      "CONTACT_HANDLE_PLACEHOLDER": "@rightnote.music",
+      "COUNTRY_LABEL": "Country of residence",
+      "COUNTRY_PLACEHOLDER": "Spain, Germany, Sweden…",
+      "CITY_LABEL": "City (optional)",
+      "CITY_PLACEHOLDER": "Barcelona, Berlin, Stockholm…",
+      "ROLE_LABEL": "Primary role",
+      "ROLE_PLACEHOLDER": "Select your role",
+      "ROLE_DESCRIPTION_LABEL": "Tell us about your work",
+      "ROLE_DESCRIPTION_PLACEHOLDER": "Share releases, collaborations, or responsibilities so we can prioritise your invite.",
+      "SUBMIT": "Join the waitlist",
+      "SUBMITTING": "Sending request…",
+      "ERRORS": {
+        "CONTACT_REQUIRED": "Choose the channel you prefer for follow-up.",
+        "CONTACT_HANDLE_REQUIRED": "Share the handle or username we should message.",
+        "CONTACT_HANDLE_SHORT": "Handles need at least three characters.",
+        "COUNTRY_REQUIRED": "Tell us your country of residence.",
+        "ROLE_REQUIRED": "Let us know the role that best fits you.",
+        "ROLE_DESCRIPTION_REQUIRED": "Add a short description so we understand your focus.",
+        "ROLE_DESCRIPTION_SHORT": "Tell us a little more (minimum 10 characters)."
+      },
+      "ROLES": {
+        "ARTIST": "Artist",
+        "PRODUCER": "Producer",
+        "SONGWRITER": "Songwriter",
+        "MANAGER": "Manager",
+        "LABEL": "Label",
+        "PUBLISHER": "Publisher",
+        "LAWYER": "Lawyer",
+        "COLLECTIVE": "Collective representative",
+        "OTHER": "Other"
+      }
+    },
+    "MESSAGES": {
+      "SUCCESS": "Thanks for your interest! We will review your request and contact you when a slot opens.",
+      "DUPLICATE": "Looks like you already joined the waitlist. We will be in touch soon.",
+      "ERROR": "We could not submit your request. Please try again in a moment."
     },
     "STATS": {
-      "TITLE": "Trusted by a growing community",
+      "EYEBROW": "Proof of traction",
+      "TITLE": "A focused network ready for clear splits",
+      "DESCRIPTION": "These live totals combine the current waitlist with verified activity on Rightnote.",
       "LOADING": "Loading live totals…",
       "ERROR": "We could not load the latest numbers. Check back soon.",
+      "HIGHLIGHT_LABEL": "Teams already queued for beta",
+      "HIGHLIGHT_CAPTION": "{{ count }} independent teams are waiting for their invite right now.",
       "LABELS": {
+        "WAITLIST": "Waitlist requests",
         "USERS": "Registered users",
         "RIGHTS_HOLDERS": "Rights holders captured",
-        "WORKS": "Works tracked"
+        "WORKS": "Works ready to go"
+      },
+      "CAPTIONS": {
+        "WAITLIST": "Artists and teams requesting an invite.",
+        "USERS": "Accounts who already collaborate on Rightnote.",
+        "RIGHTS_HOLDERS": "People represented with accurate shares.",
+        "WORKS": "Tracks and compositions ready to release from Rightnote."
       }
+    },
+    "PAIN_POINTS": {
+      "TITLE": "Built to ship in a regulated landscape",
+      "AI_DISCLOSURE": {
+        "TITLE": "Mandatory AI disclosure",
+        "BODY": "Log AI involvement on every work so your export pack answers EU transparency obligations without manual data entry."
+      },
+      "PRIVACY": {
+        "TITLE": "Privacy-first collaboration",
+        "BODY": "Handle invites, splits, and agreements without exposing inboxes or leaking unreleased metadata."
+      },
+      "COMPLEXITY": {
+        "TITLE": "Less admin, more releases",
+        "BODY": "Smarter defaults and guided flows replace spreadsheets, email threads, and re-keying the same data for each system."
+      }
+    },
+    "DIFFERENTIATORS": {
+      "TITLE": "Why teams switch to Rightnote",
+      "INTRO": "Track how Rightnote stacks up against typical split sheet tools and generic project managers.",
+      "RIGHTNOTE": "Rightnote",
+      "OTHERS": "Legacy tools",
+      "FEATURES": {
+        "AI_LOGGING": "AI disclosure logging",
+        "AI_LOGGING_YES": "Built in with exportable evidence",
+        "AI_LOGGING_NO": "Manual notes, no audit trail",
+        "RIGHTS_AUDIT": "Rights holder audit",
+        "RIGHTS_AUDIT_YES": "One-click review across sessions",
+        "RIGHTS_AUDIT_NO": "Scattered spreadsheets",
+        "EXPORT_PROTOCOLS": "Protocol-grade exports",
+        "EXPORT_PROTOCOLS_YES": "Generate PFLICHTENHEFT compliant packs",
+        "EXPORT_PROTOCOLS_NO": "Requires legal rewrites",
+        "GDPR": "GDPR-ready waitlist",
+        "GDPR_YES": "Scoped invites, private data",
+        "GDPR_NO": "Collects more than needed"
+      }
+    },
+    "HOW_IT_WORKS": {
+      "TITLE": "How it works",
+      "STEP_ONE_TITLE": "Register and create your workspace",
+      "STEP_ONE_BODY": "Sign up, create a workspace, and tailor it for your catalogue or organisation structure.",
+      "STEP_TWO_TITLE": "Add works and rights holders",
+      "STEP_TWO_BODY": "Upload new works, capture key metadata, and connect writers or performers with precise ownership splits.",
+      "STEP_THREE_TITLE": "Share and stay aligned",
+      "STEP_THREE_BODY": "Use QR codes or invites to bring collaborators in, agree on splits, and export protocol-ready PDFs when you need them."
+    },
+    "JOURNEY": {
+      "HEADING": "What the invite journey looks like",
+      "SUBTITLE": "A quick overview of how you go from the waitlist to collaborating on your first release."
+    },
+    "FOOTER": {
+      "TAGLINE": "Rightnote — music rights, ready for release.",
+      "PRIVACY": "Privacy policy",
+      "TERMS": "Terms of service",
+      "LOGIN": "Admin login"
     }
   },
   "ADMIN": {

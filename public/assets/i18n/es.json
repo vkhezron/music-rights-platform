@@ -16,34 +16,6 @@
     "MANAGE_WORKSPACES": "Gestionar espacios de trabajo",
     "ADD_FIRST_WORKSPACE": "Crea tu primer espacio de trabajo"
   },
-  "LANDING": {
-    "HERO": {
-      "TITLE": "Aporta claridad a tus derechos musicales",
-      "DESCRIPTION": "Mantén cada composición, split y titular de derechos organizado en un solo espacio de trabajo. Invita a colaboradores, documenta acuerdos y exporta protocolos listos para firmar en minutos.",
-      "PRIMARY_CTA": "Crear una cuenta",
-      "SECONDARY_CTA": "Iniciar sesión",
-      "NOTE": "Muchas otras herramientas de gestión, licencias y colaboración están en desarrollo y llegarán muy pronto."
-    },
-    "HOW_IT_WORKS": {
-      "TITLE": "Agregar tu catálogo es muy sencillo",
-      "STEP_ONE_TITLE": "1. Regístrate y crea tu espacio de trabajo",
-      "STEP_ONE_BODY": "Regístrate, crea un espacio de trabajo y ajústalo a tu catálogo o a la estructura de tu organización.",
-      "STEP_TWO_TITLE": "2. Añade obras y titulares de derechos",
-      "STEP_TWO_BODY": "Carga nuevas obras, captura los metadatos clave y conecta a autores o intérpretes con repartos de propiedad precisos.",
-      "STEP_THREE_TITLE": "3. Comparte y mantente alineado",
-      "STEP_THREE_BODY": "Usa códigos QR o invitaciones para sumar colaboradores, acordar los splits y exportar PDF listos para protocolo cuando lo necesites."
-    },
-    "STATS": {
-      "TITLE": "Con la confianza de una comunidad en crecimiento",
-      "LOADING": "Cargando totales en vivo…",
-      "ERROR": "No pudimos cargar los números más recientes. Vuelve a intentarlo pronto.",
-      "LABELS": {
-        "USERS": "Usuarios registrados",
-        "RIGHTS_HOLDERS": "Titulares de derechos registrados",
-        "WORKS": "Obras gestionadas"
-      }
-    }
-  },
   "BUTTONS": {
     "SAVE": "Guardar",
     "CANCEL": "Cancelar",
@@ -288,34 +260,150 @@
     "ERROR_PROFILE_MISSING": "El perfil aún no está disponible. Completa tu perfil para habilitar la colaboración.",
     "ERROR_GENERIC": "No se pudo cargar tu perfil en este momento."
   },
-  "WORKSPACE": {
-    "CREATE_TITLE": "Crear espacio de trabajo",
-    "CREATE_SUBTITLE": "Configura tu espacio de trabajo para gestionar derechos y colaborar",
-    "NAME": "Nombre del espacio de trabajo",
-    "NAME_REQUIRED": "El nombre del espacio de trabajo es obligatorio",
-    "NAME_MIN_LENGTH": "El nombre debe tener al menos 2 caracteres",
-    "TYPE": "Tipo de espacio de trabajo",
-    "DESCRIPTION": "Descripción",
-    "CREATE_WORKSPACE": "Crear espacio de trabajo",
-    "CREATION_ERROR": "No se pudo crear el espacio de trabajo. Por favor, inténtalo de nuevo.",
-    "YOUR_WORKSPACES": "Tus espacios de trabajo",
-    "NO_WORKSPACES": "Aún no tienes espacios de trabajo",
-    "CREATE_FIRST": "Crea tu primer espacio de trabajo",
-    "MANAGE_WORKSPACES": "Gestionar proyectos",
-    "PROJECT": "Proyecto",
-    "CREATE_PROJECT": "Crear proyecto",
-    "YOUR_PROJECTS": "Tus proyectos",
-    "NEW_PROJECT": "Nuevo proyecto",
-    "CURRENT": "Actual",
-    "NO_PROJECTS_YET": "Aún no tienes proyectos. Comienza creando tu primer proyecto musical.",
-    "CREATE_FIRST_PROJECT": "Crea tu primer proyecto",
-    "CREATE_NEW_PROJECT": "Crear nuevo proyecto",
-    "PROJECT_NAME": "Nombre del proyecto",
-    "PROJECT_TYPE": "Tipo de proyecto",
-    "SELECT_TYPE": "Selecciona el tipo de proyecto...",
-    "NAME_PLACEHOLDER": "ej. Vibras de Verano 2025, Álbum Debut, Mi Último Sencillo",
-    "TYPE_REQUIRED": "El tipo de proyecto es obligatorio",
-    "DESCRIPTION_PLACEHOLDER": "Añade notas sobre este proyecto (fecha de lanzamiento, colaboradores, etc.)",
+  "LANDING": {
+    "HERO": {
+      "TAGLINE": "Beta solo por invitación",
+      "TITLE": "Añadir tu catálogo es sencillo",
+      "DESCRIPTION": "Únete a la lista de espera curada y luego gestiona obras, splits y divulgaciones con los equipos en los que confías.",
+      "BENEFITS": {
+        "ONE": "Mantén splits, obras y evidencia de divulgaciones alineadas en un único espacio de trabajo.",
+        "TWO": "Invita a tus colaboradores de confianza con un flujo compatible con RGPD que hace la transparencia sencilla.",
+        "THREE": "Exporta paquetes listos para protocolo sin hojas de cálculo ni hilos de correo interminables."
+      }
+    },
+    "ALREADY_INVITED": {
+      "LABEL": "¿Ya tienes un código de invitación?",
+      "CTA": "Inicia sesión"
+    },
+    "INVITE": {
+      "TOGGLE": "Unirme con código de invitación",
+      "LABEL": "Pega tu código de invitación",
+      "PLACEHOLDER": "p. ej. RIGHT-123-456",
+      "CONTINUE": "Continuar al registro",
+      "HELP": "Te llevaremos a crear la cuenta y aplicaremos tu código automáticamente."
+    },
+    "FORM": {
+      "TITLE": "Únete a la lista de espera",
+      "SUBTITLE": "Cuéntanos cómo contactarte y dónde trabajas para priorizar tu cupo.",
+      "CONTACT_LABEL": "¿Cómo prefieres que te contactemos?",
+      "CONTACT_OPTIONS": {
+        "INSTAGRAM": "Instagram",
+        "TELEGRAM": "Telegram"
+      },
+      "CONTACT_HANDLE_LABEL": "Perfil o usuario",
+      "CONTACT_HANDLE_PLACEHOLDER": "@rightnote.music",
+      "COUNTRY_LABEL": "País de residencia",
+      "COUNTRY_PLACEHOLDER": "España, Alemania, Suecia…",
+      "CITY_LABEL": "Ciudad (opcional)",
+      "CITY_PLACEHOLDER": "Barcelona, Berlín, Estocolmo…",
+      "ROLE_LABEL": "Rol principal",
+      "ROLE_PLACEHOLDER": "Selecciona tu rol",
+      "ROLE_DESCRIPTION_LABEL": "Cuéntanos sobre tu trabajo",
+      "ROLE_DESCRIPTION_PLACEHOLDER": "Comparte lanzamientos, colaboraciones o responsabilidades para priorizar tu invitación.",
+      "SUBMIT": "Unirme a la lista de espera",
+      "SUBMITTING": "Enviando solicitud…",
+      "ERRORS": {
+        "CONTACT_REQUIRED": "Elige el canal por el que prefieres el seguimiento.",
+        "CONTACT_HANDLE_REQUIRED": "Indica el usuario o alias al que debemos escribirte.",
+        "CONTACT_HANDLE_SHORT": "El usuario debe tener al menos tres caracteres.",
+        "COUNTRY_REQUIRED": "Indícanos tu país de residencia.",
+        "ROLE_REQUIRED": "Cuéntanos cuál es el rol que mejor te define.",
+        "ROLE_DESCRIPTION_REQUIRED": "Añade una breve descripción para entender tu enfoque.",
+        "ROLE_DESCRIPTION_SHORT": "Danos un poco más de detalle (mínimo 10 caracteres)."
+      },
+      "ROLES": {
+        "ARTIST": "Artista",
+        "PRODUCER": "Productor",
+        "SONGWRITER": "Compositor",
+        "MANAGER": "Manager",
+        "LABEL": "Sello",
+        "PUBLISHER": "Editorial",
+        "LAWYER": "Abogado",
+        "COLLECTIVE": "Representante de colectivo",
+        "OTHER": "Otro"
+      }
+    },
+    "MESSAGES": {
+      "SUCCESS": "¡Gracias por tu interés! Revisaremos tu solicitud y te contactaremos cuando se abra un cupo.",
+      "DUPLICATE": "Parece que ya te uniste a la lista de espera. Nos pondremos en contacto pronto.",
+      "ERROR": "No pudimos enviar tu solicitud. Inténtalo de nuevo en unos momentos."
+    },
+    "STATS": {
+      "EYEBROW": "Pruebas de tracción",
+      "TITLE": "Una red enfocada lista para splits claros",
+      "DESCRIPTION": "Estos totales en vivo combinan la lista de espera actual con la actividad verificada en Rightnote.",
+      "LOADING": "Cargando totales en vivo…",
+      "ERROR": "No pudimos cargar los números más recientes. Vuelve pronto.",
+      "HIGHLIGHT_LABEL": "Equipos en cola para la beta",
+      "HIGHLIGHT_CAPTION": "{{ count }} equipos independientes esperan su invitación en este momento.",
+      "LABELS": {
+        "WAITLIST": "Solicitudes en lista de espera",
+        "USERS": "Usuarios registrados",
+        "RIGHTS_HOLDERS": "Titulares de derechos registrados",
+        "WORKS": "Obras listas para lanzar"
+      },
+      "CAPTIONS": {
+        "WAITLIST": "Artistas y equipos que solicitan una invitación.",
+        "USERS": "Cuentas que ya colaboran en Rightnote.",
+        "RIGHTS_HOLDERS": "Personas representadas con repartos precisos.",
+        "WORKS": "Pistas y composiciones listas para salir desde Rightnote."
+      }
+    },
+    "PAIN_POINTS": {
+      "TITLE": "Diseñado para cumplir en entornos regulados",
+      "AI_DISCLOSURE": {
+        "TITLE": "Divulgación de IA obligatoria",
+        "BODY": "Registra el uso de IA en cada obra para que tu paquete de exportación cumpla las obligaciones de transparencia de la UE sin trabajo manual."
+      },
+      "PRIVACY": {
+        "TITLE": "Colaboración con privacidad",
+        "BODY": "Gestiona invitaciones, splits y acuerdos sin exponer buzones ni filtrar metadatos no publicados."
+      },
+      "COMPLEXITY": {
+        "TITLE": "Menos gestión, más lanzamientos",
+        "BODY": "Predeterminados inteligentes y flujos guiados reemplazan hojas de cálculo, hilos de correo y reingresos de datos."
+      }
+    },
+    "DIFFERENTIATORS": {
+      "TITLE": "Por qué los equipos cambian a Rightnote",
+      "INTRO": "Compara cómo se posiciona Rightnote frente a hojas de splits tradicionales y gestores de proyectos genéricos.",
+      "RIGHTNOTE": "Rightnote",
+      "OTHERS": "Herramientas heredadas",
+      "FEATURES": {
+        "AI_LOGGING": "Registro de divulgación de IA",
+        "AI_LOGGING_YES": "Integrado con evidencia exportable",
+        "AI_LOGGING_NO": "Notas manuales, sin trazabilidad",
+        "RIGHTS_AUDIT": "Auditoría de titulares de derechos",
+        "RIGHTS_AUDIT_YES": "Revisión con un clic entre sesiones",
+        "RIGHTS_AUDIT_NO": "Hojas de cálculo dispersas",
+        "EXPORT_PROTOCOLS": "Exportaciones de nivel protocolo",
+        "EXPORT_PROTOCOLS_YES": "Genera paquetes compatibles con PFLICHTENHEFT",
+        "EXPORT_PROTOCOLS_NO": "Requiere reescritura legal",
+        "GDPR": "Lista de espera conforme al RGPD",
+        "GDPR_YES": "Invitaciones acotadas, datos privados",
+        "GDPR_NO": "Recopila más de lo necesario"
+      }
+    },
+    "HOW_IT_WORKS": {
+      "TITLE": "Cómo funciona",
+      "STEP_ONE_TITLE": "Regístrate y crea tu espacio de trabajo",
+      "STEP_ONE_BODY": "Regístrate, crea un espacio de trabajo y adáptalo a tu catálogo o estructura organizativa.",
+      "STEP_TWO_TITLE": "Añade obras y titulares de derechos",
+      "STEP_TWO_BODY": "Carga nuevas obras, captura metadatos clave y conecta escritores o intérpretes con repartos precisos.",
+      "STEP_THREE_TITLE": "Comparte y mantente alineado",
+      "STEP_THREE_BODY": "Usa códigos QR o invitaciones para sumar colaboradores, acordar repartos y exportar PDFs listos para protocolo cuando lo necesites."
+    },
+    "JOURNEY": {
+      "HEADING": "Así es el recorrido de la invitación",
+      "SUBTITLE": "Un vistazo rápido de cómo pasas de la lista de espera a colaborar en tu primer lanzamiento."
+    },
+    "FOOTER": {
+      "TAGLINE": "Rightnote — derechos musicales, listos para lanzar.",
+      "PRIVACY": "Política de privacidad",
+      "TERMS": "Términos del servicio",
+      "LOGIN": "Acceso de administrador"
+    }
+  },
   "ADMIN": {
     "LABEL": "Administración",
     "HEADLINE": "Panel de administración",
@@ -447,6 +535,33 @@
       "WORK_IN_PROGRESS_DESC": "Muy pronto podrás redactar anuncios, programar envíos y revisar métricas de entrega para tus comunicaciones clave."
     }
   },
+  "WORKSPACES": {
+    "CREATE_SUBTITLE": "Configura tu espacio de trabajo para gestionar derechos y colaborar",
+    "NAME": "Nombre del espacio de trabajo",
+    "NAME_REQUIRED": "El nombre del espacio de trabajo es obligatorio",
+    "NAME_MIN_LENGTH": "El nombre debe tener al menos 2 caracteres",
+    "TYPE": "Tipo de espacio de trabajo",
+    "DESCRIPTION": "Descripción",
+    "CREATE_WORKSPACE": "Crear espacio de trabajo",
+    "CREATION_ERROR": "No se pudo crear el espacio de trabajo. Por favor, inténtalo de nuevo.",
+    "YOUR_WORKSPACES": "Tus espacios de trabajo",
+    "NO_WORKSPACES": "Aún no tienes espacios de trabajo",
+    "CREATE_FIRST": "Crea tu primer espacio de trabajo",
+    "MANAGE_WORKSPACES": "Gestionar proyectos",
+    "PROJECT": "Proyecto",
+    "CREATE_PROJECT": "Crear proyecto",
+    "YOUR_PROJECTS": "Tus proyectos",
+    "NEW_PROJECT": "Nuevo proyecto",
+    "CURRENT": "Actual",
+    "NO_PROJECTS_YET": "Aún no tienes proyectos. Empieza creando tu primer proyecto musical.",
+    "CREATE_FIRST_PROJECT": "Crea tu primer proyecto",
+    "CREATE_NEW_PROJECT": "Crear nuevo proyecto",
+    "PROJECT_NAME": "Nombre del proyecto",
+    "PROJECT_TYPE": "Tipo de proyecto",
+    "SELECT_TYPE": "Selecciona el tipo de proyecto...",
+    "NAME_PLACEHOLDER": "Ej.: Summer Vibes 2025, Álbum debut, Mi último sencillo",
+    "TYPE_REQUIRED": "El tipo de proyecto es obligatorio",
+    "DESCRIPTION_PLACEHOLDER": "Añade notas sobre este proyecto (fecha de lanzamiento, colaboradores, etc.)",
     "DESCRIPTION_HINT": "Esto te ayuda a organizar y recordar detalles sobre tu proyecto",
     "CREATE_PROJECT_BTN": "Crear proyecto",
     "TYPE_SINGLE": "Sencillo",

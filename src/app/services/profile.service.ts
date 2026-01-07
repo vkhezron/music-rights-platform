@@ -18,8 +18,9 @@ export class ProfileService {
 
   constructor() {
     // Load profile when user logs in
-    this.supabase.user$.subscribe(async (user) => {
+    this.supabase.user$.subscribe(async user => {
       if (user) {
+        this.currentProfile$.next(null);
         await this.loadProfile(user.id);
       } else {
         this.currentProfile$.next(null);

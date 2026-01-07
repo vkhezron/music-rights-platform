@@ -45,7 +45,7 @@ export class Register {
   constructor() {
     this.registerForm = this.fb.group({
       displayName: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
+      username: ['', [Validators.required, Validators.minLength(3), Validators.pattern(/^[a-zA-Z0-9_]+$/)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
     });
@@ -121,9 +121,11 @@ export class Register {
     this.isLoading.set(true);
 
     try {
-      const { displayName, email, password } = this.registerForm.value;
+      const { displayName, username, password } = this.registerForm.value;
+      const usernameValue = ((username as string) ?? '').trim().toLowerCase();
+      const passwordValue = (password as string) ?? '';
 
-      await this.supabase.signUp(email, password, displayName);
+      await this.supabase.signUp(usernameValue, passwordValue, displayName);
 
       // Success!
       this.successMessage.set('AUTH.REGISTRATION_SUCCESS');
@@ -146,8 +148,8 @@ export class Register {
     } catch (error: any) {
       console.error('Registration error:', error);
 
-      if (error.message?.includes('already registered')) {
-        this.errorMessage.set('AUTH.EMAIL_ALREADY_EXISTS');
+      if (error.message === 'AUTH.USERNAME_TAKEN' || error.message?.includes('already registered')) {
+        this.errorMessage.set('AUTH.USERNAME_TAKEN');
       } else {
         this.errorMessage.set(error.message || 'AUTH.REGISTRATION_ERROR');
       }

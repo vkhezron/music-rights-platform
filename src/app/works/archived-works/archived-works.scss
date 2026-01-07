@@ -117,44 +117,21 @@
 }
 
 // =====================================================
-// PAGE HEADER
+// PAGE CONTENT LAYOUT
 // =====================================================
 
-.page-header {
+.page-content {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 24px 24px 0;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.5rem 2rem 2.5rem;
 }
 
-.back-btn,
-.refresh-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: none;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
-}
-
-.back-btn:hover,
-.refresh-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.header-titles h1 {
-  margin: 0;
-  font-size: 24px;
-}
-
-.header-titles p {
-  margin: 4px 0 0;
-  color: rgba(0, 0, 0, 0.6);
+@media (max-width: 768px) {
+  .page-content {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
 }
 
 .status .loading,

@@ -1,22 +1,24 @@
 <div class="work-form-container">
   
   <!-- Header -->
-  <div class="form-header">
-    <div class="header-left">
-      <button class="back-btn" (click)="cancel()">
-        <lucide-icon [img]="ArrowLeft" [size]="20"></lucide-icon>
+  <div class="page-nav-bento">
+    <div class="page-nav-left">
+      <button type="button" class="page-nav-back" (click)="cancel()">
+        <lucide-icon [img]="ArrowLeft" [size]="18"></lucide-icon>
+        <span>{{ 'COMMON.BACK' | translate }}</span>
       </button>
-      <div class="header-info">
+
+      <div class="page-nav-info">
         <h1>{{ (isEditMode() ? 'WORKS.EDIT_WORK' : 'WORKS.CREATE_WORK') | translate }}</h1>
         <p>{{ (isEditMode() ? 'WORKS.EDIT_WORK_SUBTITLE' : 'WORKS.CREATE_WORK_SUBTITLE') | translate }}</p>
       </div>
     </div>
 
     @if (isEditMode()) {
-      <div class="header-actions">
+      <div class="page-nav-actions">
         <button
           type="button"
-          class="history-button"
+          class="page-nav-action"
           (click)="openChangeHistory()"
           [disabled]="changeHistoryLoading()"
         >

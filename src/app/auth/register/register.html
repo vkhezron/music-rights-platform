@@ -60,26 +60,31 @@
         }
       </div>
 
-      <!-- Email Input -->
+      <!-- Username Input -->
       <div class="form-group">
-        <label for="email">{{ 'AUTH.EMAIL' | translate }}</label>
+        <label for="username">{{ 'AUTH.USERNAME' | translate }}</label>
         <input
-          id="email"
-          type="email"
-          formControlName="email"
+          id="username"
+          type="text"
+          formControlName="username"
           class="form-input"
-          [class.error]="hasError('email', 'required') || hasError('email', 'email')"
-          placeholder="name@example.com"
+          [class.error]="hasError('username', 'required') || hasError('username', 'minlength') || hasError('username', 'pattern')"
+          placeholder="your_username"
         />
-        
-        @if (hasError('email', 'required')) {
+
+        @if (hasError('username', 'required')) {
           <div class="error-message">
-            {{ 'AUTH.REQUIRED_FIELD' | translate }}
+            {{ 'AUTH.USERNAME_REQUIRED' | translate }}
           </div>
         }
-        @if (hasError('email', 'email') && !hasError('email', 'required')) {
+        @if (hasError('username', 'minlength') && !hasError('username', 'required')) {
           <div class="error-message">
-            {{ 'AUTH.INVALID_EMAIL' | translate }}
+            {{ 'AUTH.USERNAME_MIN_LENGTH' | translate }}
+          </div>
+        }
+        @if (hasError('username', 'pattern') && !hasError('username', 'required')) {
+          <div class="error-message">
+            {{ 'AUTH.USERNAME_FORMAT_HINT' | translate }}
           </div>
         }
       </div>

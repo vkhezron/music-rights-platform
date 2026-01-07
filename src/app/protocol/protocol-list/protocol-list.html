@@ -45,36 +45,48 @@
     </button>
   </div>
 
-  <header class="page-header">
-    <button class="back-btn" type="button" (click)="goBack()">
-      <lucide-icon [img]="ArrowLeft" [size]="18"></lucide-icon>
-      <span>{{ 'PROTOCOL_LIST.BACK' | translate }}</span>
-    </button>
+  <div class="page-content">
+    <div class="page-nav-bento">
+      <div class="page-nav-left">
+        <button type="button" class="page-nav-back" (click)="goBack()">
+          <lucide-icon [img]="ArrowLeft" [size]="18"></lucide-icon>
+          <span>{{ 'PROTOCOL_LIST.BACK' | translate }}</span>
+        </button>
 
-    <div class="header-titles">
-      <h1>{{ 'PROTOCOL_LIST.TITLE' | translate }}</h1>
-      <p>{{ 'PROTOCOL_LIST.SUBTITLE' | translate }}</p>
+        <div class="page-nav-info">
+          <h1>{{ 'PROTOCOL_LIST.TITLE' | translate }}</h1>
+          <p>{{ 'PROTOCOL_LIST.SUBTITLE' | translate }}</p>
+        </div>
+      </div>
+
+      <div class="page-nav-actions">
+        <button
+          type="button"
+          class="page-nav-action"
+          (click)="refreshProtocols()"
+          [disabled]="isLoading()"
+        >
+          <lucide-icon [img]="RefreshCcw" [size]="18"></lucide-icon>
+          <span>{{ 'PROTOCOL_LIST.REFRESH' | translate }}</span>
+        </button>
+        <button
+          type="button"
+          class="page-nav-action page-nav-action--primary"
+          (click)="createWorkToStart()"
+        >
+          <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
+          <span>{{ 'PROTOCOL_LIST.CREATE' | translate }}</span>
+        </button>
+      </div>
     </div>
 
-    <div class="header-actions">
-      <button class="refresh-btn" type="button" (click)="refreshProtocols()" [disabled]="isLoading()">
-        <lucide-icon [img]="RefreshCcw" [size]="18"></lucide-icon>
-        <span>{{ 'PROTOCOL_LIST.REFRESH' | translate }}</span>
-      </button>
-      <button class="create-btn" type="button" (click)="createWorkToStart()">
-        <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
-        <span>{{ 'PROTOCOL_LIST.CREATE' | translate }}</span>
-      </button>
-    </div>
-  </header>
+    <section class="workspace-info" *ngIf="currentWorkspace() as workspace">
+      <div class="badge">{{ 'PROTOCOL_LIST.ACTIVE_WORKSPACE' | translate }}</div>
+      <h2>{{ workspace.name }}</h2>
+      <p *ngIf="workspace.description">{{ workspace.description }}</p>
+    </section>
 
-  <section class="workspace-info" *ngIf="currentWorkspace() as workspace">
-    <div class="badge">{{ 'PROTOCOL_LIST.ACTIVE_WORKSPACE' | translate }}</div>
-    <h2>{{ workspace.name }}</h2>
-    <p *ngIf="workspace.description">{{ workspace.description }}</p>
-  </section>
-
-  <section class="protocol-actions" *ngIf="!isLoading()">
+    <section class="protocol-actions" *ngIf="!isLoading()">
     <div class="action-card">
       <div class="action-card__header">
         <h3>{{ 'PROTOCOL_LIST.NEW_PROTOCOL_LABEL' | translate }}</h3>
@@ -144,70 +156,71 @@
     </div>
   </section>
 
-  <section class="status" *ngIf="isLoading() || errorMessage()">
+    <section class="status" *ngIf="isLoading() || errorMessage()">
     <div class="loading" *ngIf="isLoading()">{{ 'COMMON.LOADING' | translate }}</div>
     <div class="error" *ngIf="errorMessage()">{{ errorMessage() | translate }}</div>
-  </section>
+    </section>
 
-  <section class="protocol-list" *ngIf="!isLoading()">
-    <ng-container *ngIf="(protocols() || []).length as total; else emptyState">
-      <div class="protocol-table" *ngIf="total > 0">
-        <div class="protocol-table__header">
-          <span>{{ 'PROTOCOL_LIST.WORK' | translate }}</span>
-          <span>{{ 'PROTOCOL_LIST.STATUS' | translate }}</span>
-          <span>{{ 'PROTOCOL_LIST.UPDATED' | translate }}</span>
-          <span></span>
-        </div>
+    <section class="protocol-list" *ngIf="!isLoading()">
+      <ng-container *ngIf="(protocols() || []).length as total; else emptyState">
+        <div class="protocol-table" *ngIf="total > 0">
+          <div class="protocol-table__header">
+            <span>{{ 'PROTOCOL_LIST.WORK' | translate }}</span>
+            <span>{{ 'PROTOCOL_LIST.STATUS' | translate }}</span>
+            <span>{{ 'PROTOCOL_LIST.UPDATED' | translate }}</span>
+            <span></span>
+          </div>
 
-        <div
-          class="protocol-table__row"
-          *ngFor="let protocol of protocols(); trackBy: trackByProtocolId"
-          (click)="openProtocol(protocol)"
-        >
-          <div class="protocol-table__cell">
-            <lucide-icon [img]="FileText" [size]="18"></lucide-icon>
-            <div class="protocol-table__cell-text">
-              <span class="title">{{ protocol.work_title }}</span>
-              <span class="subtitle" *ngIf="protocol.release_title">{{ protocol.release_title }}</span>
+          <div
+            class="protocol-table__row"
+            *ngFor="let protocol of protocols(); trackBy: trackByProtocolId"
+            (click)="openProtocol(protocol)"
+          >
+            <div class="protocol-table__cell">
+              <lucide-icon [img]="FileText" [size]="18"></lucide-icon>
+              <div class="protocol-table__cell-text">
+                <span class="title">{{ protocol.work_title }}</span>
+                <span class="subtitle" *ngIf="protocol.release_title">{{ protocol.release_title }}</span>
+              </div>
+            </div>
+            <div class="protocol-table__cell status">
+              <span class="status-pill status-{{ protocol.status || 'draft' }}">{{ getStatusKey(protocol) | translate }}</span>
+            </div>
+            <div class="protocol-table__cell">
+              <span>{{ protocol.updated_at | date:'medium' }}</span>
+            </div>
+            <div class="protocol-table__cell action">
+              <button
+                type="button"
+                class="duplicate-btn"
+                (click)="$event.stopPropagation(); duplicateProtocol(protocol)"
+              >
+                <lucide-icon [img]="CopyPlus" [size]="16"></lucide-icon>
+                <span>{{ 'PROTOCOL_LIST.DUPLICATE' | translate }}</span>
+              </button>
+              <button type="button" class="open-btn" (click)="$event.stopPropagation(); openProtocol(protocol)">
+                {{ 'PROTOCOL_LIST.OPEN_WORK' | translate }}
+              </button>
             </div>
           </div>
-          <div class="protocol-table__cell status">
-            <span class="status-pill status-{{ protocol.status || 'draft' }}">{{ getStatusKey(protocol) | translate }}</span>
-          </div>
-          <div class="protocol-table__cell">
-            <span>{{ protocol.updated_at | date:'medium' }}</span>
-          </div>
-          <div class="protocol-table__cell action">
-            <button
-              type="button"
-              class="duplicate-btn"
-              (click)="$event.stopPropagation(); duplicateProtocol(protocol)"
-            >
-              <lucide-icon [img]="CopyPlus" [size]="16"></lucide-icon>
-              <span>{{ 'PROTOCOL_LIST.DUPLICATE' | translate }}</span>
-            </button>
-            <button type="button" class="open-btn" (click)="$event.stopPropagation(); openProtocol(protocol)">
-              {{ 'PROTOCOL_LIST.OPEN_WORK' | translate }}
-            </button>
-          </div>
+        </div>
+      </ng-container>
+    </section>
+
+    <ng-template #emptyState>
+      <div class="empty-state">
+        <lucide-icon [img]="FileText" [size]="72" [strokeWidth]="1.5"></lucide-icon>
+        <h3>{{ 'PROTOCOL_LIST.EMPTY_TITLE' | translate }}</h3>
+        <p>{{ 'PROTOCOL_LIST.EMPTY_DESC' | translate }}</p>
+        <div class="empty-actions">
+          <button type="button" (click)="goToWorks()">
+            {{ 'PROTOCOL_LIST.GO_TO_WORKS' | translate }}
+          </button>
+          <button type="button" (click)="createWorkToStart()">
+            {{ 'PROTOCOL_LIST.CREATE_WORK' | translate }}
+          </button>
         </div>
       </div>
-    </ng-container>
-  </section>
-
-  <ng-template #emptyState>
-    <div class="empty-state">
-      <lucide-icon [img]="FileText" [size]="72" [strokeWidth]="1.5"></lucide-icon>
-      <h3>{{ 'PROTOCOL_LIST.EMPTY_TITLE' | translate }}</h3>
-      <p>{{ 'PROTOCOL_LIST.EMPTY_DESC' | translate }}</p>
-      <div class="empty-actions">
-        <button type="button" (click)="goToWorks()">
-          {{ 'PROTOCOL_LIST.GO_TO_WORKS' | translate }}
-        </button>
-        <button type="button" (click)="createWorkToStart()">
-          {{ 'PROTOCOL_LIST.CREATE_WORK' | translate }}
-        </button>
-      </div>
-    </div>
-  </ng-template>
+    </ng-template>
+  </div>
 </div>

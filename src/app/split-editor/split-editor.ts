@@ -70,8 +70,11 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   protected changeHistory = signal<WorkChangeRecord[]>([]);
   protected changeHistoryError = signal<string | null>(null);
 
+  protected readonly isInstrumentalWork = computed(() => this.work()?.work_type === 'instrumental');
   protected lyricsEntries = computed(() =>
-    this.entries().filter(entry => entry.splitType === 'lyrics')
+    this.isInstrumentalWork()
+      ? []
+      : this.entries().filter(entry => entry.splitType === 'lyrics')
   );
   protected musicEntries = computed(() =>
     this.entries().filter(entry => entry.splitType === 'music')
@@ -80,7 +83,9 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
     this.entries().filter(entry => entry.splitType === 'neighbouring')
   );
 
-  protected lyricsTotal = computed(() => this.splitCalculator.calculateLyricsTotal(this.entries()));
+  protected lyricsTotal = computed(() =>
+    this.isInstrumentalWork() ? 0 : this.splitCalculator.calculateLyricsTotal(this.entries())
+  );
   protected musicTotal = computed(() => this.splitCalculator.calculateMusicTotal(this.entries()));
   protected neighbouringTotal = computed(() => this.splitCalculator.calculateNeighbouringTotal(this.entries()));
   protected ipWeightedTotal = computed(() =>
@@ -132,6 +137,16 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   }
 
   private computeTotalStatusInternal(entries: SplitEntry[], category: SplitCategory): SplitTotalStatus {
+    if (category === 'lyrics' && this.isInstrumentalWork()) {
+      return {
+        category,
+        total: 0,
+        difference: -100,
+        state: 'empty',
+        hasEntries: false,
+      } satisfies SplitTotalStatus;
+    }
+
     const categoryEntries = entries.filter(entry => entry.splitType === category);
     const total = categoryEntries.reduce((sum, entry) => sum + (entry.ownershipPercentage || 0), 0);
     const difference = total - 100;
@@ -600,6 +615,11 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
 
   protected async addManualEntry(splitType: SplitCategory): Promise<void> {
     this.clearMessages();
+
+    if (!this.isCategoryEnabled(splitType)) {
+      return;
+    }
+
     const entry = this.applyCategoryDefaults({
       tempId: this.generateTempId(),
       entryMethod: 'add_manually',
@@ -609,11 +629,15 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
       isReadonly: false,
     });
 
-    this.entries.update(list => [...list, entry]);
+    this.entries.update(list => this.enforceCategoryConstraints([...list, entry]));
   }
 
   protected async addSelfEntry(splitType: SplitCategory): Promise<void> {
     this.clearMessages();
+
+    if (!this.isCategoryEnabled(splitType)) {
+      return;
+    }
 
     try {
       const currentUser = this.supabase.currentUser;
@@ -650,7 +674,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
             isReadonly: false,
           });
 
-      this.entries.update(list => [...list, entry]);
+      this.entries.update(list => this.enforceCategoryConstraints([...list, entry]));
     } catch (error) {
       console.error('Failed to add current user to splits', error);
       this.errorMessage.set('Unable to add your profile right now.');
@@ -659,6 +683,10 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
 
   protected async startQrFlow(splitType: SplitCategory): Promise<void> {
     this.clearMessages();
+
+    if (!this.isCategoryEnabled(splitType)) {
+      return;
+    }
 
     if (!(await this.ensureCameraAccess())) {
       return;
@@ -696,16 +724,20 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
 
   protected onEntryUpdated(updated: SplitEntry): void {
     this.entries.update(list =>
-      list.map(entry =>
-        this.isSameEntry(entry, updated)
-          ? this.applyCategoryDefaults({ ...entry, ...updated })
-          : entry
+      this.enforceCategoryConstraints(
+        list.map(entry =>
+          this.isSameEntry(entry, updated)
+            ? this.applyCategoryDefaults({ ...entry, ...updated })
+            : entry
+        )
       )
     );
   }
 
   protected onEntryRemoved(entry: SplitEntry): void {
-    this.entries.update(list => list.filter(item => !this.isSameEntry(item, entry)));
+    this.entries.update(list =>
+      this.enforceCategoryConstraints(list.filter(item => !this.isSameEntry(item, entry)))
+    );
   }
 
   protected async saveSplits(): Promise<void> {
@@ -713,7 +745,8 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
 
     this.clearMessages();
 
-    const preparedEntries = this.entries().map(entry => this.ensureEntryNickname(entry));
+    const normalizedEntries = this.entries().map(entry => this.ensureEntryNickname(entry));
+    const preparedEntries = this.enforceCategoryConstraints(normalizedEntries);
     this.entries.set(preparedEntries);
 
     if (!this.canSubmit()) {
@@ -849,7 +882,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
 
       const splits = await this.worksService.getWorkSplits(workId);
       const hydrated = splits.map(split => this.hydrateEntry(mapSplitToEntry(split)));
-      this.entries.set(hydrated);
+      this.entries.set(this.enforceCategoryConstraints(hydrated));
     } catch (error) {
       console.error('Failed to load split data', error);
       this.errorMessage.set('Unable to load split details. Please try again.');
@@ -910,6 +943,22 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
     return base;
   }
 
+  private isCategoryEnabled(category: SplitCategory): boolean {
+    if (category === 'lyrics' && this.isInstrumentalWork()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private enforceCategoryConstraints(entries: SplitEntry[]): SplitEntry[] {
+    if (!this.isInstrumentalWork()) {
+      return entries;
+    }
+
+    return entries.filter(entry => entry.splitType !== 'lyrics');
+  }
+
   private ensureEntryNickname(entry: SplitEntry): SplitEntry {
     const direct = this.normalizeNickname(entry.nickname);
     if (direct) {
@@ -954,6 +1003,10 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
   }
 
   protected shouldShowAddMe(splitType: SplitCategory): boolean {
+    if (!this.isCategoryEnabled(splitType)) {
+      return false;
+    }
+
     if (!this.supabase.currentUser && !this.profileService.currentProfile) {
       return false;
     }
@@ -1080,7 +1133,9 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
       }
     }
 
-    const groups: SplitCategory[] = ['lyrics', 'music', 'neighbouring'];
+    const groups: SplitCategory[] = this.isInstrumentalWork()
+      ? ['music', 'neighbouring']
+      : ['lyrics', 'music', 'neighbouring'];
 
     for (const category of groups) {
       const status = this.computeTotalStatusInternal(entries, category);
@@ -1117,7 +1172,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
       }
 
       const splitType = this.qrTargetSplitType();
-      if (!splitType) return;
+      if (!splitType || !this.isCategoryEnabled(splitType)) return;
 
       const existingHolder = this.findRightsHolderByProfileId(profile.id);
       if (existingHolder && this.isDuplicateEntry(existingHolder.id, splitType)) {
@@ -1139,7 +1194,7 @@ export class SplitEditorComponent implements OnInit, OnDestroy {
             isReadonly: false,
           });
 
-      this.entries.update(list => [...list, entry]);
+      this.entries.update(list => this.enforceCategoryConstraints([...list, entry]));
       this.stopQrFlow();
     } catch (error) {
       console.error('QR payload error', error);

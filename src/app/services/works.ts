@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { WorkspaceService } from './workspace.service';
-import { Work, WorkFormData, WorkSplit, SplitType, WorkChangeRecord } from '../../models/work.model';
+import { Work, WorkFormData, WorkSplit, SplitType, WorkChangeRecord, WorkType, WorkOriginalReference, WorkLanguageSelection } from '../../models/work.model';
 import {
   WorkCreationDeclaration,
   WorkCreationDeclarationDraft,
@@ -22,6 +22,7 @@ export class WorksService {
   public currentWork$ = this.currentWorkSubject.asObservable();
 
   private readonly allowedStatuses: Work['status'][] = ['draft', 'registered', 'published', 'archived'];
+  private readonly allowedWorkTypes: WorkType[] = ['standard', 'instrumental', 'remix'];
 
   constructor() {
     // Load works when workspace changes
@@ -45,14 +46,127 @@ export class WorksService {
     const { work_creation_declarations, ...rest } = record;
     const base = rest as Record<string, unknown>;
 
+    const rawType = (base as { work_type?: string }).work_type ?? 'standard';
+    const normalizedType = this.normalizeWorkType(rawType);
+
+    const rawOriginals = (base as { original_works?: unknown }).original_works;
+    const originalWorks = Array.isArray(rawOriginals)
+      ? (rawOriginals as WorkOriginalReference[])
+      : null;
+
+    const primaryLanguagesRaw = (base as { primary_languages?: unknown }).primary_languages;
+    const secondaryLanguagesRaw = (base as { secondary_languages?: unknown }).secondary_languages;
+    const primaryLanguages = this.normalizeLanguageSelections(primaryLanguagesRaw);
+    const secondaryLanguages = this.normalizeLanguageSelections(secondaryLanguagesRaw);
+
+    const fallbackLanguages = Array.isArray((base as { languages?: unknown }).languages)
+      ? ((base as { languages?: unknown }).languages as string[])
+      : [];
+    const combinedLanguages = this.buildLanguageNameList(primaryLanguages, secondaryLanguages, fallbackLanguages);
+
     const normalized = {
       ...(base as unknown as Work),
       status: this.normalizeStatus((base as { status?: string }).status),
       is_cover_version: Boolean((base as { is_cover_version?: boolean }).is_cover_version),
+      work_type: normalizedType,
+      is_100_percent_human: Boolean((base as { is_100_percent_human?: boolean }).is_100_percent_human),
+      uses_sample_libraries: Boolean((base as { uses_sample_libraries?: boolean }).uses_sample_libraries),
+      has_commercial_license: Boolean((base as { has_commercial_license?: boolean }).has_commercial_license),
+      sample_library_names: (base as { sample_library_names?: string | null }).sample_library_names ?? null,
+      original_works: originalWorks,
       ai_disclosures: work_creation_declarations ?? [],
+      primary_languages: primaryLanguages.length ? primaryLanguages : null,
+      secondary_languages: secondaryLanguages.length ? secondaryLanguages : null,
+      languages: combinedLanguages,
     } as Work;
 
     return normalized;
+  }
+
+  private normalizeWorkType(value?: string | null): WorkType {
+    const candidate = (value ?? 'standard').toLowerCase();
+    return this.allowedWorkTypes.includes(candidate as WorkType) ? (candidate as WorkType) : 'standard';
+  }
+
+  private normalizeLanguageSelections(raw: unknown): WorkLanguageSelection[] {
+    if (!Array.isArray(raw)) {
+      return [];
+    }
+
+    const selections: WorkLanguageSelection[] = [];
+    for (const entry of raw as unknown[]) {
+      const normalized = this.normalizeLanguageSelection(entry);
+      if (normalized) {
+        selections.push(normalized);
+      }
+    }
+    return selections;
+  }
+
+  private normalizeLanguageSelection(entry: unknown): WorkLanguageSelection | null {
+    if (!entry || typeof entry !== 'object') {
+      return null;
+    }
+
+    const candidate = entry as Record<string, unknown>;
+    const languageValue = candidate['language'];
+    const language = typeof languageValue === 'string' ? languageValue.trim() : '';
+    if (!language) {
+      return null;
+    }
+
+    const iso1Value = candidate['iso_639_1'];
+    const iso1 = typeof iso1Value === 'string' && iso1Value.trim().length
+      ? iso1Value.trim()
+      : null;
+    const iso3Value = candidate['iso_639_3'];
+    const iso3 = typeof iso3Value === 'string' && iso3Value.trim().length
+      ? iso3Value.trim()
+      : null;
+
+    const isCustom = candidate['is_custom'] === true || (!iso1 && !iso3);
+
+    return {
+      language,
+      iso_639_1: iso1,
+      iso_639_3: iso3,
+      is_custom: isCustom,
+    };
+  }
+
+  private buildLanguageNameList(
+    primary: WorkLanguageSelection[],
+    secondary: WorkLanguageSelection[],
+    fallback?: unknown
+  ): string[] {
+    const names: string[] = [];
+
+    const addName = (value?: string | null) => {
+      if (!value) {
+        return;
+      }
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return;
+      }
+      const key = trimmed.toLowerCase();
+      if (!names.some(existing => existing.toLowerCase() === key)) {
+        names.push(trimmed);
+      }
+    };
+
+    primary.forEach(selection => addName(selection.language));
+    secondary.forEach(selection => addName(selection.language));
+
+    if (Array.isArray(fallback)) {
+      (fallback as unknown[]).forEach(item => {
+        if (typeof item === 'string') {
+          addName(item);
+        }
+      });
+    }
+
+    return names;
   }
 
   private resolveRightsLayer(splitType: SplitType): 'ip' | 'neighboring' {
@@ -113,10 +227,17 @@ export class WorksService {
     try {
       const { ai_disclosures, ...insertPayload } = formData;
 
+      const payload = {
+        ...insertPayload,
+        primary_languages: insertPayload.primary_languages ?? [],
+        secondary_languages: insertPayload.secondary_languages ?? [],
+        languages: insertPayload.languages ?? [],
+      };
+
       const { data, error } = await this.supabase.client
         .from('works')
         .insert({
-          ...insertPayload,
+          ...payload,
           workspace_id: currentWorkspace.id,
           created_by: currentUser.id,
           status: 'draft'
@@ -150,9 +271,31 @@ export class WorksService {
     try {
       const { ai_disclosures, ...updatePayload } = formData;
 
+      const payload: Partial<WorkFormData> & Record<string, unknown> = {
+        ...updatePayload,
+      };
+
+      if (payload.primary_languages === undefined) {
+        delete payload.primary_languages;
+      } else if (payload.primary_languages === null) {
+        payload.primary_languages = [];
+      }
+
+      if (payload.secondary_languages === undefined) {
+        delete payload.secondary_languages;
+      } else if (payload.secondary_languages === null) {
+        payload.secondary_languages = [];
+      }
+
+      if (payload.languages === undefined) {
+        delete payload.languages;
+      } else if (payload.languages === null) {
+        payload.languages = [];
+      }
+
       const { data, error } = await this.supabase.client
         .from('works')
-        .update(updatePayload)
+        .update(payload)
         .eq('id', id)
         .select()
         .single();

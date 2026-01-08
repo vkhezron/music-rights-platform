@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import type { Work } from '../../models/work.model';
+import type { Work, WorkLanguageSelection } from '../../models/work.model';
 import type { RightsHolder } from './rights-holder';
 import type { WorkSplitRow } from '../split-editor/split-editor';
 
@@ -79,6 +79,7 @@ export class PdfGeneratorService {
     };
 
     const generatedAt = new Date();
+    const isRemixWork = work.work_type === 'remix';
 
     const ensureSpace = (height: number) => {
       if (y + height > pageHeight - margin) {
@@ -220,6 +221,85 @@ export class PdfGeneratorService {
       y += lines.length * 12 + 6;
     };
 
+    const drawProductionMetadata = () => {
+      const items: Array<{ label: string; value: string }> = [];
+
+      if (typeof work.is_100_percent_human === 'boolean') {
+        items.push({
+          label: 'Creation Process',
+          value: work.is_100_percent_human ? '100% human created' : 'Includes assisted or automated elements',
+        });
+      }
+
+      if (typeof work.uses_sample_libraries === 'boolean') {
+        items.push({ label: 'Sample Libraries Used', value: this.formatBoolean(work.uses_sample_libraries) });
+      }
+
+      if (typeof work.has_commercial_license === 'boolean') {
+        items.push({ label: 'Commercial License Secured', value: this.formatBoolean(work.has_commercial_license) });
+      }
+
+      if (!items.length && !work.sample_library_names) {
+        return;
+      }
+
+      drawSectionTitle('Production Metadata', sectionStyles.metadata);
+
+      if (items.length) {
+        drawKeyValueGrid(items);
+      } else {
+        drawParagraph('No production metadata recorded.');
+      }
+
+      if (work.sample_library_names) {
+        drawParagraph(`Sample Libraries: ${this.safeText(work.sample_library_names)}`);
+      }
+    };
+
+    const drawSourceWorks = () => {
+      const sources = work.original_works && work.original_works.length ? work.original_works : null;
+
+      if (!sources && !isRemixWork) {
+        return;
+      }
+
+      const sectionLabel = isRemixWork ? 'Source Works (Remix)' : 'Referenced Works';
+      drawSectionTitle(sectionLabel, sectionStyles.metadata);
+
+      if (!sources) {
+        drawParagraph('No source works documented for this remix yet.');
+        return;
+      }
+
+      sources.forEach((original, index) => {
+        const heading = original.title ? `${index + 1}. ${original.title}` : `Source Work ${index + 1}`;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        ensureSpace(18);
+        doc.text(this.safeText(heading), margin, y);
+        y += 14;
+        setBodyFont();
+
+        const details: Array<{ label: string; value: string }> = [];
+        if (original.isrc) {
+          details.push({ label: 'ISRC', value: original.isrc });
+        }
+        if (original.iswc) {
+          details.push({ label: 'ISWC', value: original.iswc });
+        }
+
+        if (details.length) {
+          drawKeyValueGrid(details);
+        }
+
+        if (original.additional_info) {
+          drawParagraph(`Notes: ${original.additional_info}`);
+        }
+
+        y += 4;
+      });
+    };
+
     const drawAIDisclosures = () => {
       drawSectionTitle('AI Disclosures', sectionStyles.ai);
 
@@ -346,13 +426,18 @@ export class PdfGeneratorService {
     drawTitle();
     // ...rest of PDF generation logic...
 
+    const languageSummary = this.buildLanguageSummary(work);
+
     drawSectionTitle('Work Overview', sectionStyles.overview);
     drawKeyValueGrid([
       { label: 'Status', value: this.formatStatus(work.status) },
       { label: 'Genre', value: work.genre || '—' },
-      { label: 'Languages', value: this.formatList(work.languages) },
+      { label: 'Work Type', value: this.formatWorkType(work.work_type) },
+      { label: 'Primary Languages', value: languageSummary.primary },
       { label: 'Duration', value: this.formatDuration(work.duration_seconds) },
+      { label: 'Secondary Languages', value: languageSummary.secondary },
       { label: 'Alternative Titles', value: this.formatList(work.alternative_titles) },
+      { label: 'All Languages', value: languageSummary.combined },
       { label: 'Catalogue Number', value: work.catalog_number || '—' },
       { label: 'EAN', value: work.ean || '—' },
       { label: 'Created At', value: this.formatDate(work.created_at) },
@@ -387,16 +472,32 @@ export class PdfGeneratorService {
       }
     }
 
+    drawProductionMetadata();
+    drawSourceWorks();
+
     drawAIDisclosures();
 
-    const ipSummary = this.buildIPSummary(ipSplits);
+    const ipSummary = this.buildIPSummary(work, ipSplits);
     drawSectionTitle('Intellectual Property Summary', sectionStyles.ip);
     drawKeyValueGrid([
-      { label: 'Lyric Contributors', value: String(ipSummary.lyricsCount) },
+      {
+        label: 'Lyric Contributors',
+        value: ipSummary.lyricsApplicable
+          ? String(ipSummary.lyricsCount)
+          : 'Not applicable (instrumental work)',
+      },
       { label: 'Music Contributors', value: String(ipSummary.musicCount) },
-      { label: 'Lyrics Share', value: `${ipSummary.lyricsShare.toFixed(2)}%` },
+      {
+        label: 'Lyrics Share',
+        value: ipSummary.lyricsApplicable ? `${ipSummary.lyricsShare.toFixed(2)}%` : 'Not applicable',
+      },
       { label: 'Music Share', value: `${ipSummary.musicShare.toFixed(2)}%` },
-      { label: 'Combined IP Total', value: `${ipSummary.combinedShare.toFixed(2)}%` },
+      {
+        label: 'Combined IP Total',
+        value: ipSummary.lyricsApplicable
+          ? `${ipSummary.combinedShare.toFixed(2)}%`
+          : `${ipSummary.combinedShare.toFixed(2)}% (music only)`,
+      },
       { label: 'Split Status', value: ipSummary.statusLabel },
     ]);
 
@@ -407,6 +508,10 @@ export class PdfGeneratorService {
       'No intellectual property contributors recorded.',
       sectionStyles.ip
     );
+
+    if (!ipSummary.lyricsApplicable) {
+      drawParagraph('Instrumental work: Lyrics splits are not required. The totals above reflect music contributions only.');
+    }
 
     if (ipSummary.isIncomplete) {
       drawParagraph('⚠️ Temporary split: Lyrics and/or music allocations are below 100%. Final shares pending.');
@@ -497,13 +602,19 @@ export class PdfGeneratorService {
     await this.downloadProtocol(work, ipSplits, neighboringSplits, filename);
   }
 
-  private buildIPSummary(ipSplits: WorkSplitRow[]) {
+  private buildIPSummary(work: Work, ipSplits: WorkSplitRow[]) {
     const lyricSplits = ipSplits.filter(split => split.split_type === 'lyrics');
     const musicSplits = ipSplits.filter(split => split.split_type === 'music');
 
     const lyricsShare = lyricSplits.reduce((sum, split) => sum + this.toNumber(split), 0);
     const musicShare = musicSplits.reduce((sum, split) => sum + this.toNumber(split), 0);
-    const combinedShare = Math.min(this.normalizeShare(lyricsShare) + this.normalizeShare(musicShare), 100);
+    const normalizedLyrics = this.normalizeShare(lyricsShare);
+    const normalizedMusic = this.normalizeShare(musicShare);
+
+    const lyricsApplicable = work.work_type !== 'instrumental';
+    const combinedShare = lyricsApplicable
+      ? Math.min(normalizedLyrics + normalizedMusic, 100)
+      : normalizedMusic;
 
     const tolerance = 0.01;
     const lyricsState = lyricsShare > 100 + tolerance ? 'over' : lyricsShare >= 100 - tolerance ? 'complete' : 'under';
@@ -513,22 +624,35 @@ export class PdfGeneratorService {
     const hasUnder = states.includes('under');
     const hasEntries = lyricSplits.length > 0 || musicSplits.length > 0;
 
-    const statusLabel = hasOver
-      ? 'Overallocated – revise immediately'
-      : hasUnder && hasEntries
-        ? 'Incomplete – temporary split'
-        : hasEntries
-          ? 'Complete'
-        : 'Complete';
+    let statusLabel: string;
+
+    if (!lyricsApplicable) {
+      statusLabel = normalizedMusic >= 100
+        ? 'Complete (instrumental work)'
+        : normalizedMusic > 0
+          ? 'Instrumental work – music splits pending completion'
+          : 'Instrumental work – music splits not recorded';
+    } else if (hasOver) {
+      statusLabel = 'Overallocated – revise immediately';
+    } else if (hasUnder && hasEntries) {
+      statusLabel = 'Incomplete – temporary split';
+    } else if (hasEntries) {
+      statusLabel = 'Complete';
+    } else {
+      statusLabel = 'No allocations recorded';
+    }
 
     return {
-      lyricsShare: this.normalizeShare(lyricsShare),
-      musicShare: this.normalizeShare(musicShare),
+      lyricsShare: normalizedLyrics,
+      musicShare: normalizedMusic,
       combinedShare,
       lyricsCount: lyricSplits.length,
       musicCount: musicSplits.length,
-      statusLabel: hasEntries ? statusLabel : 'No allocations recorded',
-      isIncomplete: hasEntries && hasUnder && !hasOver,
+      statusLabel,
+      isIncomplete: lyricsApplicable
+        ? hasEntries && hasUnder && !hasOver
+        : normalizedMusic > 0 && normalizedMusic < 100,
+      lyricsApplicable,
     };
   }
 
@@ -626,6 +750,78 @@ export class PdfGeneratorService {
     return value?.toString().trim() || '';
   }
 
+  private buildLanguageSummary(work: Work): { primary: string; secondary: string; combined: string } {
+    const primaryNames = this.extractLanguageNames(work.primary_languages);
+    const secondaryNames = this.extractLanguageNames(work.secondary_languages);
+    const combinedNames = [...primaryNames];
+
+    const pushUnique = (value: string) => {
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return;
+      }
+      const key = trimmed.toLowerCase();
+      if (!combinedNames.some(existing => existing.toLowerCase() === key)) {
+        combinedNames.push(trimmed);
+      }
+    };
+
+    secondaryNames.forEach(pushUnique);
+    this.sanitizeLanguageList(work.languages).forEach(pushUnique);
+
+    return {
+      primary: this.formatList(primaryNames),
+      secondary: this.formatList(secondaryNames),
+      combined: this.formatList(combinedNames),
+    };
+  }
+
+  private extractLanguageNames(list?: WorkLanguageSelection[] | null): string[] {
+    if (!list || !list.length) {
+      return [];
+    }
+
+    const names: string[] = [];
+    const seen = new Set<string>();
+
+    list.forEach(selection => {
+      const name = selection?.language?.trim();
+      if (!name) {
+        return;
+      }
+      const key = name.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        names.push(name);
+      }
+    });
+
+    return names;
+  }
+
+  private sanitizeLanguageList(list?: string[] | null): string[] {
+    if (!list || !list.length) {
+      return [];
+    }
+
+    const names: string[] = [];
+    const seen = new Set<string>();
+
+    list.forEach(entry => {
+      const name = entry?.toString().trim();
+      if (!name) {
+        return;
+      }
+      const key = name.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        names.push(name);
+      }
+    });
+
+    return names;
+  }
+
   private formatList(items?: string[]): string {
     if (!items || !items.length) {
       return '—';
@@ -663,6 +859,28 @@ export class PdfGeneratorService {
     }
 
     return status.charAt(0).toUpperCase() + status.slice(1);
+  }
+
+  private formatWorkType(type?: Work['work_type']): string {
+    if (!type) {
+      return 'Standard';
+    }
+
+    const map: Record<Work['work_type'], string> = {
+      standard: 'Standard',
+      instrumental: 'Instrumental',
+      remix: 'Remix',
+    };
+
+    return map[type] ?? this.safeText(type);
+  }
+
+  private formatBoolean(value?: boolean | null): string {
+    if (value === undefined || value === null) {
+      return '—';
+    }
+
+    return value ? 'Yes' : 'No';
   }
 
   private formatSectionLabel(section: string): string {

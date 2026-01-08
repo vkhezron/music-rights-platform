@@ -48,6 +48,29 @@
 
       <!-- Work Title -->
       <div class="form-group">
+        <span class="group-label required">{{ 'WORKS.WORK_TYPE' | translate }}</span>
+        <div
+          class="work-type-options"
+          role="radiogroup"
+          [attr.aria-label]="('WORKS.WORK_TYPE' | translate)"
+        >
+          @for (option of workTypeOptions; track option.value) {
+            <label class="work-type-option">
+              <input
+                type="radio"
+                [value]="option.value"
+                formControlName="work_type"
+              />
+              <div class="work-type-content">
+                <span class="work-type-name">{{ option.labelKey | translate }}</span>
+                <span class="work-type-description">{{ option.descriptionKey | translate }}</span>
+              </div>
+            </label>
+          }
+        </div>
+      </div>
+
+      <div class="form-group">
         <label for="work_title" class="required">
           {{ 'WORKS.WORK_TITLE' | translate }}
         </label>
@@ -325,101 +348,369 @@
       <!-- Languages -->
       <div class="form-group">
         <label class="group-label">{{ 'WORKS.LANGUAGES' | translate }}</label>
+        <p class="field-hint">{{ 'WORKS.LANGUAGES_NOTICE' | translate }}</p>
+      </div>
 
-        <div class="checkbox-grid">
-          @for (language of languageOptions; track language) {
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                [checked]="isLanguageSelected(language)"
-                (change)="onLanguageToggle(language)"
-              />
-              <span>{{ language }}</span>
-            </label>
+      <div class="form-group">
+        <div class="inline-group-header">
+          <label class="group-label">{{ 'WORKS.PRIMARY_LANGUAGES' | translate }}</label>
+          <button
+            type="button"
+            class="add-btn"
+            (click)="addPrimaryLanguage()"
+            [disabled]="primaryLanguages.length >= maxPrimaryLanguages"
+          >
+            <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
+            <span>{{ 'WORKS.ADD_PRIMARY_LANGUAGE' | translate }}</span>
+          </button>
+        </div>
+
+        <div class="language-list language-list--primary">
+          @for (group of primaryLanguages.controls; track $index) {
+            <div class="language-entry" [formGroup]="$any(group)">
+              <div class="language-entry-row">
+                @if (!$any(group).get('isCustom')?.value) {
+                  <input
+                    type="text"
+                    class="form-input"
+                    formControlName="value"
+                    list="work-language-options"
+                    (change)="onPrimaryLanguageSelected($index, $any($event.target).value)"
+                    [attr.placeholder]="'WORKS.PRIMARY_LANGUAGE_PLACEHOLDER' | translate"
+                  />
+                } @else {
+                  <input
+                    type="text"
+                    class="form-input"
+                    formControlName="customValue"
+                    (change)="onPrimaryLanguageSelected($index, $any($event.target).value)"
+                    [attr.placeholder]="'WORKS.CUSTOM_LANGUAGE_PLACEHOLDER' | translate"
+                  />
+                }
+                <button
+                  type="button"
+                  class="remove-btn"
+                  (click)="removePrimaryLanguage($index)"
+                  [disabled]="primaryLanguages.length === 1"
+                >
+                  <lucide-icon [img]="X" [size]="18"></lucide-icon>
+                </button>
+              </div>
+              <label class="checkbox-label language-custom-toggle">
+                <input
+                  type="checkbox"
+                  formControlName="isCustom"
+                  (change)="onLanguageCustomToggle('primary', $index)"
+                />
+                <span>{{ 'WORKS.LANGUAGE_NOT_IN_LIST' | translate }}</span>
+              </label>
+            </div>
           }
         </div>
       </div>
 
       <div class="form-group">
-        <label class="checkbox-label cover-checkbox">
-          <input
-            type="checkbox"
-            formControlName="is_cover_version"
-          />
-          <span>{{ 'WORKS.IS_COVER_VERSION' | translate }}</span>
-        </label>
+        <div class="inline-group-header">
+          <label class="group-label">{{ 'WORKS.SECONDARY_LANGUAGES' | translate }}</label>
+          <button
+            type="button"
+            class="add-btn"
+            (click)="addSecondaryLanguage()"
+          >
+            <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
+            <span>{{ 'WORKS.ADD_SECONDARY_LANGUAGE' | translate }}</span>
+          </button>
+        </div>
+        <p class="field-hint">{{ 'WORKS.SECONDARY_LANGUAGES_HINT' | translate }}</p>
+
+        <div class="language-list language-list--secondary">
+          @for (group of secondaryLanguages.controls; track $index) {
+            <div class="language-entry" [formGroup]="$any(group)">
+              <div class="language-entry-row">
+                @if (!$any(group).get('isCustom')?.value) {
+                  <input
+                    type="text"
+                    class="form-input"
+                    formControlName="value"
+                    list="work-language-options"
+                    (change)="onSecondaryLanguageSelected($index, $any($event.target).value)"
+                    [attr.placeholder]="'WORKS.SECONDARY_LANGUAGE_PLACEHOLDER' | translate"
+                  />
+                } @else {
+                  <input
+                    type="text"
+                    class="form-input"
+                    formControlName="customValue"
+                    (change)="onSecondaryLanguageSelected($index, $any($event.target).value)"
+                    [attr.placeholder]="'WORKS.CUSTOM_LANGUAGE_PLACEHOLDER' | translate"
+                  />
+                }
+                <button
+                  type="button"
+                  class="remove-btn"
+                  (click)="removeSecondaryLanguage($index)"
+                >
+                  <lucide-icon [img]="X" [size]="18"></lucide-icon>
+                </button>
+              </div>
+              <label class="checkbox-label language-custom-toggle">
+                <input
+                  type="checkbox"
+                  formControlName="isCustom"
+                  (change)="onLanguageCustomToggle('secondary', $index)"
+                />
+                <span>{{ 'WORKS.LANGUAGE_NOT_IN_LIST' | translate }}</span>
+              </label>
+            </div>
+          }
+        </div>
       </div>
 
-      @if (workForm.get('is_cover_version')?.value) {
-        <div class="cover-fields">
-          <!-- Original Work Title -->
-          <div class="form-group">
-            <label for="original_work_title" class="required">
-              {{ 'WORKS.ORIGINAL_WORK_TITLE' | translate }}
-            </label>
+      <datalist id="work-language-options">
+        @for (option of languageOptions; track option.language) {
+          <option [value]="option.language" [attr.label]="languageOptionLabel(option)">
+            {{ languageOptionLabel(option) }}
+          </option>
+        }
+      </datalist>
+
+      @if (shouldShowCoverVersionControls()) {
+        <div class="form-group">
+          <label class="checkbox-label cover-checkbox">
             <input
-              id="original_work_title"
-              type="text"
-              formControlName="original_work_title"
-              class="form-input"
-              [class.error]="hasError('original_work_title', 'required')"
-              placeholder="Original work title"
+              type="checkbox"
+              formControlName="is_cover_version"
             />
-            @if (hasError('original_work_title', 'required')) {
-              <div class="error-message">
-                {{ 'WORKS.ORIGINAL_TITLE_REQUIRED' | translate }}
+            <span>{{ 'WORKS.IS_COVER_VERSION' | translate }}</span>
+          </label>
+        </div>
+
+        @if (workForm.get('is_cover_version')?.value) {
+          <div class="cover-fields">
+            <!-- Original Work Title -->
+            <div class="form-group">
+              <label for="original_work_title" class="required">
+                {{ 'WORKS.ORIGINAL_WORK_TITLE' | translate }}
+              </label>
+              <input
+                id="original_work_title"
+                type="text"
+                formControlName="original_work_title"
+                class="form-input"
+                [class.error]="hasError('original_work_title', 'required')"
+                placeholder="Original work title"
+              />
+              @if (hasError('original_work_title', 'required')) {
+                <div class="error-message">
+                  {{ 'WORKS.ORIGINAL_TITLE_REQUIRED' | translate }}
+                </div>
+              }
+            </div>
+
+            <div class="form-row">
+              <!-- Original Work ISRC -->
+              <div class="form-group">
+                <label for="original_work_isrc">
+                  {{ 'WORKS.ORIGINAL_WORK_ISRC' | translate }}
+                </label>
+                <input
+                  id="original_work_isrc"
+                  type="text"
+                  formControlName="original_work_isrc"
+                  class="form-input code-input"
+                  placeholder="USRC17607839"
+                  maxlength="12"
+                />
               </div>
-            }
-          </div>
 
-          <div class="form-row">
-            <!-- Original Work ISRC -->
-            <div class="form-group">
-              <label for="original_work_isrc">
-                {{ 'WORKS.ORIGINAL_WORK_ISRC' | translate }}
-              </label>
-              <input
-                id="original_work_isrc"
-                type="text"
-                formControlName="original_work_isrc"
-                class="form-input code-input"
-                placeholder="USRC17607839"
-                maxlength="12"
-              />
+              <!-- Original Work ISWC -->
+              <div class="form-group">
+                <label for="original_work_iswc">
+                  {{ 'WORKS.ORIGINAL_WORK_ISWC' | translate }}
+                </label>
+                <input
+                  id="original_work_iswc"
+                  type="text"
+                  formControlName="original_work_iswc"
+                  class="form-input code-input"
+                  placeholder="T-123.456.789-0"
+                />
+              </div>
             </div>
 
-            <!-- Original Work ISWC -->
+            <!-- Original Work Info (fallback) -->
             <div class="form-group">
-              <label for="original_work_iswc">
-                {{ 'WORKS.ORIGINAL_WORK_ISWC' | translate }}
+              <label for="original_work_info">
+                {{ 'WORKS.ORIGINAL_WORK_INFO' | translate }}
               </label>
               <input
-                id="original_work_iswc"
+                id="original_work_info"
                 type="text"
-                formControlName="original_work_iswc"
-                class="form-input code-input"
-                placeholder="T-123.456.789-0"
+                formControlName="original_work_info"
+                class="form-input"
+                placeholder="Additional information if ISRC/ISWC not available"
               />
+              <div class="field-hint">{{ 'WORKS.ORIGINAL_WORK_INFO_HINT' | translate }}</div>
             </div>
           </div>
+        }
+      }
+    </div>
 
-          <!-- Original Work Info (fallback) -->
-          <div class="form-group">
-            <label for="original_work_info">
-              {{ 'WORKS.ORIGINAL_WORK_INFO' | translate }}
-            </label>
-            <input
-              id="original_work_info"
-              type="text"
-              formControlName="original_work_info"
-              class="form-input"
-              placeholder="Additional information if ISRC/ISWC not available"
-            />
-            <div class="field-hint">{{ 'WORKS.ORIGINAL_WORK_INFO_HINT' | translate }}</div>
+    <!-- Sample Disclosure Section -->
+    <div class="form-section">
+      <h2 class="section-title">
+        <lucide-icon [img]="AlertTriangle" [size]="24"></lucide-icon>
+        {{ 'WORKS.SAMPLE_DISCLOSURE_TITLE' | translate }}
+      </h2>
+
+      <div class="form-group sample-checkbox">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="is_100_percent_human" />
+          <span>{{ 'WORKS.SAMPLE_100_HUMAN' | translate }}</span>
+        </label>
+        <div class="field-hint">{{ 'WORKS.SAMPLE_100_HUMAN_HINT' | translate }}</div>
+      </div>
+
+      <div class="form-group sample-checkbox">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="uses_sample_libraries" />
+          <span>{{ 'WORKS.SAMPLE_LIBRARY_USAGE' | translate }}</span>
+        </label>
+        <div class="field-hint">{{ 'WORKS.SAMPLE_LIBRARY_USAGE_HINT' | translate }}</div>
+      </div>
+
+      @if (workForm.get('uses_sample_libraries')?.value) {
+        <div class="form-group">
+          <label for="sample_library_names" class="required">
+            {{ 'WORKS.SAMPLE_LIBRARY_NAMES_LABEL' | translate }}
+          </label>
+          <input
+            id="sample_library_names"
+            type="text"
+            formControlName="sample_library_names"
+            class="form-input"
+            [class.error]="hasError('sample_library_names', 'required')"
+            [placeholder]="'WORKS.SAMPLE_LIBRARY_NAMES_PLACEHOLDER' | translate"
+          />
+          @if (hasError('sample_library_names', 'required')) {
+            <div class="error-message">
+              {{ 'WORKS.SAMPLE_LIBRARY_NAMES_REQUIRED' | translate }}
+            </div>
+          }
+        </div>
+
+        <div class="form-group sample-checkbox">
+          <label class="checkbox-label required">
+            <input type="checkbox" formControlName="has_commercial_license" />
+            <span>{{ 'WORKS.SAMPLE_LICENSE_CONFIRM' | translate }}</span>
+          </label>
+          @if (hasError('has_commercial_license', 'required')) {
+            <div class="error-message">
+              {{ 'WORKS.SAMPLE_LICENSE_REQUIRED' | translate }}
+            </div>
+          }
+        </div>
+
+        <div class="sample-warning" role="note">
+          <lucide-icon [img]="AlertTriangle" [size]="18"></lucide-icon>
+          <div>
+            <strong>{{ 'WORKS.SAMPLE_WARNING_TITLE' | translate }}</strong>
+            <p>{{ 'WORKS.SAMPLE_WARNING_TEXT' | translate }}</p>
           </div>
         </div>
       }
     </div>
+
+    <!-- Remix Original Works Section -->
+    @if (isRemix()) {
+      <div class="form-section">
+        <h2 class="section-title">
+          <lucide-icon [img]="Repeat" [size]="24"></lucide-icon>
+          {{ 'WORKS.REMIX_ORIGINALS_TITLE' | translate }}
+        </h2>
+        <p class="section-subtitle">{{ 'WORKS.REMIX_ORIGINALS_HINT' | translate }}</p>
+
+        <div class="original-works-list">
+          @for (group of originalWorks.controls; track $index) {
+            <div class="original-work-card" [formGroup]="$any(group)">
+              <div class="card-header">
+                <h3>{{ 'WORKS.REMIX_ORIGINAL_LABEL' | translate:{ index: $index + 1 } }}</h3>
+                <button
+                  type="button"
+                  class="remove-btn"
+                  (click)="removeOriginalWork($index)"
+                  [disabled]="originalWorks.length === 1"
+                  [attr.aria-label]="'WORKS.REMOVE_ORIGINAL_WORK' | translate"
+                >
+                  <lucide-icon [img]="X" [size]="16"></lucide-icon>
+                </button>
+              </div>
+
+              <div class="form-group">
+                <label class="required">{{ 'WORKS.REMIX_ORIGINAL_TITLE' | translate }}</label>
+                <input
+                  type="text"
+                  formControlName="title"
+                  class="form-input"
+                  [class.error]="$any(group).get('title')?.invalid && ($any(group).get('title')?.touched || $any(group).get('title')?.dirty)"
+                  [placeholder]="'WORKS.REMIX_ORIGINAL_TITLE_PLACEHOLDER' | translate"
+                />
+                @if ($any(group).get('title')?.invalid && ($any(group).get('title')?.touched || $any(group).get('title')?.dirty)) {
+                  <div class="error-message">{{ 'WORKS.REMIX_ORIGINAL_TITLE_REQUIRED' | translate }}</div>
+                }
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>{{ 'WORKS.REMIX_ORIGINAL_ISRC' | translate }}</label>
+                  <input
+                    type="text"
+                    formControlName="isrc"
+                    class="form-input code-input"
+                    placeholder="USRC17607839"
+                    maxlength="12"
+                    [class.error]="$any(group).get('isrc')?.invalid && $any(group).get('isrc')?.value"
+                  />
+                  @if ($any(group).get('isrc')?.invalid && $any(group).get('isrc')?.value) {
+                    <div class="error-message">{{ 'WORKS.REMIX_ORIGINAL_ISRC_INVALID' | translate }}</div>
+                  }
+                </div>
+
+                <div class="form-group">
+                  <label>{{ 'WORKS.REMIX_ORIGINAL_ISWC' | translate }}</label>
+                  <input
+                    type="text"
+                    formControlName="iswc"
+                    class="form-input code-input"
+                    placeholder="T-123.456.789-0"
+                    [class.error]="$any(group).get('iswc')?.invalid && $any(group).get('iswc')?.value"
+                  />
+                  @if ($any(group).get('iswc')?.invalid && $any(group).get('iswc')?.value) {
+                    <div class="error-message">{{ 'WORKS.REMIX_ORIGINAL_ISWC_INVALID' | translate }}</div>
+                  }
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>{{ 'WORKS.REMIX_ORIGINAL_NOTES' | translate }}</label>
+                <input
+                  type="text"
+                  formControlName="additional_info"
+                  class="form-input"
+                  [placeholder]="'WORKS.REMIX_ORIGINAL_NOTES_PLACEHOLDER' | translate"
+                />
+              </div>
+            </div>
+          }
+        </div>
+
+        <button type="button" class="add-btn" (click)="addOriginalWork()">
+          <lucide-icon [img]="Plus" [size]="18"></lucide-icon>
+          <span>{{ 'WORKS.ADD_ORIGINAL_WORK' | translate }}</span>
+        </button>
+      </div>
+    }
 
     <!-- AI Disclosure Section -->
     <div class="form-section">
@@ -512,7 +803,7 @@
               </div>
               <div class="review-row">
                 <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.LANGUAGES' | translate }}</dt>
-                @let languages = formatLanguages(review.languages);
+                @let languages = formatLanguages(review.primary_languages, review.secondary_languages, review.languages);
                 <dd>{{ languages || ('WORKS.REVIEW_MODAL.EMPTY.NO_LANGUAGES' | translate) }}</dd>
               </div>
               <div class="review-row">
@@ -535,6 +826,60 @@
               </div>
             </dl>
           </section>
+
+          <section class="review-section">
+            <h4>{{ 'WORKS.REVIEW_MODAL.SECTIONS.PRODUCTION' | translate }}</h4>
+            <dl class="review-list">
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.WORK_TYPE' | translate }}</dt>
+                <dd>{{ ('WORKS.WORK_TYPE_LABEL.' + (review.work_type || 'standard')) | translate }}</dd>
+              </div>
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.IS_100_PERCENT_HUMAN' | translate }}</dt>
+                <dd>{{ review.is_100_percent_human ? ('COMMON.YES' | translate) : ('COMMON.NO' | translate) }}</dd>
+              </div>
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.USES_SAMPLE_LIBRARIES' | translate }}</dt>
+                <dd>{{ review.uses_sample_libraries ? ('COMMON.YES' | translate) : ('COMMON.NO' | translate) }}</dd>
+              </div>
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.SAMPLE_LIBRARY_NAMES' | translate }}</dt>
+                <dd>{{ review.sample_library_names || ('WORKS.REVIEW_MODAL.EMPTY.NOT_SET' | translate) }}</dd>
+              </div>
+              <div class="review-row">
+                <dt>{{ 'WORKS.REVIEW_MODAL.FIELDS.HAS_COMMERCIAL_LICENSE' | translate }}</dt>
+                <dd>
+                  {{ review.uses_sample_libraries
+                    ? (review.has_commercial_license ? ('COMMON.YES' | translate) : ('COMMON.NO' | translate))
+                    : ('WORKS.REVIEW_MODAL.EMPTY.NOT_APPLICABLE' | translate) }}
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          @if (review.original_works?.length) {
+            <section class="review-section">
+              <h4>{{ 'WORKS.REVIEW_MODAL.SECTIONS.REMIX' | translate }}</h4>
+              <ul class="remix-summary-list">
+                @for (original of review.original_works; track $index) {
+                  <li>
+                    <strong>{{ original.title }}</strong>
+                    <div class="remix-summary-meta">
+                      @if (original.isrc) {
+                        <span>{{ 'WORKS.REMIX_ORIGINAL_ISRC' | translate }}: {{ original.isrc }}</span>
+                      }
+                      @if (original.iswc) {
+                        <span>{{ 'WORKS.REMIX_ORIGINAL_ISWC' | translate }}: {{ original.iswc }}</span>
+                      }
+                    </div>
+                    @if (original.additional_info) {
+                      <p class="remix-summary-notes">{{ original.additional_info }}</p>
+                    }
+                  </li>
+                }
+              </ul>
+            </section>
+          }
 
           <section class="review-section">
             <h4>{{ 'WORKS.REVIEW_MODAL.SECTIONS.IDENTIFIERS' | translate }}</h4>
@@ -603,13 +948,25 @@
           </section>
 
           <footer class="review-actions">
-            <button
-              type="button"
-              class="ghost-button"
-              (click)="closeReview()"
-              [disabled]="isSubmitting()">
-              {{ 'WORKS.REVIEW_MODAL.ACTIONS.BACK' | translate }}
-            </button>
+            <div class="review-actions-left">
+              <button
+                type="button"
+                class="ghost-button"
+                (click)="closeReview()"
+                [disabled]="isSubmitting()">
+                {{ 'WORKS.REVIEW_MODAL.ACTIONS.BACK' | translate }}
+              </button>
+              <div class="download-work-data">
+                <button
+                  type="button"
+                  class="ghost-button"
+                  (click)="downloadPendingWorkData()"
+                  [disabled]="isSubmitting()">
+                  {{ 'WORKS.REVIEW_MODAL.ACTIONS.DOWNLOAD_WORK_DATA' | translate }}
+                </button>
+                <span class="download-hint">{{ 'WORKS.REVIEW_MODAL.ACTIONS.DOWNLOAD_WORK_DATA_HINT' | translate }}</span>
+              </div>
+            </div>
             <button
               type="button"
               class="primary-button"

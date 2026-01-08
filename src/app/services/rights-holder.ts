@@ -81,17 +81,98 @@ export class RightsHoldersService {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (this.isConflictError(error)) {
+          const existing = await this.findExistingRightsHolder(
+            insertData.workspace_id,
+            insertData.profile_id,
+            insertData.nickname,
+            insertData.email
+          );
+
+          if (existing) {
+            this.mergeIntoSubject(existing);
+            return existing;
+          }
+        }
+
+        throw error;
+      }
 
       // Update local state
-      const current = this.rightsHoldersSubject.value;
-      this.rightsHoldersSubject.next([rightsHolder, ...current]);
+      this.mergeIntoSubject(rightsHolder);
 
       return rightsHolder;
     } catch (error) {
       console.error('Error creating rights holder:', error);
       throw error;
     }
+  }
+
+  private mergeIntoSubject(rightsHolder: RightsHolder): void {
+    const current = this.rightsHoldersSubject.value;
+    const existingIndex = current.findIndex(rh => rh.id === rightsHolder.id);
+
+    if (existingIndex >= 0) {
+      const updated = [...current];
+      updated[existingIndex] = rightsHolder;
+      this.rightsHoldersSubject.next(updated);
+    } else {
+      this.rightsHoldersSubject.next([rightsHolder, ...current]);
+    }
+  }
+
+  private isConflictError(error: { code?: string; status?: number }): boolean {
+    if (!error) {
+      return false;
+    }
+
+    return error.status === 409 || error.code === '23505' || error.code === '409';
+  }
+
+  private async findExistingRightsHolder(
+    workspaceId: string,
+    profileId?: string,
+    nickname?: string,
+    email?: string
+  ): Promise<RightsHolder | null> {
+    if (profileId) {
+      const { data, error } = await this.supabase.client
+        .from('rights_holders')
+        .select('*')
+        .eq('workspace_id', workspaceId)
+        .eq('profile_id', profileId)
+        .maybeSingle();
+      if (!error && data) {
+        return data;
+      }
+    }
+
+    if (nickname) {
+      const { data, error } = await this.supabase.client
+        .from('rights_holders')
+        .select('*')
+        .eq('workspace_id', workspaceId)
+        .eq('nickname', nickname)
+        .maybeSingle();
+      if (!error && data) {
+        return data;
+      }
+    }
+
+    if (email) {
+      const { data, error } = await this.supabase.client
+        .from('rights_holders')
+        .select('*')
+        .eq('workspace_id', workspaceId)
+        .eq('email', email)
+        .maybeSingle();
+      if (!error && data) {
+        return data;
+      }
+    }
+
+    return null;
   }
 
   async updateRightsHolder(id: string, data: Partial<RightsHolderFormData>): Promise<RightsHolder> {

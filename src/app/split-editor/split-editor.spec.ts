@@ -6,6 +6,7 @@ import { of } from 'rxjs';
 
 import { SplitEditorComponent } from './split-editor';
 import type { SplitEntry } from './models/split-entry.model';
+import type { Work } from '../models/work.model';
 import { WorksService } from '../services/works';
 import { RightsHoldersService } from '../services/rights-holder';
 import { ProfileService } from '../services/profile.service';
@@ -17,6 +18,20 @@ import { TranslateMockLoader } from '../../testing/translate-mock.loader';
 describe('SplitEditorComponent', () => {
   let component: SplitEditorComponent;
   let fixture: ComponentFixture<SplitEditorComponent>;
+  const createWork = (workType: Work['work_type']): Work => {
+    const timestamp = new Date().toISOString();
+    return {
+      id: 'work-1',
+      workspace_id: 'workspace-1',
+      work_title: 'Test Work',
+      is_cover_version: false,
+      status: 'draft',
+      created_by: 'user-1',
+      created_at: timestamp,
+      updated_at: timestamp,
+      work_type: workType,
+    } as Work;
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -121,5 +136,32 @@ describe('SplitEditorComponent', () => {
     expect(component['lyricsStatus']().state).toBe('complete');
     expect(component['musicStatus']().state).toBe('complete');
     expect(component['canSubmit']()).toBeTruthy();
+  });
+
+  it('should treat instrumental works as music-only splits', () => {
+    component['work'].set(createWork('instrumental'));
+
+    const musicEntry: SplitEntry = {
+      entryMethod: 'add_manually',
+      splitType: 'music',
+      ownershipPercentage: 100,
+      nickname: 'composer1',
+      aiDisclosure: { creationType: 'human' },
+      isReadonly: false,
+    };
+
+    component['entries'].set([musicEntry]);
+
+    expect(component['lyricsStatus']().hasEntries).toBeFalsy();
+    expect(component['musicStatus']().state).toBe('complete');
+    expect(component['canSubmit']()).toBeTruthy();
+  });
+
+  it('should block lyric additions when work type is instrumental', async () => {
+    component['work'].set(createWork('instrumental'));
+
+    await (component as any).addManualEntry('lyrics');
+
+    expect(component['entries']().length).toBe(0);
   });
 });

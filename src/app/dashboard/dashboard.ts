@@ -168,7 +168,11 @@ export class Dashboard implements OnInit {
         const work = await this.worksService.createWork({
           work_title: workspace.name,
           status: 'draft',
-          is_cover_version: false
+          is_cover_version: false,
+          work_type: 'standard',
+          is_100_percent_human: false,
+          uses_sample_libraries: false,
+          has_commercial_license: false
         });
         
         // Redirect to edit the work
@@ -213,7 +217,11 @@ export class Dashboard implements OnInit {
         const work = await this.worksService.createWork({
           work_title: workspace.name,
           status: 'draft',
-          is_cover_version: false
+          is_cover_version: false,
+          work_type: 'standard',
+          is_100_percent_human: false,
+          uses_sample_libraries: false,
+          has_commercial_license: false
         });
         this.router.navigate(['/works/edit', work.id]);
       } else {

@@ -58,23 +58,25 @@
     </div>
   } @else {
     <div class="split-totals">
-      <div
-        class="total-card"
-        [class.progress-valid]="lyricsStatus().state === 'complete'"
-        [class.progress-warning]="lyricsStatus().state === 'over'"
-        [class.progress-error]="lyricsStatus().state === 'over'"
-        [class.progress-idle]="lyricsStatus().state !== 'complete' && lyricsStatus().state !== 'over'"
-      >
-        <span class="total-card__label">{{ 'PROTOCOL.LYRICS' | translate }}</span>
-        <span class="total-card__value">{{ lyricsTotal() | number:'1.0-2' }}%</span>
-        <p
-          class="total-card__hint"
-          [class.total-card__hint--alert]="lyricsStatus().state === 'under' || lyricsStatus().state === 'over'"
-          [class.total-card__hint--info]="!lyricsStatus().hasEntries"
+      @if (!isInstrumentalWork()) {
+        <div
+          class="total-card"
+          [class.progress-valid]="lyricsStatus().state === 'complete'"
+          [class.progress-warning]="lyricsStatus().state === 'over'"
+          [class.progress-error]="lyricsStatus().state === 'over'"
+          [class.progress-idle]="lyricsStatus().state !== 'complete' && lyricsStatus().state !== 'over'"
         >
-          {{ totalHint(lyricsStatus()) }}
-        </p>
-      </div>
+          <span class="total-card__label">{{ 'PROTOCOL.LYRICS' | translate }}</span>
+          <span class="total-card__value">{{ lyricsTotal() | number:'1.0-2' }}%</span>
+          <p
+            class="total-card__hint"
+            [class.total-card__hint--alert]="lyricsStatus().state === 'under' || lyricsStatus().state === 'over'"
+            [class.total-card__hint--info]="!lyricsStatus().hasEntries"
+          >
+            {{ totalHint(lyricsStatus()) }}
+          </p>
+        </div>
+      }
       <div
         class="total-card"
         [class.progress-valid]="musicStatus().state === 'complete'"
@@ -117,48 +119,50 @@
       </div>
     }
 
-    <section class="split-section">
-      <header class="split-section__header">
-        <div>
-          <h2>{{ 'PROTOCOL.LYRICS' | translate }}</h2>
-          <p>Capture lyric ownership for every contributor.</p>
+    @if (!isInstrumentalWork()) {
+      <section class="split-section">
+        <header class="split-section__header">
+          <div>
+            <h2>{{ 'PROTOCOL.LYRICS' | translate }}</h2>
+            <p>Capture lyric ownership for every contributor.</p>
+          </div>
+          <span class="split-section__total">{{ lyricsTotal() | number:'1.0-2' }}%</span>
+        </header>
+
+        <div class="split-section__entries">
+          @if (!lyricsEntries().length) {
+            <p class="split-section__empty">{{ 'SPLITS.NO_IP_SPLITS_YET' | translate }}</p>
+          }
+
+          @for (entry of lyricsEntries(); track trackEntry($index, entry)) {
+            <app-split-entry-card
+              [entry]="entry"
+              (entryUpdated)="onEntryUpdated($event)"
+              (entryRemoved)="onEntryRemoved($event)"
+            ></app-split-entry-card>
+          }
         </div>
-        <span class="split-section__total">{{ lyricsTotal() | number:'1.0-2' }}%</span>
-      </header>
 
-      <div class="split-section__entries">
-        @if (!lyricsEntries().length) {
-          <p class="split-section__empty">{{ 'SPLITS.NO_IP_SPLITS_YET' | translate }}</p>
-        }
-
-        @for (entry of lyricsEntries(); track trackEntry($index, entry)) {
-          <app-split-entry-card
-            [entry]="entry"
-            (entryUpdated)="onEntryUpdated($event)"
-            (entryRemoved)="onEntryRemoved($event)"
-          ></app-split-entry-card>
-        }
-      </div>
-
-      <div class="split-section__actions">
-        <button
-          type="button"
-          class="action-btn"
-          (click)="startQrFlow('lyrics')"
-          [disabled]="isLoading() || isSaving()"
-        >
-          {{ 'SPLITS.ADD_NEW_BY_QR' | translate }}
-        </button>
-        <button type="button" class="action-btn" (click)="addManualEntry('lyrics')">
-          {{ 'SPLITS.ADD_NEW_RIGHTSHOLDER_MANUALLY' | translate }}
-        </button>
-        @if (shouldShowAddMe('lyrics')) {
-          <button type="button" class="action-btn" (click)="addSelfEntry('lyrics')">
-            {{ 'SPLITS.ADD_ME' | translate }}
+        <div class="split-section__actions">
+          <button
+            type="button"
+            class="action-btn"
+            (click)="startQrFlow('lyrics')"
+            [disabled]="isLoading() || isSaving()"
+          >
+            {{ 'SPLITS.ADD_NEW_BY_QR' | translate }}
           </button>
-        }
-      </div>
-    </section>
+          <button type="button" class="action-btn" (click)="addManualEntry('lyrics')">
+            {{ 'SPLITS.ADD_NEW_RIGHTSHOLDER_MANUALLY' | translate }}
+          </button>
+          @if (shouldShowAddMe('lyrics')) {
+            <button type="button" class="action-btn" (click)="addSelfEntry('lyrics')">
+              {{ 'SPLITS.ADD_ME' | translate }}
+            </button>
+          }
+        </div>
+      </section>
+    }
 
     <section class="split-section">
       <header class="split-section__header">

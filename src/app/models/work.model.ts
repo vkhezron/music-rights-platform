@@ -4,6 +4,22 @@
 
 import { WorkCreationDeclaration, WorkCreationDeclarationDraft } from './work-creation-declaration.model';
 
+export type WorkType = 'standard' | 'instrumental' | 'remix';
+
+export interface WorkOriginalReference {
+  title: string;
+  isrc?: string | null;
+  iswc?: string | null;
+  additional_info?: string | null;
+}
+
+export interface WorkLanguageSelection {
+  language: string;
+  iso_639_1: string | null;
+  iso_639_3: string | null;
+  is_custom?: boolean;
+}
+
 export interface Work {
   id: string;
   workspace_id: string;
@@ -20,6 +36,8 @@ export interface Work {
   // Work details
   duration_seconds?: number;
   languages?: string[];
+  primary_languages?: WorkLanguageSelection[] | null;
+  secondary_languages?: WorkLanguageSelection[] | null;
   genre?: string;
   
   // Dates
@@ -37,6 +55,12 @@ export interface Work {
   status: 'draft' | 'registered' | 'published' | 'archived';
   notes?: string;
   ai_disclosures?: WorkCreationDeclaration[];
+  work_type: WorkType;
+  is_100_percent_human?: boolean;
+  uses_sample_libraries?: boolean;
+  sample_library_names?: string | null;
+  has_commercial_license?: boolean;
+  original_works?: WorkOriginalReference[] | null;
   
   // Metadata
   created_by: string;
@@ -65,6 +89,14 @@ export interface WorkFormData {
   status: 'draft' | 'registered' | 'published' | 'archived';
   notes?: string;
   ai_disclosures?: WorkCreationDeclarationDraft[];
+  work_type: WorkType;
+  is_100_percent_human?: boolean;
+  uses_sample_libraries?: boolean;
+  sample_library_names?: string | null;
+  has_commercial_license?: boolean;
+  original_works?: WorkOriginalReference[] | null;
+  primary_languages?: WorkLanguageSelection[] | null;
+  secondary_languages?: WorkLanguageSelection[] | null;
 }
 
 // Split types
